@@ -41,9 +41,11 @@ async function start() {
 		} else {
 			await fs.appendFile(path.join(base, 'log.txt'), getContent()).then(() => {
 				console.log('Log file created success');
-			});                
-                const data=await fs.readFile(path.join(base, 'log.txt'), {encoding:'utf-8'});
-            console.log(data);
+			});
+			const data = await fs.readFile(path.join(base, 'log.txt'), {
+				encoding: 'utf-8',
+			});
+			console.log(data);
 		}
 	} catch (err) {
 		console.log('err', err);

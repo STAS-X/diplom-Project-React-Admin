@@ -6,7 +6,7 @@ const path = require('path');
 const notesPath = path.join(__dirname, 'db.json');
 
 async function saveNotes(notes) {
-	await fs.writeFile(notesPath, JSON.stringify(notes));
+	await fs.writeFile(notesPath, JSON.stringify(notes).replace(/{/g,'\n{'));
 }
 
 async function addNote(title) {
@@ -38,7 +38,7 @@ async function printNotes(id) {
 	const notes = await getNotes();
     if (!isNaN(id) && id>0 && id<=notes.length) {
         const note = notes.find((note, noteId) => noteId + 1 === id);
-        console.log(chalk.blue(`Note №${id} has note [${note.title}] at ${note.id}`))
+        console.log(chalk.blue(`Note №${id} has note [${note.title}] at ${note.id}`));
     } else {
 			notes.forEach((note, id) =>
 				console.log(
