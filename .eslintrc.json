@@ -1,0 +1,29 @@
+{
+    "env": {
+        "browser": true,
+        "commonjs": true,
+        "es2021": true
+    },
+    "parserOptions": {
+        "ecmaVersion": 12,
+    },
+    "rules": {
+        "semi": [2, "always"],
+        "indent": [0, 4],
+        "multiline-ternary": ["off"],
+        "quotes": [
+            "error",
+            "single",
+            {
+                "allowTemplateLiterals": true
+            }
+        ],
+        "space-before-function-paren": [
+            2,
+            {
+                "anonymous": "ignore",
+                "named": "never"
+            }
+        ]
+    }
+}
