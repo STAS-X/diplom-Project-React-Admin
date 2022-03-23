@@ -9,7 +9,7 @@ async function saveNotes(notes) {
 	await fs.writeFile(notesPath, JSON.stringify(notes).replace(/{/g,'\n{'));
 }
 
-async function addNote(title) {
+async function addNote({ title } ) {
 	const notes = await getNotes();
 	const note = {
 		title,
@@ -18,6 +18,7 @@ async function addNote(title) {
 	notes.push(note);
 	await saveNotes(notes);
 	await printNotes(notes.length);
+	return true;
 }
 
 async function getNotes() {
@@ -30,8 +31,30 @@ async function removeNotes(id) {
 	if (notes.find((note, noteId) => noteId+1 === id)) {
 		const newNotes = notes.filter((note, noteId) => noteId + 1 !== id);
 		await saveNotes(newNotes);
-		console.log(chalk.bgCyanBright(`Note №${id} was remove`));
-	} else console.log(chalk.bgRedBright(`Note №${id} not found`));
+		console.log(chalk.cyanBright(`Note №${id} was remove`));
+	} else console.log(chalk.redBright(`Note №${id} not found`));
+}
+
+async function updateNote(note) {
+	const notes = await getNotes();
+	if (notes.find((item) => item.id === note.id)) {
+		notes.forEach((item) => {if (item.id === note.id) item.title=note.title});
+		await saveNotes(notes);
+		console.log(chalk.cyanBright(`Note by ID ${note.id} was edited`));
+		return true;
+	} else console.log(chalk.redBright(`Note №${id} not found`));
+	return false;
+}
+
+async function removeNotesByTimeStamp(stamp) {
+	const notes = await getNotes();
+	if (notes.find((note) => note.id === stamp)) {
+		const newNotes = notes.filter((note) => note.id !== stamp);
+		await saveNotes(newNotes);
+		console.log(chalk.cyanBright(`Note by ID ${stamp} was remove`));
+		return true;
+	} else console.log(chalk.redBright(`Note by ID ${stamp} not found`));
+	return false;
 }
 
 async function printNotes(id) {
@@ -52,4 +75,6 @@ module.exports = {
 	addNote,
 	getNotes,
 	removeNotes,
+	updateNote,
+	removeNotesByTimeStamp,
 };

@@ -1,12 +1,3 @@
-// import path from 'path';
-// import {fileURLToPath} from 'url';
-
-// const __filepath=fileURLToPath(import.meta.url);
-// const __dirpath = path.dirname(__filepath);
-
-// console.log(__dirpath);
-// console.log(__filepath);
-
 const os = require('os');
 const path = require('path');
 const fs = require('fs').promises;
