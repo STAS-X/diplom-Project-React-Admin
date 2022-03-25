@@ -11,6 +11,14 @@
 			crossorigin="anonymous"
 		/>
 
+		<style type="text/css">
+			div[hidden] {
+				height: 0;
+ 				visibility: hidden;
+			}
+
+		</style>
+
 		<title><%= appTitle%></title>
 
 		<svg xmlns="http://www.w3.org/2000/svg" style="display: none">
@@ -37,42 +45,18 @@
 	</head>
 
 	<body>
-		<% if (alerted) {%>
-		<div
-			class="alert <% if (created) { %>alert-success<%} else if (removed) {%>alert-warning<% } else {%>alert-info<%}%> alert-dismissible fade show"
-			data-id="post-alert"
-		>
-			<svg
-				class="bi flex-shrink-0 me-2"
-				width="24"
-				height="24"
-				role="img"
-				aria-label="<% if (created) { %>Success:<%} else if (removed) {%>Warning:<% } else {%>Info: <%}%>"
-			>
-				<use
-					xlink:href="<% if (created) { %>#check-circle-fill<%} else if (removed) {%>#exclamation-triangle-fill<% } else {%>#info-fill<%}%>"
-				/>
-			</svg>
-			<% if (created) { %>Note was added!<%} else if (removed) {%>Note was
-			deleted! <% } else if (edited) {%>Note was edited!<%} else {%>Action not
-			completed<%}%>
-			<button
-				type="button"
-				class="btn-close"
-				data-bs-dismiss="alert"
-				aria-label="Close"
-			></button>
-		</div>
-		<% } %>
-
 		<div class="container">
 			<h1><%= appTitle%></h1>
 
 			<form action="/" method="post">
 				<div class="form-group">
-					<input type="text" class="form-control" name="title" required />
+					<input type="text" class="form-control" name="title" data-id="title" required />
 				</div>
-				<button class="btn btn-primary my-3" type="submit" data-type="add">
+				<button
+					class="btn btn-primary my-3"
+					onclick="(e) => {fetch_data({note : {title: document.querySelector(`input[data-id='title']`).value},  type:'create'});}"
+					data-type="add"
+				>
 					Create post
 				</button>
 			</form>
@@ -81,16 +65,18 @@
 				<ul class="list-group">
 					<% for (const note of notes) { %>
 					<li
-						class="list-group-item d-flex justify-content-between align-items-center"
+						class="list-group-item"
+						data-id="<%=note.id%>"
 					>
+					<div class="d-flex justify-content-between align-items-center" data-type="show" data-id="<%=note.id%>">
 						<span
-							>Title - <%= note.title%> <br />
-							TimeStamp - <%= note.id%> <br />
+							>Title - <%= note.title%> <br>
+							TimeStamp - <%= note.id%>
 						</span>
 						<div>
 							<button
-								class="btn <% if (id && id === note.id) {%>btn-primary btn-success <% } else { %>btn-primary <%}%> mx-2"
-								onclick="fetch_data({note : {id:this.dataset.id, title: '<%=note.title%>'},  type:'edit'})"
+								class="btn btn-primary mx-2"
+								onclick="toggleEditShowDiv('<%=note.id%>')"
 								data-type="edit"
 								data-id="<%=note.id%>"
 							>
@@ -99,102 +85,70 @@
 
 							<button
 								class="btn btn-danger"
-								onclick="fetch_data({note : {id:this.dataset.id, title: '<%=note.title%>'},  type:'remove'})"
+								onclick="fetch_data({note : {id:'<%=note.id%>', title: '<%=note.title%>'},  type:'remove'})"
 								data-type="remove"
 								data-id="<%=note.id%>"
 							>
 								&times;
 							</button>
 						</div>
+					</div>
+					<div class="d-flex justify-content-between align-items-center" data-type="edit" data-id="<%=note.id%>" hidden>
+						<div>
+						<label class="d-block my-1" for="name">Enter title:</label>
+							<input type="text" data-type="edit-title" data-id="<%=note.id%>" name="edit" value="<%=note.title%>" data-oldvalue="<%=note.title%>" required
+								minlength="1" size="50"
+								onkeypress="if(event.keyCode === 13){event.preventDefault();fetch_data({ note: {id:'<%=note.id%>', title: document.querySelector(`input[data-type='edit-title'][data-id='<%=note.id%>']`).dataset.oldvalue}, type:'edit'});toggleEditShowDiv('<%= note.id%>');}">
+						</div>
+						<div>
+							<button
+								class="btn btn-primary mx-2"
+								onclick="fetch_data({ note: {id:'<%=note.id%>', title: document.querySelector(`input[data-type='edit-title'][data-id='<%=note.id%>']`).dataset.oldvalue}, type:'edit'});toggleEditShowDiv('<%=note.id%>');"
+								data-type="save"
+								data-id="<%=note.id%>"
+							>
+								Save note
+							</button>
+
+							<button
+								class="btn btn-secondary"
+								onclick="toggleEditShowDiv('<%=note.id%>');"
+								data-type="cancel"
+								data-id="<%=note.id%>"
+							>
+								Cancel
+							</button>
+						</div>
+					</div>
 					</li>
 					<%}%>
 				</ul>
 			</div>
-			<% } else { %> Notes is empty! <% } %>
+			<% } %>
+			<div hidden data-type="empty"> Notes is empty! <div>
 		</div>
 
 		<script
 			src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.min.js"
 			defer
 		></script>
+
 		<script>
-			document.addEventListener('DOMContentLoaded', () => {
-			    <% if (alerted) { %>
-			                   //if (!bootstrap.Alert) return;
-			        const alertNode = document.querySelector('[data-id="post-alert"]');
-			        const alertBoot=bootstrap.Alert.getOrCreateInstance(alertNode);
-
-			                 <% if (!created) { %>
-			                          if (window.history.replaceState) {
-			              			   window.history.pushState({}, null, '/');
-			                 } <%}%>
-
-			                 <% if (edited && id) { %>
-                             	setTimeout(() => {
-										document.querySelector(`button[data-type="edit"][data-id="<%=id%>"]`).classList.toggle('btn-success');
-									}, 1000);
-			                 <%}%>
-
-			                 if (document.querySelector('input[name="title"]')) document.querySelector('input[name="title"]').focus();
-
-			                 alertNode.addEventListener('closed.bs.alert', () => {
-			                     if (document.querySelector('input[name="title"]')) document.querySelector('input[name="title"]').focus();
-			                     alertBoot.dispose();
-			        });
-			                 setTimeout((alert)=> {
-			                     if (document.querySelector('[data-id="post-alert"]')) {
-			                     alert.close();
-			                     }
-			                 },3000,alertBoot);
-			    <% } %>
-			});
-		</script>
-		<script>
-			async function fetch_data(data) {
-				try {
-					if (data.type === 'remove') {
-						const response = await fetch(`/remove/${data.note.id}`, {
-							method: 'DELETE',
-							headers: {
-								'Content-Type': 'application/json',
-								// 'Content-Type': 'application/x-www-form-urlencoded',
-							},
-							redirect: 'follow',
-						});
-						if (response.ok) {
-							const body = await response.json();
-							if (body.status === 'completed') {
-								console.log(`Note ${data.note.id} removed success`);
-							} else console.log(`Error`);
-						}
-						window.location.href = `/remove/${data.note.id}`;
-					} else {
-						let newTitle = prompt(`Edit note ${data.note.id}`, data.note.title);
-						if (newTitle && newTitle !== data.note.title) {
-							const response = await fetch(`/edit/${data.note.id}`, {
-								method: 'PUT',
-								headers: {
-									'Content-Type': 'application/json',
-									// 'Content-Type': 'application/x-www-form-urlencoded',
-								},
-								redirect: 'follow',
-								body: JSON.stringify({ ...data.note, title: newTitle }),
+			function loadScript(src) {
+							let script = document.createElement('script');
+							script.src = src;
+							script.async = false;
+							script.addEventListener("load", (e) =>{
+								<% if (alerted && created && id)  {%>
+									setAlertMessage(true, true, false, false, <%= id%>);
+								<% } %>
+								<% if (notes.length === 0) {%>
+									document.querySelector(`div[data-type="empty"]`).hidden=false;
+								<% } %>	
 							});
-
-							if (response.ok) {
-								const body = await response.json();
-								if (body.status === 'completed') {
-									console.log(`Note ${data.note.id} edited success`);
-								} else console.error(`Error`);
-							}
-
-							window.location.href = `/edit/${data.note.id}`;
-						} else console.warning('Title must have least one symbol and differ from source');
-					}
-				} catch (error) {
-					console.error('Ошибка:', error);
+							document.body.append(script);
 				}
-			}
+				loadScript('/fetchFunc.js');
 		</script>
 	</body>
 </html>
