@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "fastcompanyxxx",
+  "uid": "uBWEBkD6vePYJEl4lvbLZuGVhCb2",
+  "private_key_id": "14f9c517e735fb28c40e90bfefe10fb09efe7db9",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCjQqRGEzgkbxtt\n5RDNRZpcg50G78/ZtLT1N5M8NLnMVwO5XIgSDSYYwhHcWK6MFAdjAWswhLdc0g5C\nYHCtPIUSwjM0lBsWxq5ELxlHRHHoiFncREV6zHD3II4ssf2R9R3WQdZKTwhLo3Yt\n1PGBqZlPOy4Cqz8fMD33vZvcavRyfS2xHI2+TS1gppeVjZUcW2QpTHueeRq539zx\n8HDWXjfqvCvqzhsAVexL9ykcAF7s1xBqofbn2Dbt4FNM39Pm/ukeG/1PfFHXj9Ku\n9fJMoj223rDV/Vinrmr9nsGgGuy/brXln4zernWd+Kb/WqAFJlvI2JJC90m0AASe\nS11feT4vAgMBAAECggEABRB/KhFUj4TG1AzkDYoYNMB8cYek6fr6FhVIQvjbvqQA\nYJKnQfAYe3IhvbUejQfeBss3eQTU71Mw0AxP0n/rHN7bWckyYe194G2ZmiVcZzs7\nlmKjySBobLIc1vQaipmQ+GGIdTuoZThH5ToS19PcBqIuVjTbu2rysSm3mQnUVWzR\n+AG6N8NB9fxUEvfhKmV38RgUWp6AdYWhaRg+hA4XnTon0od5WilbBtv8BwK+M8YS\njOc8xLCojuclP0hLt59hy2OsRo69Aoy8cqbl8XvGxr3nOhvTIqUZfc2PATCrkpdM\nXVTZt7mN6QS5krdZYV0MPQ48ZbkXqTTAKBypjo+L6QKBgQDW05lTjOatoNJZ/of8\ntEqeuIcCtNoq5hd9z8z+3sw4jmjrp6+XqkDsJZmTOhoPNeL1aHYtyxJic7EdIkVc\n1BqPzPbt0yqcXMHE+ExSzXV35kkUYbYHjxLeDB/z+YLa5WONlIgc7TVUT7r/OZaK\nmDKDVp5VCIVg2kWJwz69t3iL8wKBgQDCjPXqC3AammTKtiFoRPqxONv0u2zvkosu\nj9w44vfpCDz039roXy9rqRJMWCtqeJZg5f29SOryH889aoDnJ6gbA6TJshYTgeN1\n7aWk/UIlk41uHQIHX1irLU1XEEikhK89ZHTdjJM98ZulEpadFIBMiJT425BVnBnB\n5KRm1lQ/1QKBgBMFm379a/OV2OplEk96+1yAhFvl/adsxkm6m7E5syWS3pF3QKIS\nTjtavPV/YI1WPSlzvXsijxcunVEyFqg4k72F7ZtzZkOAJxw0zDVMwgkC2Be46zBS\nJ96HflDRGBgf1afUrhS5oE493RX6WG0fOuHMSqrG3WCNEzk2k5ii5UanAoGBAL6X\n8eKTygOF9fBRdXD9AsvT9EhRxWr+mbPH4+snD9AP7gfHtmGnvoEuZWq9hesMr+XF\n60sgwGrrls+IIzhRtXKhozKlcNMzkG7bnkeAhOjjIM8bQ/2M/wTToM0GeuQRyMvQ\nOl1Bdo5cwCp7h2njx70yoR8bms8D2ogFQroshuTxAoGBAI9cffUGM5v310vp6kGm\n2jeBob3imwiiOjv4EfHSBXKtdtA1ysmANqdnGMrvh6AVzqeO0s+5yvqd8bG649y4\nFr4DXd5pp7TQwltHJA6CKK/ZLxdFvGfriR6gvpz0egNfTHfPYA7CyHmdEOHp8qIV\nk41trKgWjKriPU3fICQrOeT3\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebasebackendadmin@fastcompanyxxx.iam.gserviceaccount.com",
+  "client_id": "115329007892250536635",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebasebackendadmin%40fastcompanyxxx.iam.gserviceaccount.com"
+}

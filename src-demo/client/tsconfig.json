@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "outDir": "dist",
+    "module": "es2015",
+    "moduleResolution": "node",
+    "target": "es5",
+    "lib": ["es6", "es2016", "dom"],
+    "baseUrl": "src",
+    "strict": true,
+    "preserveConstEnums": true,
+    "sourceMap": true,
+    "resolveJsonModule": true,
+    "isolatedModules": false,
+    "skipLibCheck": true,
+    "noImplicitAny": true,
+    "esModuleInterop": true,
+    "typeRoots": ["node_modules/@types", "src/types.d.ts"]
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
+}

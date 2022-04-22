@@ -1,0 +1,14 @@
+{
+  "isFireBase": true,
+  "apiDataEndpoint": "http://localhost:3333/api/",
+  "apiDataEndpointProd": "https://localhost/api/",
+  "firebaseConfig": {
+    "apiKey": "AIzaSyDIfqfzxSnigmrqo2Lp2Ot2M0YPL3ckjs4",
+    "authDomain": "fastcompanyxxx.firebaseapp.com",
+    "databaseURL": "https://fastcompanyxxx-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "projectId": "fastcompanyxxx",
+    "storageBucket": "fastcompanyxxx.appspot.com",
+    "messagingSenderId": "977973005188",
+    "appId": "1:977973005188:web:257cf0fe3204179924ebd1"
+  }
+}

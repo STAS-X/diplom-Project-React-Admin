@@ -1,0 +1,46 @@
+button.firebaseui-idp-button, button.firebaseui-tenant-button {
+  max-width: unset;
+  padding-left: 53px;
+}
+
+div.firebaseui-card-content, div.firebaseui-card-footer {
+  padding: 0 10px;
+}
+
+.layout > div:nth-of-type(1) {
+  margin-top: 0 !important;
+}
+
+div.aside {
+  transition: width 300ms ease-out, opacity 300ms ease-out;
+}
+
+.rotateMenu {
+  animation: spin 300ms;
+  transform: rotate(180deg);
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(180deg);
+    }
+}
+
+.unrotateMenu {
+  animation: unspin 300ms;
+  transform: rotate(-180deg);
+}
+
+@keyframes unspin {
+    0% {
+        transform: rotate(180deg);
+    }
+
+    100% {
+        transform: rotate(0deg);
+    }
+}
