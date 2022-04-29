@@ -1,35 +1,39 @@
 const tokenService = require('../services/token.service');
+const { getDoc, doc } = require('firebase/firestore');
+const app = require('../app.js');
 
-module.exports = (req, res, next) => {
-	if (req.method === 'OPTIONS') {
-		return next();
-	}
+module.exports = async (req, res, next) => {
+  if (req.method === 'OPTIONS') {
+    return next();
+  }
 
-	try {
-		// Bearer erwerfsdfsdfewrewrwerwerrwesdfsdff
-		const token = req.headers.authorization
-			? req.headers.authorization.split(' ')[1]
-			: null;
+  try {
+    // Bearer erwerfsdfsdfewrewrwerwerrwesdfsdff
+    const token = req.headers.authorization
+      ? req.headers.authorization.split(' ')[1]
+      : null;
 
-		if (!token) {
-			if (req.headers.session_expire)
-				return res.status(401).send({
+    const isValid = tokenService.validateAccess(token);
 
-						message:
-							'Текущая сессия истекла. Требуется повторная авторизация',
-						type: 'expires',
-					});
-			return res.status(401).json({ message: 'Unauthorized' });
-		}
+    if (!isValid) {
+      return res.status(401).send({
+        status: 401,
+        name: 'AuthorizationError',
+        message: 'Unautorized',
+      });
+    }
+      const firestore = app.firestore;
 
-		const data = tokenService.validateAccess(token);
-		if (!data) return res.status(401).json({ message: 'Unauthorized' });
+      const userSnap = await getDoc(doc(firestore, 'auth', 'user'));
+      if (userSnap.exists() > 0) {
+        const user = userSnap.data();
+    	req.userId = user.uid;
+	  }
 
-		req.user = data;
-		next();
-	} catch (error) {
-		return res.status(401).json({
-			message: `На сервере поризошла ошибка ${error.message}. Попробуйте позже.`,
-		});
-	}
+    next();
+  } catch (error) {
+    return res.status(401).send({
+      message: `На сервере поризошла ошибка ${error.message}. Попробуйте позже.`,
+    });
+  }
 };

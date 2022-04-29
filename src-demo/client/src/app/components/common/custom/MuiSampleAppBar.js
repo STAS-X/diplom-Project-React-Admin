@@ -63,12 +63,13 @@ const CustomAppBar = (props) => {
   const dispatch = useDispatch();
   const theme = useSelector(getAppTheme());
   const appTitle = useSelector(getAppTitle());
-  const authData = useSelector(getAuthData());
+  const { user: authUser } = useSelector(getAuthData());
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
     event.currentTarget.classList.toggle('unrotateMenu');
-    if (event.currentTarget.classList.contains('rotateMenu')) event.currentTarget.classList.toggle('rotateMenu');
+    if (event.currentTarget.classList.contains('rotateMenu'))
+      event.currentTarget.classList.toggle('rotateMenu');
 
     dispatch(setSidebarVisibility(false));
   };
@@ -78,8 +79,9 @@ const CustomAppBar = (props) => {
 
   const handleCloseNavMenu = () => {
     anchorElNav.classList.toggle('rotateMenu');
-    if (anchorElNav.classList.contains('unrotateMenu')) anchorElNav.classList.toggle('unrotateMenu');
-    
+    if (anchorElNav.classList.contains('unrotateMenu'))
+      anchorElNav.classList.toggle('unrotateMenu');
+
     setAnchorElNav(null);
     dispatch(setSidebarVisibility(true));
   };
@@ -118,7 +120,7 @@ const CustomAppBar = (props) => {
             sx={{
               ml: 0.5,
               color: green[300],
-              minWidth:'200px',
+              minWidth: '200px',
               display: 'flex',
             }}
           >
@@ -178,16 +180,14 @@ const CustomAppBar = (props) => {
           <ThemeButton />
           <Tooltip
             title={
-              authData?.user?.displayName
-                ? authData.user.displayName
-                : 'Login settings'
+              authUser?.displayName ? authUser?.displayName : 'Login settings'
             }
           >
             <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
               <StyledBadge
                 overlap="circular"
                 anchorOrigin={
-                  authData?.user?.providerId === 'password'
+                  authUser?.providerId === 'password'
                     ? { vertical: 'top', horizontal: 'right' }
                     : { vertical: 'bottom', horizontal: 'right' }
                 }
@@ -195,12 +195,10 @@ const CustomAppBar = (props) => {
               >
                 <Avatar
                   alt="Remy Sharp"
-                  title={`${authData?.user?.email}`}
+                  title={`${authUser?.email ? authUser?.email : 'email empty'}`}
                   sx={{ width: 48, height: 48 }}
                   src={
-                    authData?.user?.photoURL
-                      ? authData.user.photoURL
-                      : '/broken-image.jpg'
+                    authUser?.photoURL ? authUser.photoURL : '/broken-image.jpg'
                   }
                 >
                   TR

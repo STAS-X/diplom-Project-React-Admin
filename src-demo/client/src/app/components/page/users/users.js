@@ -23,7 +23,9 @@ import {
   EditContextProvider,
   useFormGroup,
   minLength,
-  useNotify, useRefresh, useRedirect,
+  useNotify,
+  useRefresh,
+  useRedirect,
 } from 'react-admin';
 import {
   Accordion,
@@ -39,25 +41,43 @@ const UserFilter = (props) => (
   </Filter>
 );
 
-export const UserList = (props) => (
-  <List {...props} filters={<UserFilter />} 
-        sx={{
-            backgroundColor: 'yellow',
-            '& .RaList-main': {
-                backgroundColor: 'red',
-            },
-        }}>
-    <Datagrid>
-      <TextField source="name" />
-      <TextField source="age" />
-      <TextField source="createdate" />
-      <TextField source="lastupdate" />
-      <ShowButton label="" />
-      <EditButton label="" />
-      <DeleteButton label="" redirect={false} />
-    </Datagrid>
-  </List>
-);
+export const UserList = (props) => {
+  const onSuccess = ({data}) => {
+    console.log(data, 'Custom success');
+    // do something
+  };
+  const onFailure = (err) => {
+    console.log(err, 'Custom failed');
+    // do something
+  };
+  const onError = ({err}) => {
+    console.log(err, 'Custom error');
+    // do something
+  };
+  return (
+    <List
+      {...props}
+      filters={<UserFilter />}
+      sx={{
+        backgroundColor: 'yellow',
+        '& .RaList-main': {
+          backgroundColor: 'red',
+        },
+      }}
+      onError={onError}
+    >
+      <Datagrid>
+        <TextField source="name" />
+        <TextField source="age" />
+        <TextField source="createdate" />
+        <TextField source="lastupdate" />
+        <ShowButton label="" />
+        <EditButton label="" />
+        <DeleteButton label="" redirect={false} />
+      </Datagrid>
+    </List>
+  );
+};
 
 export const UserShow = (props) => (
   <Show {...props} title="Users page">
@@ -134,12 +154,11 @@ const MyEdit = (props) => {
   console.log(record);
   return (
     <EditContextProvider value={controllerProps}>
-      
       <div>
         <h2>Новый титл для формы редактирования</h2>
         {React.cloneElement(props.children, {
           basePath,
-          record: {...record, name: "Test XXX",  age: 40},
+          record: { ...record, name: 'Test XXX', age: 40 },
           redirect,
           resource,
           save,
@@ -152,16 +171,16 @@ const MyEdit = (props) => {
 };
 
 export const UserEdit = (props) => {
-    const notify = useNotify();
-    const refresh = useRefresh();
-    const redirect = useRedirect();
+  const notify = useNotify();
+  const refresh = useRefresh();
+  const redirect = useRedirect();
 
-    const onSuccess = () => {
-        notify(`Изменения были применены успешно`);
-        redirect('/#/posts');
-        refresh();
-    };
-    
+  const onSuccess = () => {
+    notify(`Изменения были применены успешно`);
+    redirect('/#/posts');
+    refresh();
+  };
+
   return (
     <MyEdit onSuccess={onSuccess} {...props}>
       <SimpleForm

@@ -2,108 +2,144 @@ const express = require('express');
 // const https = require('https');
 const config = require('config');
 const chalk = require('chalk');
+const bodyParser = require('body-parser');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
 const routes = require('./routes');
 
-//import * as functions from 'firebase-functions';
-const fireCreditial = require('./config/fireBaseCreditial.json');
-const firebaseConfig = require('./config/default.json');
-const auth = require('firebase/auth');
-const { signOut } = require('firebase/auth');
-const firebase = require('firebase/app');
-const { initializeApp } = require('firebase/app');
-const {
-  getDatabase,
-  ref,
-  get,
-  child,
-  set,
-  onValue,
-} = require('firebase/database');
-const {
-  getFirestore,
-  collection,
-  getDoc,
-  getDocs,
-  doc,
-} = require('firebase/firestore');
+const firebase = require('firebase/compat/app');
+require('firebase/compat/auth');
+require('firebase/compat/firestore');
+require('firebase/compat/storage');
+const { FirebaseDataProvider } = require('react-admin-firebase');
 
-const firebaseApp = initializeApp(config.firebaseConfig);
+firebase.initializeApp(config.firebaseConfig);
+const { doc, collection, getDoc, setDoc } = require('firebase/firestore');
 
-const signEmail = async () => {
-  await auth
-    .signInWithEmailAndPassword(
-      auth.getAuth(firebaseApp),
-      'backenduserfirebase@firebase.com',
-      'qQ123456'
-    )
+const dataProvider = FirebaseDataProvider(config.firebaseConfig, {
+  logging: true,
+  //rootRef: 'rootrefcollection/QQG2McwjR2Bohi9OwQzP',
+  app: firebase,
+  // watch: ['posts'];
+  // dontwatch: ['comments'];
+  persistence: 'local',
+  disableMeta: false,
+  dontAddIdFieldToDoc: false,
+  lazyLoading: {
+    enabled: false,
+  },
+  renameMetaFields: {
+    created_at: 'createdAt',
+    created_by: 'createdBy',
+    updated_at: 'updatedAt',
+    updated_by: 'updatedBy',
+  },
+  useFileNamesInStorage: false,
+  firestoreCostsLogger: {
+    enabled: false,
+  },
+});
+
+const signWithEmail = async () => {
+  await firebase
+    .auth()
+    .signInWithEmailAndPassword('backenduserfirebase@firebase.com', 'qQ123456')
     .then(async (user) => {
-      console.log(user, 'Backend loggin DB success');
-      const store = getFirestore(firebaseApp);
-      const snapshot = await getDoc(doc(store, 'users', '1'));
-      console.log(snapshot.data());
-      // firebaseApp
-      //   .ref('users/' + 'uBWEBkD6vePYJEl4lvbLZuGVhCb2')
-      //   .once('value', (snap) => {
-      //     console.log(snap.val());
-      //   });
+      console.log(chalk.green('Backend login DB success'));
+      module.exports.provider = dataProvider;
+      module.exports.firestore = firebase.firestore();
+    })
+    .catch((error) => {
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      console.log(chalk.red(errorMessage));
+      process.exit(1);
     });
 };
-signEmail();
-  // const getdoc = async () => {
-//         const store = getFirestore(firebaseApp);
-//         const snapshot = await getDoc(doc(store, 'users', '1'));
-//         console.log(snapshot.data());
-// }
-// getdoc();
-// signOut(auth).then(async () => {
-//       console.log(user,'Backend loggout DB success');
-//       const store = getFirestore(firebaseApp);
-//       const snapshot = await getDoc(doc(store, 'users', '1'));
-//       console.log(snapshot.data());
-// })
-
-//       const store = getFirestore(firebaseApp);
-//       //const firestore = getFirestore();
-// const getMarker = async () => {
-//     const snapshot = await collection(store, 'users').get();
-//     return snapshot.docs.map(doc => doc.data());
-// }
-// console.log(getMarker());
-
-//console.log(store);
-
-// store
-//   .collection('paintings')
-//   .orderBy('createdAt', 'desc').then((doc) => console.log(doc));
-
-// const docSnap = async () => {
-//   const docs = await getDocs(collection(store, 'users'));
-//   docs.forEach((doc) => {
-//     console.log(doc.id, " => ", doc.data());
-//   });
-// };
-// docSnap();
-
-//.then((snap) => console.log(snap.data()));
 
 const app = express();
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(bodyParser.json());
 app.use(cors());
+
+// const loginValidation = {
+//   body: Joi.object({
+//     email: Joi.string().email().required(),
+//     password: Joi.string()
+//       .regex(/[a-zA-Z0-9]{3,30}/)
+//       .required(),
+//   }),
+// };
+
+// // parallel processing
+// const validate = validations => {
+//   return async (req, res, next) => {
+//     await Promise.all(validations.map(validation => validation.run(req)));
+
+//     const errors = validationResult(req);
+//     if (errors.isEmpty()) {
+//       return next();
+//     }
+
+//     res.status(400).json({ errors: errors.array() });
+//   };
+// };
+
+// app.get(
+//   '/api/users/',
+//   (req, res, next) => {
+//     //console.log(req.headers['providerparams']);
+//     // if (typeof req.body === 'object') {
+//     //   const data = { email: 'test', password: 'qqqwQweR123454' }; //JSON.parse(req.headers['providerparams']);
+//     //   req.body = data || {};
+//     // }
+//     req.body = { email: 'testtest.ru', password: 'qqqwQweR123454' };
+//     next();
+//   },
+//   validate([
+//     body('email')
+//       .isEmail()
+//       .withMessage(
+//         'Ошибка валидации: значение должно быть в формате email'
+//       ),
+//     body('password')
+//       .isLength({ min: 6 })
+//       .withMessage(
+//         'Ошибка валидации: минимальное количество символов в пароле - 6'
+//       ),
+//   ]),
+// );
+
+// app.use(function (err, req, res, next) {
+//   if (err) {
+//     console.log(err);
+//     return res.status(err.statusCode).send({
+//       error: {
+//         status: err.statusCode,
+//         name: err.name,
+//         message: err.details ? err.details.body.message : err.message,
+//         error: err.error,
+//       },
+//     });
+//   }
+
+//   return res.status(500).send({
+//     error: {
+//       status: err.statusCode,
+//       name: err.name,
+//       message: err.message,
+//       error: err.details ? err.details.body.message : err.message,
+//     },
+//   });
+// });
+
 app.use('/api', routes);
 
 const PORT = config.get('port') || 3333;
 const PORT_PROD = config.get('portProd') || 3333;
-// Creating object of key and certificate
-// for SSL
-// const options = {
-//	key: fs.readFileSync(path.join(__dirname, 'config', 'server.key')),
-//	cert: fs.readFileSync(path.join(__dirname, 'config', 'server.cert')),
-// };
 
 if (process.env.NODE_ENV === 'production') {
   console.log(chalk.red('This is production mode'));
@@ -115,10 +151,15 @@ if (process.env.NODE_ENV === 'production') {
   });
 } else console.log(chalk.blue('This is development mode'));
 
-app.listen(PORT, () =>
-  console.log(chalk.green(`Server has been starte on ${PORT} port`))
-);
+app.listen(PORT, () => {
+  signWithEmail();
+  console.log(chalk.green(`Server has been starte on ${PORT} port`));
+});
 
+// module.exports = async () => {
+//   const isLogIn = await signWithEmail();
+//   if (isLogIn) return (module.exports = dataProvider);
+// };
 // ('backenduserfirebase@firebase.com', 'qQ123456')
 // .then((user) => console.log(user, 'Backend loggin DB success'));
 

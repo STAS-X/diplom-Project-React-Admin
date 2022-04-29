@@ -1,5 +1,6 @@
 import * as React from "react";
 import {useSelector} from 'react-redux';
+import {useEffect} from 'react';
 import {
   Datagrid,
   List,
@@ -111,6 +112,12 @@ const ReferenceFilter = (props) => (
   </Filter>
 );
 const { loadedOnce } = useSelector((state) => state.admin.resources.posts.list);
+
+useEffect(()=>{
+
+   return () => {}
+}, []);
+
 
  return (
    <>

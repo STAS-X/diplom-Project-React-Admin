@@ -12,292 +12,186 @@ const httpClient = httpService;
 
 export default {
   getList: (resource, params) => {
-    const { page, perPage } = params.pagination;
-    const { field, order } = params.sort;
-    const query = {
-      sort: JSON.stringify([field, order]),
-      range: JSON.stringify([(page - 1) * perPage, page * perPage - 1]),
-      filter: JSON.stringify(params.filter),
-    };
-    const url = `${apiUrl}/${resource}?${stringify(query)}`;
-
-    return new Promise((resolve, reject) => {
-      httpClient.get(url, { queryType: 'getList' }).then(
-        ({ status, headers, body }) => {
-          let json;
-          try {
-            json = JSON.parse(body);
-          } catch (e) {
-            // not json, no big deal
-          }
-          if (status < 200 || status >= 300) {
-            return reject({
-              status,
-              body: { message: (json && json.message) || statusText },
-              data: json,
-            });
-          }
-          return resolve({
-            status,
-            headers,
-            body,
-            data: json,
-            total: parseInt(headers.get('content-range').split('/').pop(), 10),
-          });
+    const url = `${apiUrl}/${resource}`;
+    return httpClient
+      .get(url, {
+        headers: {
+          ProviderRequest: 'getList',
+          ProviderParams: JSON.stringify(params),
+        },
+      })
+      .then(({ status, statusText, data }) => {
+        if (status < 200 || status >= 300) {
+          return { status, message: (error && error.message) || statusText };
         }
-      );
-    });
+        return {
+          data,
+          total: data ? data.length : 0,
+        };
+      });
   },
 
-  getOne: (resource, params) =>
-    new Promise((resolve, reject) => {
-      httpClient.get(`${apiUrl}/${resource}/${params.id}`, {
-        queryType: 'getOne',
-      }).then(({ status, headers, body }) => {
-        let json;
-        try {
-          json = JSON.parse(body);
-        } catch (e) {
-          // not json, no big deal
-        }
+  getOne: (resource, params) => {
+    const url = `${apiUrl}/${resource}/${params.id}`;
+    return httpClient
+      .get(url, {
+        headers: {
+          ProviderRequest: 'getOne',
+          ProviderParams: JSON.stringify(params),
+        },
+      })
+      .then(({ status, statusText, data }) => {
         if (status < 200 || status >= 300) {
-          return reject({
-            status,
-            body: { message: (json && json.message) || statusText },
-            data: json,
-          });
+          return { status, message: (error && error.message) || statusText };
         }
-        return resolve({
-          status,
-          headers,
-          body,
-          data: json,
-        });
+        return {
+          data,
+          total: data ? data.length : 0,
+        };
       });
-    }),
+  },
 
   getMany: (resource, params) => {
-    const query = {
-      filter: JSON.stringify({ ids: params.ids }),
-    };
-    const url = `${apiUrl}/${resource}?${stringify(query)}`;
-    return new Promise((resolve, reject) => {
-      httpClient.get(url, { queryType: 'getMany' }).then(
-        ({ status, headers, body }) => {
-          let json;
-          try {
-            json = JSON.parse(body);
-          } catch (e) {
-            // not json, no big deal
-          }
-          if (status < 200 || status >= 300) {
-            return reject({
-              status,
-              error: { message: (json && json.message) || statusText },
-              data: json,
-            });
-          }
-          return resolve({
-            status,
-            headers,
-            body,
-            data: json,
-          });
+    const url = `${apiUrl}/${resource}`;
+    return httpClient
+      .get(url, {
+        headers: {
+          ProviderRequest: 'getMany',
+          ProviderParams: JSON.stringify(params),
+        },
+      })
+      .then(({ status, statusText, data }) => {
+        if (status < 200 || status >= 300) {
+          return { status, message: (error && error.message) || statusText };
         }
-      );
-    });
+        return {
+          data,
+          total: data ? data.length : 0,
+        };
+      });
   },
 
   getManyReference: (resource, params) => {
-    const { page, perPage } = params.pagination;
-    const { field, order } = params.sort;
-    const query = {
-      sort: JSON.stringify([field, order]),
-      range: JSON.stringify([(page - 1) * perPage, page * perPage - 1]),
-      filter: JSON.stringify({
-        ...params.filter,
-        [params.target]: params.id,
-      }),
-    };
-    const url = `${apiUrl}/${resource}?${stringify(query)}`;
-
-    return new Promise((resolve, reject) => {
-      httpClient.get(url, { queryType: 'getManyReference' }).then(
-        ({ status, headers, body }) => {
-          let json;
-          try {
-            json = JSON.parse(body);
-          } catch (e) {
-            // not json, no big deal
-          }
-          if (status < 200 || status >= 300) {
-            return reject({
-              status,
-              error: { message: (json && json.message) || statusText },
-              data: json,
-            });
-          }
-          return resolve({
-            status,
-            headers,
-            body,
-            data: json,
-            total: parseInt(headers.get('content-range').split('/').pop(), 10),
-          });
+    const url = `${apiUrl}/${resource}`;
+    return httpClient
+      .get(url, {
+        headers: {
+          ProviderRequest: 'getManyReference',
+          ProviderParams: JSON.stringify(params),
+        },
+      })
+      .then(({ status, statusText, data }) => {
+        if (status < 200 || status >= 300) {
+          return { status, message: (error && error.message) || statusText };
         }
-      );
-    });
+        return {
+          data,
+          total: data ? data.length : 0,
+        };
+      });
   },
 
-  update: (resource, params) =>
-    new Promise((resolve, reject) => {
-      httpClient.put(`${apiUrl}/${resource}/${params.id}`, {
-        method: 'PUT',
-        queryType: 'update',
+  update: (resource, params) => {
+    const url = `${apiUrl}/${resource}/${params.id}`;
+    return httpClient
+      .put(url, {
         body: JSON.stringify(params.data),
-      }).then(({ status, headers, body }) => {
-        let json;
-        try {
-          json = JSON.parse(body);
-        } catch (e) {
-          // not json, no big deal
-        }
+        data: JSON.stringify(params),
+        headers: {
+          ProviderRequest: 'update',
+        },
+      })
+      .then(({ status, statusText, data }) => {
         if (status < 200 || status >= 300) {
-          return reject({
-            status,
-            error: { message: (json && json.message) || statusText },
-            data: json,
-          });
+          return { status, message: (error && error.message) || statusText };
         }
-        return resolve({
-          status,
-          headers,
-          body,
-          data: json,
-        });
+        return {
+          data,
+        };
       });
-    }),
+  },
 
   updateMany: (resource, params) => {
     const query = {
       filter: JSON.stringify({ id: params.ids }),
     };
-    return new Promise((resolve, reject) => {
-      httpClient.put(`${apiUrl}/${resource}?${stringify(query)}`, {
-        method: 'PUT',
-        queryType: 'updateMany',
-        body: JSON.stringify(params.data),
-      }).then(({ status, headers, body }) => {
-        let json;
-        try {
-          json = JSON.parse(body);
-        } catch (e) {
-          // not json, no big deal
-        }
+    const url = `${apiUrl}/${resource}?${stringify(query)}`;
+    return httpClient
+      .put(url, {
+        data: JSON.stringify(params),
+        headers: {
+          ProviderRequest: 'updateMany',
+        },
+      })
+      .then(({ status, statusText, data }) => {
         if (status < 200 || status >= 300) {
-          return reject({
-            status,
-            error: { message: (json && json.message) || statusText },
-            data: json,
-          });
+          return { status, message: (error && error.message) || statusText };
         }
-        return resolve({
-          status,
-          headers,
-          body,
-          data: json,
-        });
+        return {
+          data,
+        };
       });
-    });
   },
 
-  create: (resource, params) =>
-    new Promise((resolve, reject) => {
-      httpClient.post(`${apiUrl}/${resource}`, {
-        method: 'POST',
-        queryType: 'create',
+  create: (resource, params) => {
+    const url = `${apiUrl}/${resource}`;
+    return httpClient
+      .post(url, {
         body: JSON.stringify(params.data),
-      }).then(({ status, headers, body }) => {
-        let json;
-        try {
-          json = JSON.parse(body);
-        } catch (e) {
-          // not json, no big deal
-        }
+        data: JSON.stringify(params),
+        headers: {
+          ProviderRequest: 'create',
+        },
+      })
+      .then(({ status, statusText, data }) => {
         if (status < 200 || status >= 300) {
-          return reject({
-            status,
-            error: { message: (json && json.message) || statusText },
-            data: json,
-          });
+          return { status, message: (error && error.message) || statusText };
         }
-        return resolve({
-          status,
-          headers,
-          body,
-          data: { ...params.data, id: json.id },
-        });
+        return {
+          data,
+        };
       });
-    }),
+  },
 
-  delete: (resource, params) =>
-    new Promise((resolve, reject) => {
-      httpClient.delete(`${apiUrl}/${resource}/${params.id}`, {
-        method: 'DELETE',
-        queryType: 'delete',
-      }).then(({ status, headers, body }) => {
-        let json;
-        try {
-          json = JSON.parse(body);
-        } catch (e) {
-          // not json, no big deal
-        }
+  delete: (resource, params) => {
+    const url = `${apiUrl}/${resource}/${params.id}`;
+    return httpClient
+      .delete(url, {
+        headers: {
+          ProviderRequest: 'delete',
+          ProviderParams: JSON.stringify(params),
+        },
+      })
+      .then(({ status, statusText, data }) => {
         if (status < 200 || status >= 300) {
-          return reject({
-            status,
-            error: { message: (json && json.message) || statusText },
-            data: json,
-          });
+          return { status, message: (error && error.message) || statusText };
         }
-        return resolve({
-          status,
-          headers,
-          body,
-          data: json,
-        });
+        return {
+          data,
+        };
       });
-    }),
+  },
 
   deleteMany: (resource, params) => {
     const query = {
       filter: JSON.stringify({ id: params.ids }),
     };
-    return new Promise((resolve, reject) => {
-      httpClient.delete(`${apiUrl}/${resource}?${stringify(query)}`, {
-        method: 'DELETE',
-        queryType: 'deleteMany',
-        body: JSON.stringify(params.data),
-      }).then(({ status, headers, body }) => {
-        let json;
-        try {
-          json = JSON.parse(body);
-        } catch (e) {
-          // not json, no big deal
-        }
+    const url = `${apiUrl}/${resource}?${stringify(query)}`;
+
+    return httpClient
+      .delete(url, {
+        headers: {
+          ProviderRequest: 'deleteMany',
+          ProviderParams: JSON.stringify(params),
+        },
+      })
+      .then(({ status, statusText, data }) => {
         if (status < 200 || status >= 300) {
-          return reject({
-            status,
-            error: { message: (json && json.message) || statusText },
-            data: json,
-          });
+          return { status, message: (error && error.message) || statusText };
         }
-        return resolve({
-          status,
-          headers,
-          body,
-          data: json,
-        });
+        return {
+          data,
+        };
       });
-    });
   },
 };

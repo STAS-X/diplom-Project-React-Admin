@@ -38,7 +38,7 @@ export default ({
         // add your own reducers here
     });
     const resettableAppReducer = (state, action) =>
-        rootReducer(action.type !== USER_LOGOUT ? state : undefined, action);
+        rootReducer(action.type !== USER_LOGOUT ? state: null, action);
 
     const saga = function* rootSaga() {
         yield all(

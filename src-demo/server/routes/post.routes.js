@@ -2,10 +2,30 @@ const express = require('express');
 // const User = require('../models/User');
 const auth = require('../middleware/auth.middlware');
 const { generateUserData } = require('../utils/helpers');
+// Add validation to create and update object
+const { validate } = require('../utils/validations');
+const { validationResult, body } = require('express-validator');
+
 const router = express.Router({ mergeParams: true });
 const app = require('../app.js');
 
-const resource = 'users';
+const resource = 'posts';
+const validations = [
+  body('title')
+    .exists()
+    .withMessage('Ошибка валидации: значение title должно быть указано')
+    .isLength({ max: 6 })
+    .withMessage(
+      'Ошибка валидации: значение title должно быть более 6 символов'
+    ),
+  body('body')
+    .exists()
+    .withMessage('Ошибка валидации: значение body должно быть указано')
+    .isLength({ min: 10 })
+    .withMessage(
+      'Ошибка валидации: минимальное количество символов в body - 10'
+    ),
+];
 
 router.get('/:id?', [
   auth,
@@ -49,9 +69,9 @@ router.delete('/:id?', [
 
 router.put('/:id?', [
   auth,
+  validate(validations),
   async (req, res) => {
     try {
-      console.log('update user');
       const dataProvider = app.provider;
       const query = req.body.headers.ProviderRequest;
       const params = JSON.parse(req.body.data);
@@ -70,14 +90,15 @@ router.put('/:id?', [
 
 router.post('/', [
   auth,
+  validate(validations),
   async (req, res) => {
     try {
-      console.log('create user');
       const dataProvider = app.provider;
       const query = req.body.headers.ProviderRequest;
       const params = JSON.parse(req.body.data);
 
       const { data } = await dataProvider[query](resource, params);
+      console.log(data, 'create');
       res.status(200).send(data);
     } catch (e) {
       res.status(500).send({

@@ -4,8 +4,6 @@
 	"accessSecret": "super secret from backend",
 	"refreshSecret": "refresh secret from backend",
   "isFireBase": true,
-  "apiDataEndpoint": "http://localhost:3333/api/",
-  "apiDataEndpointProd": "https://localhost/api/",
   "firebaseConfig": {
     "apiKey": "AIzaSyDIfqfzxSnigmrqo2Lp2Ot2M0YPL3ckjs4",
     "authDomain": "fastcompanyxxx.firebaseapp.com",

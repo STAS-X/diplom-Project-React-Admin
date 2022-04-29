@@ -1,5 +1,5 @@
-import "react-toastify/dist/ReactToastify.css";
 import { toast, cssTransition } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 const bounce = cssTransition({
     enter: "animate__animated animate__bounceIn",
@@ -20,8 +20,15 @@ const initOpts = {
     draggable: true,
     pauseOnFocusLoss: false,
     pauseOnHover: false,
-    autoClose: 2500
+    autoClose: 3000
 };
+
+const Message = ({ toastName, toastContent }) => (
+  <div>
+    <h4 style={{ margin: 0 }}>{toastName}</h4>
+    <h5 style={{ margin: 0, marginTop: '10px' }}>{toastContent}</h5>
+  </div>
+);
 
 export function toastSuccessBounce(text) {
     toast.success("👌 " + text, {
@@ -31,18 +38,18 @@ export function toastSuccessBounce(text) {
     });
 }
 
-export function toastErrorBounce(text) {
-    toast.error("👋 " + text, {
-        ...initOpts,
-        position: toast.POSITION.TOP_RIGHT,
-        transition: bounce
-    });
+export function toastErrorBounce(name, message) {
+  toast.error(<Message toastName={'👋 ' + name} toastContent={message} />, {
+    ...initOpts,
+    position: toast.POSITION.TOP_RIGHT,
+    transition: bounce,
+  });
 }
 
-export function toastDarkBounce(text) {
-    toast.dark("👋 " + text, {
-        ...initOpts,
-        transition: bounce
+export function toastDarkBounce(name, message) {
+    toast.dark(<Message toastName={'👋 ' + name} toastContent={message} />, {
+      ...initOpts,
+      transition: bounce,
     });
 }
 

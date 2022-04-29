@@ -9,8 +9,18 @@ import AppLoader from './app/components/ui/hoc/appLoader';
 
 import { authProvider, dataProvider } from './app/dbapp/initFireBase';
 
+import { ToastContainer } from 'react-toastify';
+
+import { ReactHooksWrapper, setHook, getHook } from 'react-hooks-outside/lib';
+
+import { useDispatch, useSelector } from 'react-redux';
+import { useLogout } from 'react-admin';
+
 import registerServiceWorker from './app/api/registerServiceWorker';
 import EventMonitor from './app/components/common/event/EventMonitor';
+import {
+  getAuthData,
+} from './app/store/authcontext';
 
 // authProvider.checkError = (error) => {
 //         const status = error.status;
@@ -30,6 +40,10 @@ import EventMonitor from './app/components/common/event/EventMonitor';
 //     redirectTo: 'https://localhost:3333/#/login',
 //   });
 // };
+
+setHook('dispatch', useDispatch)
+  .setHook('selector', () => useSelector)
+  .setHook('logout', useLogout);
 
 ReactDOM.render(
   <React.StrictMode>
@@ -52,8 +66,10 @@ ReactDOM.render(
             <Redirect exact from="/" to="/main" />
           </Switch>
         </AppLoader>
+        <ReactHooksWrapper />
       </BrowserRouter>
     </Provider>
+    <ToastContainer />
   </React.StrictMode>,
   document.getElementById('root')
 );

@@ -44,3 +44,7 @@ div.aside {
         transform: rotate(0deg);
     }
 }
+
+div.Toastify__toast {
+  box-shadow: 0 8px 12px 0 rgb(0 0 0 / 15%), 0 15px 20px 0 rgb(0 0 0 / 20%);
+}

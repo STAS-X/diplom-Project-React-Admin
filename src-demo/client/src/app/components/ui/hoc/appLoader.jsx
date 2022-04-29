@@ -1,85 +1,91 @@
-import { useEffect, useMemo, useState } from 'react';
-import { toastDarkBounce } from '../../../utils/animateTostify';
-import PropTypes from 'prop-types';
-import { useLogout } from 'react-admin';
-import { useDispatch, useSelector } from 'react-redux';
+import { useEffect, useMemo } from 'react';
 import {
-  setAuthData,
-  setAuthLogout,
-  getLoggedStatus,
-  setAuthLoggedStatus,
+  toastDarkBounce,
+  toastErrorBounce,
+} from '../../../utils/animateTostify';
+import PropTypes from 'prop-types';
+
+import { useDispatch, useSelector } from 'react-redux';
+
+import localStorageService from '../../../services/localStorage.service';
+import { firebaseApp } from '../../../dbapp/initFireBase';
+import {
   getAuthError,
+  getAuthData,
+  setAuthError,
+  setAuthLogout,
+  setAuthLoggedStatus,
+  setAuthUser,
+  setAuthToken,
 } from '../../../store/authcontext';
-import { getAppError } from '../../../store/appcontext';
-import firebase from 'firebase/compat/app';
+import { getAppError, setAppError } from '../../../store/appcontext';
+import authService from '../../../services/auth.service';
+import { getHook } from 'react-hooks-outside';
+import { useLogout } from 'react-admin';
 
-const handleUserTokenRefresh = (user, dispatch, logout) => {
-  if (user) {
-    dispatch(setAuthLoggedStatus(true));
-    const { displayName, email, photoURL, providerId, uid } =
-      user._delegate.providerData[0];
-    const { stsTokenManager: token } = user._delegate;
-    dispatch(
-      setAuthData({
-        user: {
-          displayName: displayName ? displayName : 'John Dow',
-          email,
-          photoURL: photoURL
-            ? photoURL
-            : `https://avatars.dicebear.com/api/avataaars/${(Math.random() + 1)
-                .toString(36)
-                .substring(7)}.svg`,
-          providerId,
-          uid,
-        },
-        token,
-      })
-    );
-  } else {
-    // dispatch(setAuthLoggedStatus(false));
-    // No user is signed in.
-    dispatch(setAuthLogout());
-    logout();
-  }
-};
-
-const AppLoader = ({ history, children }) => {
-  const dispatch = useDispatch();
-  const isLoggedIn = useSelector(getLoggedStatus());
+const AppLoader = ({ children }) => {
+  //const data = select(getAuthData());
+  const { user: authUser, token: authToken } = useSelector(getAuthData());
   const authError = useSelector(getAuthError());
   const appError = useSelector(getAppError());
   const memoError = useMemo(() => authError || appError, [authError, appError]);
-  const memoLogged = useMemo(() => isLoggedIn, [isLoggedIn]);
-  const logout = useLogout();
-
+  // const memoLogged = useMemo(() => isLoggedIn, [isLoggedIn]);
+  const handleLogout = () => {
+    const logout = getHook('logout');
+    logout();
+  }
+  
   useEffect(() => {
-    if (memoError && memoError.message) {
-      toastDarkBounce(memoError.message);
-      setTimeout(() => {
-        dispatch(setAuthLogout());
-        logout();
-      }, 1500);
-      return 'need reauthorization';
-    }
-  }, [memoError]);
+    const dispatch = getHook('dispatch');
 
-  // Listen to the Firebase Auth state and set the local state.
-  useEffect(() => {
-    const unregisterAuthObserver = firebase
+    const unregisterAuthObserver = firebaseApp
       .auth()
       .onAuthStateChanged(async (user) => {
-        handleUserTokenRefresh(user, dispatch, logout);
+        if (user) {
+          const { data } = authToken
+            ? await authService.getAuthData(authToken.accessToken)
+            : { data: { user: null, token: null } };
+
+          if (data.user || localStorageService.getUser()) {
+            dispatch(setAuthUser(data.user || localStorageService.getUser()));
+            dispatch(
+              setAuthToken(data.token || localStorageService.getToken())
+            );
+          } else {
+            dispatch(setAuthLogout());
+            handleLogout();
+          }
+        } else {
+          // No user is signed in.
+          dispatch(setAuthLogout());
+          handleLogout();
+        }
       });
-    const unregisterAuthTokenObserver = firebase
-      .auth()
-      .onIdTokenChanged(async (user) => {
-        handleUserTokenRefresh(user, dispatch, logout);
-      });
-    return () => {
-      unregisterAuthObserver();
-      unregisterAuthTokenObserver();
-    }; // Make sure we un-register Firebase observers when the component unmounts.
+    return () => unregisterAuthObserver(); // Make sure we un-register Firebase observers when the component unmounts.
   }, []);
+
+  useEffect(() => {
+    //console.log('Произошла ошибка');
+    const dispatch = getHook('dispatch');
+
+    if (memoError) {
+      if (memoError.name === 'AuthorizationError') {
+        dispatch(setAppError(null));
+        dispatch(setAuthError(null));
+        toastErrorBounce('Обнаружена ошибка:', `${memoError.error.message}`);
+
+        dispatch(setAuthLogout());
+        handleLogout();
+      } else {
+        dispatch(setAppError(null));
+        dispatch(setAuthError(null));
+        toastDarkBounce(
+          'При выполнении запроса произошла ошибка:',
+          `${memoError.message}`
+        );
+      }
+    }
+  }, [memoError]);
 
   return children;
 };

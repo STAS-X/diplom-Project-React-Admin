@@ -1,10 +1,46 @@
 // LoginPage.js
 import React, { useEffect, useState } from 'react';
-import {Redirect } from 'react-router-dom'
+import { Redirect } from 'react-router-dom';
 import { Login, LoginForm } from 'react-admin';
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
 import firebase from 'firebase/compat/app';
 import ForgotPasswordButton from './CustomForgotPassword';
+import { getHook } from 'react-hooks-outside';
+import authService from '../../services/auth.service';
+import {
+  setAuthLoggedStatus,
+  setAuthUser,
+  setAuthToken,
+} from '../../store/authcontext';
+//import { GoogleAuthProvider } from "firebase/auth";
+
+const handleUserTokenRefresh = async (user) => {
+  const dispatch = getHook('dispatch');
+  //const logout = getHook('logout');
+  const { displayName, email, photoURL, providerId, uid } = user._delegate;
+  const authUser = {
+    displayName: displayName ? displayName : 'John Dow',
+    email,
+    photoURL: photoURL
+      ? photoURL
+      : `https://avatars.dicebear.com/api/avataaars/${(Math.random() + 1)
+          .toString(36)
+          .substring(7)}.svg`,
+    providerId,
+    uid,
+  };
+  const authToken = { ...user._delegate.stsTokenManager };
+
+  // Проверяем на существование зарегистрированного пользователя и если он есть в firebase.auth() загружаем его в БД
+  const { data } = await authService.register({
+    user: authUser,
+    token: authToken,
+  });
+
+  dispatch(setAuthToken(data.token));
+  dispatch(setAuthUser(authUser));
+  dispatch(setAuthLoggedStatus(true));
+};
 
 const SignInScreen = ({ setData, ...props }) => {
   // Configure FirebaseUI.
@@ -17,8 +53,7 @@ const SignInScreen = ({ setData, ...props }) => {
     signInOptions: [
       {
         provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
-        // signInMethod:
-        //   firebase.auth.EmailAuthProvider.EMAIL_LINK_SIGN_IN_METHOD ||
+        signInMethod: firebase.auth.EmailAuthProvider.EMAIL_LINK_SIGN_IN_METHOD,
         //   firebase.auth.EmailAuthProvider.EMAIL_PASSWORD_SIGN_IN_METHOD,
         emailLinkSignIn: function () {
           return {
@@ -46,15 +81,43 @@ const SignInScreen = ({ setData, ...props }) => {
       },
       {
         provider: firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+        signInMethod: firebase.auth.GoogleAuthProvider.GOOGLE_SIGN_IN_METHOD,
       },
     ],
     autoUpgradeAnonymousUsers: true,
     // Optional callbacks in order to get Access Token from Google,Facebook,... etc
     callbacks: {
+      signInWithPopup: () =>
+        (auth, provider)
+          .then((result) => {
+            console.log('sign popup');
+            // This gives you a Google Access Token. You can use it to access the Google API.
+            const credential = GoogleAuthProvider.credentialFromResult(result);
+
+            const token = credential.accessToken;
+            // The signed-in user info.
+            const user = result.user;
+            // ...
+          })
+          .catch((error) => {
+            // Handle Errors here.
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            // The email of the user's account used.
+            const email = error.email;
+            // The AuthCredential type that was used.
+            const credential = GoogleAuthProvider.credentialFromError(error);
+            // ...
+          }),
       signInSuccessWithAuthResult: (result) => {
         const credential = result.credential;
         // The signed-in user info.
         const user = result.user;
+
+        //dispatch(setAuthUser(localStorageService.getUser()));
+        //dispatch(setAuthToken(localStorageService.getToken()));
+        handleUserTokenRefresh(user);
+
         // console.log(firebase.auth().currentUser, 'LoggedSuccess');
         // This gives you a Facebook Access Token. You can use it to access the Facebook API.
       },
@@ -80,16 +143,15 @@ const SignInScreen = ({ setData, ...props }) => {
 
   const [isSignedIn, setIsSignedIn] = useState(false); // Local signed-in state.
 
- useEffect(() => {
+  useEffect(() => {
     const unregisterAuthObserver = firebase
       .auth()
       .onAuthStateChanged((user) => {
         if (user) {
-            setIsSignedIn(!!user);
-          console.log('test');
+          setIsSignedIn(!!user);
+          //handleUserTokenRefresh(user);
         } else {
-            // No user is signed in.
-
+          // No user is signed in.
         }
       });
     return () => unregisterAuthObserver(); // Make sure we un-register Firebase observers when the component unmounts.
@@ -106,7 +168,7 @@ const SignInScreen = ({ setData, ...props }) => {
       </div>
     );
   } else {
-     return <Redirect to="/main" />;
+    return <Redirect to="/main" />;
     // return (
     //   <div style={{ marginLeft: '10px' }}>
     //     <h4>Добро пожаловать в приложение</h4>
@@ -114,8 +176,7 @@ const SignInScreen = ({ setData, ...props }) => {
     //     <a onClick={() => firebase.auth().signOut()}>Sign-out</a>
     //   </div>
     // );
-
-   }
+  }
 };
 
 const CustomLoginForm = ({ ...props }) => {
@@ -132,9 +193,9 @@ const CustomLoginForm = ({ ...props }) => {
   );
 };
 
-const CustomLoginPage = ({...props}) => (
+const CustomLoginPage = ({ ...props }) => (
   <Login {...props}>
-      <CustomLoginForm {...props} />;
+    <CustomLoginForm {...props} />;
   </Login>
 );
 
