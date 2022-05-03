@@ -12,6 +12,9 @@ import { firebaseApp } from '../../../dbapp/initFireBase';
 import {
   getAuthError,
   getAuthData,
+  setAuthFromDB,
+  getAuthDBStatus,
+  setAuthDBStatus,
   setAuthError,
   setAuthLogout,
   setAuthLoggedStatus,
@@ -26,6 +29,7 @@ import { useLogout } from 'react-admin';
 const AppLoader = ({ children }) => {
   //const data = select(getAuthData());
   const { user: authUser, token: authToken } = useSelector(getAuthData());
+  const authDBStatus = useSelector(getAuthDBStatus());
   const authError = useSelector(getAuthError());
   const appError = useSelector(getAppError());
   const memoError = useMemo(() => authError || appError, [authError, appError]);
@@ -33,27 +37,28 @@ const AppLoader = ({ children }) => {
   const handleLogout = () => {
     const logout = getHook('logout');
     logout();
-  }
-  
-  useEffect(() => {
-    const dispatch = getHook('dispatch');
+  };
 
+  useEffect(() => {
     const unregisterAuthObserver = firebaseApp
       .auth()
-      .onAuthStateChanged(async (user) => {
-        if (user) {
-          const { data } = authToken
-            ? await authService.getAuthData(authToken.accessToken)
-            : { data: { user: null, token: null } };
+      .onAuthStateChanged((user) => {
+        const dispatch = getHook('dispatch');
 
-          if (data.user || localStorageService.getUser()) {
-            dispatch(setAuthUser(data.user || localStorageService.getUser()));
-            dispatch(
-              setAuthToken(data.token || localStorageService.getToken())
-            );
+        if (user) {
+          //const dispatch = getHook('dispatch');
+          if (!authToken && localStorageService.getToken()) {
+            if (!authDBStatus) {
+            // Если данные в сторе отсутствуют, подгружаем их из БД, если это возможно
+            const token = localStorageService.getToken();
+            dispatch(setAuthFromDB(token.accessToken));
+            } else {
+              // Если данные уже были запрошены и они отсутствуют в базе, тогда выходим на авторизацию
+              dispatch(setAuthLogout());
+              handleLogout();
+            }
           } else {
-            dispatch(setAuthLogout());
-            handleLogout();
+            dispatch(setAuthDBStatus(false));
           }
         } else {
           // No user is signed in.
@@ -72,10 +77,10 @@ const AppLoader = ({ children }) => {
       if (memoError.name === 'AuthorizationError') {
         dispatch(setAppError(null));
         dispatch(setAuthError(null));
-        toastErrorBounce('Обнаружена ошибка:', `${memoError.error.message}`);
+        toastErrorBounce('Обнаружена ошибка:', `${memoError.message}`);
 
-        dispatch(setAuthLogout());
-        handleLogout();
+        //dispatch(setAuthLogout());
+        //handleLogout();
       } else {
         dispatch(setAppError(null));
         dispatch(setAuthError(null));

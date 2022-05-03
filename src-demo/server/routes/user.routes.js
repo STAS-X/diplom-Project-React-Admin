@@ -8,7 +8,7 @@ const app = require('../app.js');
 const resource = 'users';
 
 router.get('/:id?', [
-  auth,
+auth,
   async (req, res) => {
     try {
       const dataProvider = app.provider;
@@ -16,6 +16,7 @@ router.get('/:id?', [
       const params = JSON.parse(req.headers['providerparams']);
 
       const { data } = await dataProvider[query](resource, params);
+
       res.status(200).send(data);
     } catch (e) {
       res.status(500).send({
@@ -28,7 +29,7 @@ router.get('/:id?', [
 ]);
 
 router.delete('/:id?', [
-  auth,
+
   async (req, res) => {
     try {
       const dataProvider = app.provider;

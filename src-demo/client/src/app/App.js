@@ -1,4 +1,4 @@
-import React from 'react';
+import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { Admin, Resource, defaultTheme, localStorageStore } from 'react-admin';
 
@@ -6,7 +6,8 @@ import UserIcon from '@material-ui/icons/People';
 import CommentIcon from '@material-ui/icons/Comment';
 import PostIcon from '@material-ui/icons/PostAdd';
 
-import { getAppTheme } from './store/appcontext';
+import { getAppTheme, getAppTitle } from './store/appcontext';
+import { getLoggedStatus } from './store/authcontext';
 
 import merge from 'lodash/merge';
 
@@ -26,7 +27,7 @@ import {
   UserCreate,
   UserEdit,
 } from './components/page/users/users';
-
+import { getHook } from 'react-hooks-outside/lib';
 import CustomLayout from './components/common/custom/customLayout';
 //import { CustomAppConsumer } from './components/common/context/themProvider';
 
@@ -44,8 +45,14 @@ import NotFound from './components/ui/NotFound';
 //   </Layout>
 // );
 
+
+
+
 const App = (props) => {
+
   const theme = useSelector(getAppTheme());
+  let mainAppPage = useSelector(getAppTitle());
+  let loggedStatus = useSelector(getLoggedStatus());
 
   const changeTheme = (theme) => {
     if (theme === 'light') {
@@ -82,38 +89,60 @@ const App = (props) => {
       },
     });
   };
+
+
+  useEffect(() => {
+      
+      const switchToAppPage = (currentPage) => {
+        if (!loggedStatus) return '/login'
+          switch (currentPage) {
+            case 'Главная страница':
+              return '/main';
+            case 'Пользователи':
+              return '/users';
+            case 'Посты':
+              return '/posts';
+            default:
+              return '/main';
+          }
+        //
+      };
+    props.history.replace(switchToAppPage(mainAppPage));
+
+    return () => {};
+  }, []);
+
   //const isLogged = useSelector(getLoggedStatus());
 
-  //if (props.history.location.pathname==='/') props.history.replace('/main');
 
   return (
-       <Admin
-        authProvider={props.authProvider}
-        dataProvider={props.dataProvider}
-        theme={changeTheme(theme)}
-        layout={CustomLayout}
-        loginPage={CustomLoginPage}
-        dashboard={Dashboard}
-        history={props.history}
-        catchAll={NotFound}
-      >
-        <Resource
-          name="users"
-          icon={UserIcon}
-          list={UserList}
-          show={UserShow}
-          create={UserCreate}
-          edit={UserEdit}
-        />
-        <Resource
-          name="posts"
-          icon={PostIcon}
-          list={PostList}
-          show={PostShow}
-          create={PostCreate}
-          edit={PostEdit}
-        />
-      </Admin>
+    <Admin
+      authProvider={props.authProvider}
+      dataProvider={props.dataProvider}
+      theme={changeTheme(theme)}
+      layout={CustomLayout}
+      loginPage={CustomLoginPage}
+      dashboard={Dashboard}
+      history={props.history}
+      catchAll={NotFound}
+    >
+      <Resource
+        name="users"
+        icon={UserIcon}
+        list={UserList}
+        show={UserShow}
+        create={UserCreate}
+        edit={UserEdit}
+      />
+      <Resource
+        name="posts"
+        icon={PostIcon}
+        list={PostList}
+        show={PostShow}
+        create={PostCreate}
+        edit={PostEdit}
+      />
+    </Admin>
   );
 };
 

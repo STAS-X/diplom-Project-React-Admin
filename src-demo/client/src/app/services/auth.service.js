@@ -45,7 +45,7 @@ httpAuth.interceptors.response.use(
 );
 
 const authService = {
-  register: (payload) => {
+  register: async (payload) => {
     return httpAuth
       .post(`signIn/`, payload)
       .then(({ status, statusText, data }) => {
@@ -58,10 +58,13 @@ const authService = {
       });
   },
 
-  refreshToken: (newToken) => {
+  logout: async () => {
+    const token = localStorageService.getToken();
     return httpAuth
-      .put('token/', {
-        token: newToken || localStorageService.getToken(),
+      .delete('signOut/', {
+        headers: {
+          Authorization: token ? `Bearer ${token.accessToken}` : '',
+        },
       })
       .then(({ status, statusText, data }) => {
         if (status < 200 || status >= 300) {
@@ -73,7 +76,26 @@ const authService = {
       });
   },
 
-  getAuthData: (accessToken) => {
+  refreshToken: async (newToken) => {
+    const oldToken = localStorageService.getToken();
+    return httpAuth
+      .put('token/', 
+        {data: { ...newToken, oldRefresh: oldToken.refreshToken} },
+        {headers: {
+          Authorization: oldToken ? `Bearer ${oldToken.accessToken}` : '',
+        }},
+      )
+      .then(({ status, statusText, data }) => {
+        if (status < 200 || status >= 300) {
+          return { status, message: (error && error.message) || statusText };
+        }
+        return {
+          data,
+        };
+      });
+  },
+
+  getAuthData: async (accessToken) => {
     //const { accessToken } = localStorageService.getToken();
     return httpAuth
       .get(`authData/`, {

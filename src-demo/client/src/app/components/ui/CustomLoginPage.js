@@ -9,6 +9,7 @@ import { getHook } from 'react-hooks-outside';
 import authService from '../../services/auth.service';
 import {
   setAuthLoggedStatus,
+  setAuthDBStatus,
   setAuthUser,
   setAuthToken,
 } from '../../store/authcontext';
@@ -36,10 +37,12 @@ const handleUserTokenRefresh = async (user) => {
     user: authUser,
     token: authToken,
   });
+  console.log(authToken, authUser, 'user login and register');
 
   dispatch(setAuthToken(data.token));
   dispatch(setAuthUser(authUser));
   dispatch(setAuthLoggedStatus(true));
+  dispatch(setAuthDBStatus(false));
 };
 
 const SignInScreen = ({ setData, ...props }) => {
@@ -48,7 +51,7 @@ const SignInScreen = ({ setData, ...props }) => {
     // Popup signin flow rather than redirect flow.
     signInFlow: 'popup',
     // Redirect to /signedIn after sign in is successful. Alternatively you can provide a callbacks.signInSuccess function.
-    signInSuccessUrl: '#/',
+    signInSuccessUrl: '/',
     // We will display Google and Facebook as auth providers.
     signInOptions: [
       {
@@ -116,7 +119,7 @@ const SignInScreen = ({ setData, ...props }) => {
 
         //dispatch(setAuthUser(localStorageService.getUser()));
         //dispatch(setAuthToken(localStorageService.getToken()));
-        handleUserTokenRefresh(user);
+        //handleUserTokenRefresh(user);
 
         // console.log(firebase.auth().currentUser, 'LoggedSuccess');
         // This gives you a Facebook Access Token. You can use it to access the Facebook API.
@@ -149,7 +152,7 @@ const SignInScreen = ({ setData, ...props }) => {
       .onAuthStateChanged((user) => {
         if (user) {
           setIsSignedIn(!!user);
-          //handleUserTokenRefresh(user);
+          handleUserTokenRefresh(user);
         } else {
           // No user is signed in.
         }

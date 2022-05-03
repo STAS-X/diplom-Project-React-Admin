@@ -21,12 +21,10 @@ const validate = (validations) => {
     }
 
     res.status(400).send({
-      error: {
-        status: 400,
+        code: 400,
         name: 'ValidationError',
         message: errors.errors[0].msg,
         errors: errors.array(),
-      },
     });
   };
 };

@@ -17,7 +17,7 @@ router.get('/:id?', async (req, res) => {
     res.status(200).send(data);
   } catch (e) {
     res.status(500).send({
-      status: 500,
+      code: 500,
       name: 'ServerError',
       message: `На сервере произошла ошибка ${e.message}. Попробуйте позже`,
     });
@@ -34,7 +34,7 @@ router.delete('/:id?', async (req, res) => {
     res.status(200).send(data);
   } catch (e) {
     res.status(500).send({
-      status: 500,
+      code: 500,
       name: 'ServerError',
       message: `На сервере произошла ошибка ${e.message}. Попробуйте позже`,
     });
@@ -52,7 +52,7 @@ router.put('/:id?', async (req, res) => {
     res.status(200).send(data);
   } catch (e) {
     res.status(500).send({
-      status: 500,
+      code: 500,
       name: 'ServerError',
       message: `На сервере произошла ошибка ${e.message}. Попробуйте позже`,
     });
@@ -70,7 +70,7 @@ router.post('/', async (req, res) => {
     res.status(200).send(data);
   } catch (e) {
     res.status(500).send({
-      status: 500,
+      code: 500,
       name: 'ServerError',
       message: `На сервере произошла ошибка ${e.message}. Попробуйте позже`,
     });

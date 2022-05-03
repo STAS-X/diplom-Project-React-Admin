@@ -65,18 +65,20 @@ const MaterialUISwitch = styled(Switch)(({ mode }) => {
   };
 });
 
-const ThemeButton = ({...props}) => {
+const ThemeButton = ({ ...props }) => {
   const dispatch = useDispatch();
   const theme = useSelector(getAppTheme());
+
   // const isLight = theme === 'light';
   return (
     <div style={{ marginLeft: 'auto' }}>
       <Tooltip title="Change theme">
         <MaterialUISwitch
           {...props}
+          checked={theme==="dark"}
           mode={theme}
           sx={{ m: 1 }}
-          onClick={()=> dispatch(setAppTheme())}
+          onClick={() => dispatch(setAppTheme())}
         />
       </Tooltip>
     </div>

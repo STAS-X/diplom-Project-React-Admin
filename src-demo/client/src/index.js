@@ -18,9 +18,8 @@ import { useLogout } from 'react-admin';
 
 import registerServiceWorker from './app/api/registerServiceWorker';
 import EventMonitor from './app/components/common/event/EventMonitor';
-import {
-  getAuthData,
-} from './app/store/authcontext';
+import { getAuthData } from './app/store/authcontext';
+import localStorageService from './app/services/localStorage.service';
 
 // authProvider.checkError = (error) => {
 //         const status = error.status;
@@ -34,16 +33,17 @@ import {
 //         return Promise.resolve();
 //     };
 // authProvider.checkAuth = (params) => {
-//   console.log(params, 'Пааметры')
+//   console.log(params, 'Параметры')
 //   // let's say user is not logged in
 //   return Promise.reject({
 //     redirectTo: 'https://localhost:3333/#/login',
 //   });
 // };
-
 setHook('dispatch', useDispatch)
   .setHook('selector', () => useSelector)
   .setHook('logout', useLogout);
+
+
 
 ReactDOM.render(
   <React.StrictMode>
@@ -61,13 +61,14 @@ ReactDOM.render(
             dataProvider={dataProvider}
             history={history}
           />
-          <EventMonitor />
           <Switch>
             <Redirect exact from="/" to="/main" />
           </Switch>
         </AppLoader>
+
         <ReactHooksWrapper />
       </BrowserRouter>
+      <EventMonitor />
     </Provider>
     <ToastContainer />
   </React.StrictMode>,

@@ -1,13 +1,17 @@
 import axios from 'axios';
 //import { toastDarkBounce } from '../utils/animateTostify';
 import { setAppError } from '../store/appcontext';
-import { setAuthToken } from '../store/authcontext';
+import {
+  setAuthRefreshToken,
+  getAuthData,
+  getAuthToken,
+} from '../store/authcontext';
 import configFile from '../config/default.json';
+import { useSelector } from 'react-redux';
 import authService from './auth.service';
 import { getHook } from 'react-hooks-outside';
 import localStorageService from './localStorage.service';
-import { authProvider } from '../dbapp/initFireBase';
-import { getAuthData } from '../store/authcontext';
+import { firebaseApp, authProvider } from '../dbapp/initFireBase';
 
 const http = axios.create({
   baseURL: configFile.isFireBase
@@ -17,49 +21,43 @@ const http = axios.create({
     : configFile.apiEndpoint,
 });
 
+function getToken() {
+  const dispatch = getHook('dispatch');
+
+  console.log(token);
+  return token;
+}
+
 http.interceptors.request.use(
   async function (config) {
     if (configFile.isFireBase) {
-      const selector = getHook('selector');
+      //const selector = getHook('selector');
       const dispatch = getHook('dispatch');
+      const { token } = dispatch(getAuthToken());
 
-      const { token } = selector(getAuthData());
+      const { expirationTime, refreshToken, accessToken } = token;
 
-      // const containSlash = /\/$/gi.test(config.url);
-      // config.url =
-      //     (containSlash ? config.url.slice(0, -1) : config.url) + ".json";
-      const { expirationTime, refreshToken, accessToken } =
-        token || localStorageService.getToken();
-
-      // const expireSession = Math.floor(
-      //   (Math.abs(Date.now() - expiresDate) / (1000 * 3600)) % 24
-      // );
-      let authToken = token;
-
+      //const authToken =
+      //  firebaseApp.auth().currentUser._delegate.stsTokenManager;
       if (refreshToken && expirationTime < Date.now()) {
-        if (authProvider.auth().currentUser) {
-          const authToken =
-            authProvider.auth().currentUser._delegate.stsTokenManager;
-          const { data } = await authService.refreshToken(authToken);
-          if (
-            data.token &&
-            data.token.refreshToken &&
-            data.token.expirationTime > Date.now()
-          )
-            authToken = data.token;
-          dispatch(setAuthToken(authToken));
-        } else authToken = null;
-      } else authToken = null;
+        const { stsTokenManager: authToken } = (await authProvider.checkAuth())._delegate;
+        const data = await dispatch(setAuthRefreshToken({...authToken}));
 
-      if (!authToken) {
-        config.headers = {
-          ...config.headers,
-          Authorization: '',
-        };
+        if (data) {
+          config.headers = {
+            ...config.headers,
+            Authorization: `Bearer ${accessToken}`,
+          };
+        } else {
+          config.headers = {
+            ...config.headers,
+            Authorization: '',
+          };
+        }
       } else {
         config.headers = {
           ...config.headers,
-          Authorization: `Bearer ${authToken.accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
         };
       }
     }

@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const config = require('config');
 //const Token = require('../models/Token');
 const { getDoc, doc } = require('firebase/firestore');
+const app = require('../app.js');
 
 class TokenService {
   // return accessToken, refreshToken, exporesIn
@@ -9,8 +10,9 @@ class TokenService {
   generate(payload) {
     const expirationTime = payload.expirationTime;
     const accessToken = jwt.sign(payload, config.get('accessSecret'), {
-      expiresIn: '1h',
+      expiresIn: 3600,
     });
+
     const refreshToken = jwt.sign(payload, config.get('refreshSecret'));
 
     return {
@@ -36,12 +38,15 @@ class TokenService {
 
   async validateRefresh(refreshToken) {
     try {
+      const firestore = app.firestore;
       const tokenSnap = await getDoc(doc(firestore, 'auth', 'token'));
       if (tokenSnap.exists() > 0) {
-        const token = tokenSnap.data();
+        const token= tokenSnap.data();
+
         return (
-          token.refreshToken ===
-          jwt.verify(refreshToken, config.get('refreshSecret'))
+          jwt.verify(refreshToken, config.get('refreshSecret')).refreshToken ===
+          jwt.verify(token.refreshToken, config.get('refreshSecret'))
+            .refreshToken
         );
       }
       return false;
@@ -52,17 +57,20 @@ class TokenService {
 
   async validateAccess(accessToken) {
     try {
+      const firestore = app.firestore;
       const tokenSnap = await getDoc(doc(firestore, 'auth', 'token'));
+
       if (tokenSnap.exists() > 0) {
         const token = tokenSnap.data();
+
         return (
-          token.refreshToken ===
-          jwt.verify(accessToken, config.get('accessSecret'))
+          jwt.verify(accessToken, config.get('accessSecret')).accessToken ===
+          jwt.verify(token.accessToken, config.get('accessSecret')).accessToken
         );
       }
       return false;
-	  
     } catch (error) {
+      console.log(error);
       return null;
     }
   }

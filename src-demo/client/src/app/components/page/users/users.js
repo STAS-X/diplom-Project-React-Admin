@@ -42,15 +42,8 @@ const UserFilter = (props) => (
 );
 
 export const UserList = (props) => {
-  const onSuccess = ({data}) => {
-    console.log(data, 'Custom success');
-    // do something
-  };
-  const onFailure = (err) => {
-    console.log(err, 'Custom failed');
-    // do something
-  };
-  const onError = ({err}) => {
+
+  const onError = (err) => {
     console.log(err, 'Custom error');
     // do something
   };
@@ -177,7 +170,7 @@ export const UserEdit = (props) => {
 
   const onSuccess = () => {
     notify(`Изменения были применены успешно`);
-    redirect('/#/posts');
+    redirect('/posts');
     refresh();
   };
 

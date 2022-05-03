@@ -47,30 +47,51 @@ router.post('/signIn', [
       // }
       const { user, token } = req.body;
 
-	  const q = query(
-      collection(firestore, 'users'),
-      where('uid', '==', user.uid)
-     );
-	 const querySnapshot = await getDocs(q);
-	 if (querySnapshot.size === 0) {
-		 const newId = nanoid();
-		  await setDoc(
-        doc(collection(firestore, 'users'), newId),
-        user
+      const q = query(
+        collection(firestore, 'users'),
+        where('uid', '==', user.uid)
       );
-	 }
+      const querySnapshot = await getDocs(q);
+      if (querySnapshot.size === 0) {
+        const newId = nanoid();
+        await setDoc(doc(collection(firestore, 'users'), newId), user);
+      }
 
       const colRef = collection(firestore, 'auth');
       await setDoc(doc(colRef, 'user'), {
         ...user,
         loggedIn: true,
       });
+
       const validateToken = tokenService.generate(token);
-      await setDoc(doc(colRef, 'token'), token);
+
+      await setDoc(doc(colRef, 'token'), validateToken);
 
       return res
         .status(200)
         .send({ token: { ...validateToken }, signIn: true });
+    } catch (error) {
+      return res.status(400).send({
+        message: error.message,
+        code: 400,
+      });
+    }
+  },
+]);
+router.delete('/signOut', [
+  auth,
+  async (req, res) => {
+    try {
+      const firestore = app.firestore;
+
+      const userSnap = await getDoc(doc(firestore, 'auth', 'user'));
+      const tokenSnap = await getDoc(doc(firestore, 'auth', 'token'));
+      if (userSnap.exists() > 0 && tokenSnap.exists() > 0) {
+        await firestore.collection('auth').doc('user').delete();
+        await firestore.collection('auth').doc('token').delete();
+        //console.log('user and token delete');
+      }
+      return res.status(200).send({ signOut: true });
     } catch (error) {
       return res.status(400).send({
         message: error.message,
@@ -94,6 +115,7 @@ router.get('/authData', [
         token = tokenSnap.data();
         user = userSnap.data();
       }
+      console.log(tokenSnap.data(), userSnap.data(), 'from db');
 
       return res.status(200).send({
         token: token ? { ...token } : null,
@@ -114,8 +136,9 @@ router.put('/token', [
   async (req, res) => {
     try {
       const firestore = app.firestore;
-      const { token } = req.body;
-      const isValid = tokenService.validateRefresh(token.refreshToken);
+      const { data } = req.body;
+
+      const isValid = await tokenService.validateRefresh(data.oldRefresh);
 
       if (!isValid) {
         return res.status(401).send({
@@ -126,8 +149,8 @@ router.put('/token', [
       }
 
       const colRef = collection(firestore, 'auth');
-      await setDoc(doc(colRef, 'token'), token);
-      const validateToken = tokenService.generate(token);
+      const validateToken = tokenService.generate(data);
+      await setDoc(doc(colRef, 'token'), validateToken);
 
       res.status(200).send({ token: { ...validateToken }, refresh: true });
     } catch (error) {

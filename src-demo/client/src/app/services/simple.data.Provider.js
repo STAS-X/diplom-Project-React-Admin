@@ -28,12 +28,12 @@ export default {
           data,
           total: data ? data.length : 0,
         };
-      });
+      }).catch(err => console.log(err));
   },
 
-  getOne: (resource, params) => {
+  getOne: async (resource, params) => {
     const url = `${apiUrl}/${resource}/${params.id}`;
-    return httpClient
+    return await httpClient
       .get(url, {
         headers: {
           ProviderRequest: 'getOne',
@@ -51,9 +51,9 @@ export default {
       });
   },
 
-  getMany: (resource, params) => {
+  getMany: async (resource, params) => {
     const url = `${apiUrl}/${resource}`;
-    return httpClient
+    return await httpClient
       .get(url, {
         headers: {
           ProviderRequest: 'getMany',
@@ -71,9 +71,9 @@ export default {
       });
   },
 
-  getManyReference: (resource, params) => {
+  getManyReference: async (resource, params) => {
     const url = `${apiUrl}/${resource}`;
-    return httpClient
+    return await httpClient
       .get(url, {
         headers: {
           ProviderRequest: 'getManyReference',
@@ -91,9 +91,9 @@ export default {
       });
   },
 
-  update: (resource, params) => {
+  update: async (resource, params) => {
     const url = `${apiUrl}/${resource}/${params.id}`;
-    return httpClient
+    return await httpClient
       .put(url, {
         body: JSON.stringify(params.data),
         data: JSON.stringify(params),
@@ -111,12 +111,12 @@ export default {
       });
   },
 
-  updateMany: (resource, params) => {
+  updateMany: async (resource, params) => {
     const query = {
       filter: JSON.stringify({ id: params.ids }),
     };
     const url = `${apiUrl}/${resource}?${stringify(query)}`;
-    return httpClient
+    return await httpClient
       .put(url, {
         data: JSON.stringify(params),
         headers: {
@@ -133,9 +133,9 @@ export default {
       });
   },
 
-  create: (resource, params) => {
+  create: async (resource, params) => {
     const url = `${apiUrl}/${resource}`;
-    return httpClient
+    return await httpClient
       .post(url, {
         body: JSON.stringify(params.data),
         data: JSON.stringify(params),
@@ -153,9 +153,9 @@ export default {
       });
   },
 
-  delete: (resource, params) => {
+  delete: async (resource, params) => {
     const url = `${apiUrl}/${resource}/${params.id}`;
-    return httpClient
+    return await httpClient
       .delete(url, {
         headers: {
           ProviderRequest: 'delete',
@@ -172,13 +172,13 @@ export default {
       });
   },
 
-  deleteMany: (resource, params) => {
+  deleteMany: async (resource, params) => {
     const query = {
       filter: JSON.stringify({ id: params.ids }),
     };
     const url = `${apiUrl}/${resource}?${stringify(query)}`;
 
-    return httpClient
+    return await httpClient
       .delete(url, {
         headers: {
           ProviderRequest: 'deleteMany',

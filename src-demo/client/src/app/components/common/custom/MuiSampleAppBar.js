@@ -20,10 +20,9 @@ import MenuItem from '@mui/material/MenuItem';
 import { useLogout, setSidebarVisibility } from 'react-admin';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAppTheme, getAppTitle } from '../../../store/appcontext';
-import { getAuthData } from '../../../store/authcontext';
+import { getAuthData, setAuthLogout } from '../../../store/authcontext';
 
 import ThemeButton from '../styled/themButton';
-import { CustomAppConsumer } from '../context/themProvider';
 
 const pages = ['Products', 'Pricing', 'Blog'];
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
@@ -91,7 +90,10 @@ const CustomAppBar = (props) => {
   };
 
   const logout = useLogout();
-  const handleLogout = () => logout();
+  const handleLogout = () => {
+    dispatch(setAuthLogout());
+    logout();
+  }
 
   return (
     <AppBar
