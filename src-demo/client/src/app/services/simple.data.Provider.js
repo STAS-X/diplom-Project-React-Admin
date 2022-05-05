@@ -1,6 +1,7 @@
 import { fetchUtils } from 'react-admin';
 import { stringify } from 'query-string';
 import appConfig from '../config/default.json';
+import { getHook } from 'react-hooks-outside';
 import httpService from './http.service';
 
 const apiUrl = appConfig.isFireBase
@@ -10,9 +11,16 @@ const apiUrl = appConfig.isFireBase
   : appConfig.apiEndpoint;
 const httpClient = httpService;
 
+const verifyLoggedStatus = () => {
+  const { getState } = getHook('store');
+  return getState().authContext.isLoggedIn;
+};
+
 export default {
   getList: (resource, params) => {
     const url = `${apiUrl}/${resource}`;
+    console.log(verifyLoggedStatus(), 'verify status');
+    if (!verifyLoggedStatus()) return new Promise((resolve) => resolve({ data: [], total: 0 }));
     return httpClient
       .get(url, {
         headers: {
@@ -28,12 +36,14 @@ export default {
           data,
           total: data ? data.length : 0,
         };
-      }).catch(err => console.log(err));
+      })
+      .catch((err) => console.log(err));
   },
 
-  getOne: async (resource, params) => {
+  getOne: (resource, params) => {
     const url = `${apiUrl}/${resource}/${params.id}`;
-    return await httpClient
+
+    return httpClient
       .get(url, {
         headers: {
           ProviderRequest: 'getOne',
@@ -51,9 +61,9 @@ export default {
       });
   },
 
-  getMany: async (resource, params) => {
+  getMany: (resource, params) => {
     const url = `${apiUrl}/${resource}`;
-    return await httpClient
+    return httpClient
       .get(url, {
         headers: {
           ProviderRequest: 'getMany',
@@ -71,9 +81,9 @@ export default {
       });
   },
 
-  getManyReference: async (resource, params) => {
+  getManyReference: (resource, params) => {
     const url = `${apiUrl}/${resource}`;
-    return await httpClient
+    return httpClient
       .get(url, {
         headers: {
           ProviderRequest: 'getManyReference',
@@ -91,9 +101,9 @@ export default {
       });
   },
 
-  update: async (resource, params) => {
+  update: (resource, params) => {
     const url = `${apiUrl}/${resource}/${params.id}`;
-    return await httpClient
+    return httpClient
       .put(url, {
         body: JSON.stringify(params.data),
         data: JSON.stringify(params),
@@ -111,12 +121,12 @@ export default {
       });
   },
 
-  updateMany: async (resource, params) => {
+  updateMany: (resource, params) => {
     const query = {
       filter: JSON.stringify({ id: params.ids }),
     };
     const url = `${apiUrl}/${resource}?${stringify(query)}`;
-    return await httpClient
+    return httpClient
       .put(url, {
         data: JSON.stringify(params),
         headers: {
@@ -133,9 +143,9 @@ export default {
       });
   },
 
-  create: async (resource, params) => {
+  create: (resource, params) => {
     const url = `${apiUrl}/${resource}`;
-    return await httpClient
+    return httpClient
       .post(url, {
         body: JSON.stringify(params.data),
         data: JSON.stringify(params),
@@ -153,9 +163,9 @@ export default {
       });
   },
 
-  delete: async (resource, params) => {
+  delete: (resource, params) => {
     const url = `${apiUrl}/${resource}/${params.id}`;
-    return await httpClient
+    return httpClient
       .delete(url, {
         headers: {
           ProviderRequest: 'delete',
@@ -172,13 +182,13 @@ export default {
       });
   },
 
-  deleteMany: async (resource, params) => {
+  deleteMany: (resource, params) => {
     const query = {
       filter: JSON.stringify({ id: params.ids }),
     };
     const url = `${apiUrl}/${resource}?${stringify(query)}`;
 
-    return await httpClient
+    return httpClient
       .delete(url, {
         headers: {
           ProviderRequest: 'deleteMany',

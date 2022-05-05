@@ -70,7 +70,6 @@ class TokenService {
       }
       return false;
     } catch (error) {
-      console.log(error);
       return null;
     }
   }

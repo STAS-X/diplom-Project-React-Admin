@@ -51,7 +51,7 @@ router.post('/', [
   auth,
   async (req, res) => {
     try {
-      console.log('route users');
+      console.log('route tasks');
       const dataProvider = app.provider;
       const query = req.body.headers.ProviderRequest;
       const params = JSON.parse(req.body.data);
@@ -72,7 +72,7 @@ router.delete('/:id?', [
   auth,
   async (req, res) => {
     try {
-      console.log('route users');
+      console.log('route tasks');
       const dataProvider = app.provider;
       const query = req.headers['providerrequest'];
       const params = JSON.parse(req.headers['providerparams']);

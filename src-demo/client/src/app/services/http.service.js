@@ -1,10 +1,11 @@
 import axios from 'axios';
+import { useState } from 'react';
 //import { toastDarkBounce } from '../utils/animateTostify';
 import { setAppError } from '../store/appcontext';
 import {
   setAuthRefreshToken,
-  getAuthData,
   getAuthToken,
+  getAuthData,
 } from '../store/authcontext';
 import configFile from '../config/default.json';
 import { useSelector } from 'react-redux';
@@ -21,43 +22,44 @@ const http = axios.create({
     : configFile.apiEndpoint,
 });
 
-function getToken() {
-  const dispatch = getHook('dispatch');
-
-  console.log(token);
-  return token;
-}
-
 http.interceptors.request.use(
   async function (config) {
     if (configFile.isFireBase) {
-      //const selector = getHook('selector');
-      const dispatch = getHook('dispatch');
-      const { token } = dispatch(getAuthToken());
 
-      const { expirationTime, refreshToken, accessToken } = token;
+      const { getState } = getHook('store');
+      const dispatch = getHook('dispatch');
+      //console.log(useStore.getState);
+      //const token  = useStore((state) => state.authContext.token);
+      const token = getState().authContext.token;
+
+      const { expirationTime=0, refreshToken=null, accessToken=null } = token;
 
       //const authToken =
       //  firebaseApp.auth().currentUser._delegate.stsTokenManager;
       if (refreshToken && expirationTime < Date.now()) {
-        const { stsTokenManager: authToken } = (await authProvider.checkAuth())._delegate;
-        const data = await dispatch(setAuthRefreshToken({...authToken}));
+        const { stsTokenManager: authToken, uid } = (
+          await authProvider.checkAuth()
+        )._delegate;
+        const data = await dispatch(setAuthRefreshToken({ ...authToken }));
 
         if (data) {
           config.headers = {
             ...config.headers,
             Authorization: `Bearer ${accessToken}`,
+            // DataUserId: `${uid}`,
           };
         } else {
           config.headers = {
             ...config.headers,
             Authorization: '',
+            // DataUserId: ''
           };
         }
       } else {
         config.headers = {
           ...config.headers,
-          Authorization: `Bearer ${accessToken}`,
+          Authorization: accessToken?`Bearer ${accessToken}`:'',
+          // DataUserId: `${user.uid}`
         };
       }
     }

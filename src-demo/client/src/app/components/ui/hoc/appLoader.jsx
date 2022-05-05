@@ -5,10 +5,10 @@ import {
 } from '../../../utils/animateTostify';
 import PropTypes from 'prop-types';
 
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector, useStore } from 'react-redux';
 
 import localStorageService from '../../../services/localStorage.service';
-import { firebaseApp } from '../../../dbapp/initFireBase';
+import { authProvider, firebaseApp } from '../../../dbapp/initFireBase';
 import {
   getAuthError,
   getAuthData,
@@ -18,25 +18,37 @@ import {
   setAuthError,
   setAuthLogout,
   setAuthLoggedStatus,
+  getLoggedStatus,
   setAuthUser,
   setAuthToken,
 } from '../../../store/authcontext';
 import { getAppError, setAppError } from '../../../store/appcontext';
 import authService from '../../../services/auth.service';
 import { getHook } from 'react-hooks-outside';
+import history from '../../../../app/utils/history';
 import { useLogout } from 'react-admin';
 
 const AppLoader = ({ children }) => {
-  //const data = select(getAuthData());
+  //const { getState } = useStore();
   const { user: authUser, token: authToken } = useSelector(getAuthData());
+  //const authUser = getState().authContext.user;
+  //const authToken = getState().authContext.token;
+  const isLogged = useSelector(getLoggedStatus());
+
   const authDBStatus = useSelector(getAuthDBStatus());
   const authError = useSelector(getAuthError());
   const appError = useSelector(getAppError());
   const memoError = useMemo(() => authError || appError, [authError, appError]);
   // const memoLogged = useMemo(() => isLoggedIn, [isLoggedIn]);
+
+  //const dispatch = useDispatch();
+  //const dispatch = getHook('dispatch');
+  //let logout = useLogout();
   const handleLogout = () => {
-    const logout = getHook('logout');
-    logout();
+    const dispatch = getHook('dispatch');
+    dispatch(setAuthLogout());
+    authProvider.logout();
+    //logout();
   };
 
   useEffect(() => {
@@ -49,12 +61,12 @@ const AppLoader = ({ children }) => {
           //const dispatch = getHook('dispatch');
           if (!authToken && localStorageService.getToken()) {
             if (!authDBStatus) {
-            // Если данные в сторе отсутствуют, подгружаем их из БД, если это возможно
-            const token = localStorageService.getToken();
-            dispatch(setAuthFromDB(token.accessToken));
+              // Если данные в сторе отсутствуют, подгружаем их из БД, если это возможно
+              const token = localStorageService.getToken();
+              dispatch(setAuthFromDB(token.accessToken));
             } else {
               // Если данные уже были запрошены и они отсутствуют в базе, тогда выходим на авторизацию
-              dispatch(setAuthLogout());
+              //dispatch(setAuthLogout());
               handleLogout();
             }
           } else {
@@ -62,11 +74,12 @@ const AppLoader = ({ children }) => {
           }
         } else {
           // No user is signed in.
-          dispatch(setAuthLogout());
+          //dispatch(setAuthLogout());
           handleLogout();
         }
       });
-    return () => unregisterAuthObserver(); // Make sure we un-register Firebase observers when the component unmounts.
+    return () => unregisterAuthObserver(); 
+    // Make sure we un-register Firebase observers when the component unmounts.
   }, []);
 
   useEffect(() => {
@@ -77,10 +90,14 @@ const AppLoader = ({ children }) => {
       if (memoError.name === 'AuthorizationError') {
         dispatch(setAppError(null));
         dispatch(setAuthError(null));
-        toastErrorBounce('Обнаружена ошибка:', `${memoError.message}`);
+        dispatch(setAuthLoggedStatus(false));
+        toastErrorBounce(
+          'Ошибка доступа:',
+          `Требуется повторная авторизация: ${memoError.message}`
+        );
 
         //dispatch(setAuthLogout());
-        //handleLogout();
+        handleLogout();
       } else {
         dispatch(setAppError(null));
         dispatch(setAuthError(null));

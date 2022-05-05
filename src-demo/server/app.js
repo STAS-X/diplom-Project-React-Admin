@@ -31,9 +31,9 @@ const dataProvider = FirebaseDataProvider(config.firebaseConfig, {
   },
   renameMetaFields: {
     created_at: 'createdAt',
-    created_by: 'createdBy',
+    created_by: false,
     updated_at: 'updatedAt',
-    updated_by: 'updatedBy',
+    updated_by: false,
   },
   useFileNamesInStorage: false,
   firestoreCostsLogger: {
@@ -44,7 +44,10 @@ const dataProvider = FirebaseDataProvider(config.firebaseConfig, {
 const signWithEmail = async () => {
   await firebase
     .auth()
-    .signInWithEmailAndPassword('backenduserfirebase@firebase.com', 'qQ123456')
+    .signInWithEmailAndPassword(
+      config.get('firebaseConfig').email,
+      config.get('firebaseConfig').password
+    )
     .then(async (user) => {
       console.log(chalk.green('Backend login DB success'));
       module.exports.provider = dataProvider;

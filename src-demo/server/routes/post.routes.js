@@ -98,7 +98,6 @@ router.post('/', [
       const params = JSON.parse(req.body.data);
 
       const { data } = await dataProvider[query](resource, params);
-      console.log(data, 'create');
       res.status(200).send(data);
     } catch (e) {
       res.status(500).send({

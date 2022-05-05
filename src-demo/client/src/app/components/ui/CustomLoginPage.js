@@ -18,7 +18,15 @@ import {
 const handleUserTokenRefresh = async (user) => {
   const dispatch = getHook('dispatch');
   //const logout = getHook('logout');
-  const { displayName, email, photoURL, providerId, uid } = user._delegate;
+
+  const {
+    displayName,
+    email,
+    photoURL,
+    uid,
+    providerData: [{ providerId }],
+  } = user._delegate;
+
   const authUser = {
     displayName: displayName ? displayName : 'John Dow',
     email,
@@ -37,10 +45,9 @@ const handleUserTokenRefresh = async (user) => {
     user: authUser,
     token: authToken,
   });
-  console.log(authToken, authUser, 'user login and register');
-
+  console.log('login try')
   dispatch(setAuthToken(data.token));
-  dispatch(setAuthUser(authUser));
+  dispatch(setAuthUser(data.user));
   dispatch(setAuthLoggedStatus(true));
   dispatch(setAuthDBStatus(false));
 };
@@ -150,6 +157,7 @@ const SignInScreen = ({ setData, ...props }) => {
     const unregisterAuthObserver = firebase
       .auth()
       .onAuthStateChanged((user) => {
+        console.log('login dialog started');
         if (user) {
           setIsSignedIn(!!user);
           handleUserTokenRefresh(user);
@@ -198,7 +206,7 @@ const CustomLoginForm = ({ ...props }) => {
 
 const CustomLoginPage = ({ ...props }) => (
   <Login {...props}>
-    <CustomLoginForm {...props} />;
+    <CustomLoginForm {...props} />
   </Login>
 );
 

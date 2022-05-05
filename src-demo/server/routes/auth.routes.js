@@ -15,6 +15,7 @@ const {
   setDoc,
   query,
   where,
+  limit,
   doc,
   getDocs,
   collection,
@@ -47,14 +48,23 @@ router.post('/signIn', [
       // }
       const { user, token } = req.body;
 
+      let userDB = user;
       const q = query(
         collection(firestore, 'users'),
-        where('uid', '==', user.uid)
+        where('uid', '==', user.uid),
+        limit(1)
       );
       const querySnapshot = await getDocs(q);
       if (querySnapshot.size === 0) {
         const newId = nanoid();
-        await setDoc(doc(collection(firestore, 'users'), newId), user);
+        await setDoc(doc(collection(firestore, 'users'), newId), {
+          ...user,
+          id: newId,
+        });
+      } else {
+        querySnapshot.forEach(async (doc) => {
+          userDB = doc.data();
+        });
       }
 
       const colRef = collection(firestore, 'auth');
@@ -64,16 +74,15 @@ router.post('/signIn', [
       });
 
       const validateToken = tokenService.generate(token);
-
       await setDoc(doc(colRef, 'token'), validateToken);
 
       return res
         .status(200)
-        .send({ token: { ...validateToken }, signIn: true });
+        .send({ token: { ...validateToken }, user: userDB, signIn: true });
     } catch (error) {
       return res.status(400).send({
-        message: error.message,
         code: 400,
+        message: error.message,
       });
     }
   },
@@ -86,7 +95,23 @@ router.delete('/signOut', [
 
       const userSnap = await getDoc(doc(firestore, 'auth', 'user'));
       const tokenSnap = await getDoc(doc(firestore, 'auth', 'token'));
-      if (userSnap.exists() > 0 && tokenSnap.exists() > 0) {
+      if (userSnap.exists() && tokenSnap.exists()) {
+        const { uid } = userSnap.data();
+        // Меняем поле даты последнего входа
+        const q = query(
+          collection(firestore, 'users'),
+          where('uid', '==', uid),
+          limit(1)
+        );
+        const querySnapshot = await getDocs(q);
+        querySnapshot.forEach(async (doc) => {
+          const id = doc.id;
+          await firestore
+            .collection('users')
+            .doc(id)
+            .update({ lastLogOut: Date.now() });
+        });
+
         await firestore.collection('auth').doc('user').delete();
         await firestore.collection('auth').doc('token').delete();
         //console.log('user and token delete');
@@ -94,8 +119,8 @@ router.delete('/signOut', [
       return res.status(200).send({ signOut: true });
     } catch (error) {
       return res.status(400).send({
-        message: error.message,
         code: 400,
+        message: error.message,
       });
     }
   },
@@ -109,13 +134,25 @@ router.get('/authData', [
 
       const tokenSnap = await getDoc(doc(firestore, 'auth', 'token'));
       const userSnap = await getDoc(doc(firestore, 'auth', 'user'));
+
       let token = null;
       let user = null;
-      if (tokenSnap.exists() > 0 && userSnap.exists() > 0) {
+
+      if (tokenSnap.exists() && userSnap.exists()) {
         token = tokenSnap.data();
         user = userSnap.data();
-      }
-      console.log(tokenSnap.data(), userSnap.data(), 'from db');
+        const q = query(
+          collection(firestore, 'users'),
+          where('uid', '==', user.uid),
+          limit(1)
+        );
+        const querySnapshot = await getDocs(q);
+        querySnapshot.forEach(async (doc) => {
+            user = doc.data();
+            console.log(user, 'get auth data from firestore')
+          });
+        }
+      //console.log(tokenSnap.data(), userSnap.data(), 'from db');
 
       return res.status(200).send({
         token: token ? { ...token } : null,
@@ -124,8 +161,8 @@ router.get('/authData', [
       });
     } catch (error) {
       return res.status(400).send({
-        message: error.message,
         code: 400,
+        message: error.message,
       });
     }
   },
@@ -154,8 +191,9 @@ router.put('/token', [
 
       res.status(200).send({ token: { ...validateToken }, refresh: true });
     } catch (error) {
-      res.status(500).json({
-        message: `На сервере произошла ошибка. ${error.message} Попробуйте позже`,
+      res.status(400).send({
+        code: 400,
+        message: error.message,
       });
     }
   },

@@ -46,6 +46,7 @@ const authSlice = createSlice({
     authSetLoggedStatus: (state, action) => {
       state.isLoggedIn = action.payload;
       if (!action.payload) {
+         localStorageService.removeAuthData();
         state.auth = null;
         state.token = null;
       }
@@ -90,6 +91,7 @@ export const setAuthLogout = () => async (dispatch, state) => {
       await authService.logout();
     }
     dispatch(authLogout());
+
   } catch (error) {
     dispatch(authSetError(error));
   }
@@ -105,14 +107,6 @@ export const setAuthError = (payload) => (dispatch) => {
 
 export const setAuthDBStatus = (payload) => (dispatch) => {
   dispatch(authSetAuthDBStatus(payload));
-};
-
-export const getAuthData = () => (state) => {
-  return { user: state.authContext.auth, token: state.authContext.token };
-};
-
-export const getAuthToken = () => (dispatch, state) => {
-  return { token: state().authContext.token };
 };
 
 export const setAuthFromDB = (payload) => async (dispatch) => {
@@ -139,9 +133,13 @@ export const setAuthRefreshToken = (payload) => async (dispatch) => {
   }
 };
 
-export const getAuthUser = () => (state) => {
-  return state.authContext.auth;
+export const getAuthData = () => (state) => {
+  return { user: state.authContext.auth, token: state.authContext.token };
 };
+
+// export const getAuthToken = () => (state) => {
+//   return state.authContext.token;
+// };
 
 export const getLoggedStatus = () => (state) => state.authContext.isLoggedIn;
 export const getAuthDBStatus = () => (state) => state.authContext.isAuthFromDB;

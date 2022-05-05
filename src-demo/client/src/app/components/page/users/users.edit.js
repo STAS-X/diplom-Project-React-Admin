@@ -5,8 +5,6 @@ import {
   Datagrid,
   List,
   Show,
-  Create,
-  Edit,
   Filter,
   SimpleShowLayout,
   SimpleForm,
@@ -35,62 +33,6 @@ import {
 } from '@material-ui/core';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 
-const UserFilter = (props) => (
-  <Filter {...props}>
-    <TextInput label="Search" source="name" alwaysOn />
-  </Filter>
-);
-
-export const UserList = (props) => {
-
-  const onError = (err) => {
-    console.log(err, 'Custom error');
-    // do something
-  };
-  return (
-    <List
-      {...props}
-      filters={<UserFilter />}
-      sx={{
-        backgroundColor: 'yellow',
-        '& .RaList-main': {
-          backgroundColor: 'red',
-        },
-      }}
-      onError={onError}
-    >
-      <Datagrid>
-        <TextField source="name" />
-        <TextField source="age" />
-        <TextField source="createdate" />
-        <TextField source="lastupdate" />
-        <ShowButton label="" />
-        <EditButton label="" />
-        <DeleteButton label="" redirect={false} />
-      </Datagrid>
-    </List>
-  );
-};
-
-export const UserShow = (props) => (
-  <Show {...props} title="Users page">
-    <SimpleShowLayout>
-      <TextField source="id" />
-      <TextField source="name" />
-      <TextField source="age" />
-    </SimpleShowLayout>
-  </Show>
-);
-
-export const UserCreate = (props) => (
-  <Create {...props}>
-    <SimpleForm>
-      <TextInput source="id" />
-      <TextInput source="name" />
-      <TextInput source="age" />
-    </SimpleForm>
-  </Create>
-);
 
 const AccordionSectionTitle = ({ children, name }) => {
   const formGroupState = useFormGroup(name);

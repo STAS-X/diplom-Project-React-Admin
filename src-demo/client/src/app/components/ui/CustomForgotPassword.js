@@ -91,7 +91,7 @@ export default function AlertDialog() {
           horizontal: "center",
         }}
         message={toastMessage}
-      ></Snackbar>
+      />
     </div>
-  );
+  )
 }

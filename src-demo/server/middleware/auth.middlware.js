@@ -27,7 +27,20 @@ module.exports = async (req, res, next) => {
       const userSnap = await getDoc(doc(firestore, 'auth', 'user'));
       if (userSnap.exists() > 0) {
         const user = userSnap.data();
-    	req.userId = user.uid; 
+    	//req.userId = user.uid; 
+      if (req.method==="PUT" || req.method==="DELETE") {
+        const { data } = req.body;
+        if (data) {
+          if (data.userId !== user.uid) {
+                  return res.status(400).send({
+                    code: 400,
+                    name: 'AccessError',
+                    description: 'Обновление или удаление данных доступно только для владельца',
+                    message: 'AccessDenied',
+                  });
+          }
+        }
+      }
 	  }
 
     next();

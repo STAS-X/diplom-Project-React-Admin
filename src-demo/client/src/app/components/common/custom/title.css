@@ -1,0 +1,57 @@
+@import url(https://fonts.googleapis.com/css?family=Finger+Paint);
+
+div.title {
+  background: black;
+  overflow: hidden;
+  font: 2wh/10vh "Finger Paint";
+  text-align: center;
+  color: transparent;
+  backface-visibility: hidden;
+}
+
+span.custom-title {
+  display: inline-block;
+  text-shadow: 0 0 0 whitesmoke;
+  animation: smoky 5s ease-in-out infinite alternate;
+}
+
+span:nth-child(even){
+  animation-name: smoky-mirror;
+}
+
+@keyframes smoky {
+	0% {
+			text-shadow: 0 0 0px whitesmoke}
+  80% {
+    text-shadow: 0 0 30px whitesmoke;
+  }
+  to {
+    transform:
+      translate3d(1.5rem,-0.5rem,0)
+      rotate(55deg)
+      skewX(70deg)
+      scale(1.25);
+    text-shadow: 0 0 40px whitesmoke;
+    opacity: 0.1;
+  }
+}
+
+@keyframes smoky-mirror {
+	0% {
+    text-shadow: 0 0 0px whitesmoke; }
+  80% {
+    text-shadow: 0 0 30px whitesmoke; }
+  to {
+    transform:
+      translate3d(1.5rem,-0.5rem,0)
+      rotate(-55deg) 
+      skewX(-70deg)
+      scale(1.2);
+     text-shadow: 0 0 40px whitesmoke;
+    opacity: 0.1;
+  }
+}
+
+  span:nth-of-type(var(--i)){ 
+    animation-delay: calc(0.5 + var(--i)/20)s; 
+  }

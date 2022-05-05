@@ -5,6 +5,8 @@
 	"refreshSecret": "refresh secret from backend",
   "isFireBase": true,
   "firebaseConfig": {
+    "email":"backenduserfirebase@firebase.com",
+    "password":"qQ123456",
     "apiKey": "AIzaSyDIfqfzxSnigmrqo2Lp2Ot2M0YPL3ckjs4",
     "authDomain": "fastcompanyxxx.firebaseapp.com",
     "databaseURL": "https://fastcompanyxxx-default-rtdb.asia-southeast1.firebasedatabase.app",
