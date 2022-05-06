@@ -28,12 +28,13 @@ http.interceptors.request.use(
 
       const { getState } = getHook('store');
       const dispatch = getHook('dispatch');
+
       //console.log(useStore.getState);
       //const token  = useStore((state) => state.authContext.token);
       const token = getState().authContext.token;
 
       const { expirationTime=0, refreshToken=null, accessToken=null } = token;
-
+      
       //const authToken =
       //  firebaseApp.auth().currentUser._delegate.stsTokenManager;
       if (refreshToken && expirationTime < Date.now()) {

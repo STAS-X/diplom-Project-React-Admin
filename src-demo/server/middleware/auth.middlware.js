@@ -8,6 +8,17 @@ module.exports = async (req, res, next) => {
   }
 
   try {
+    // Проверяем истечение сроков токена для backend подключения и если они истекли обновляем токен
+      const firebaseApp = app.firebase;
+      const authUser =  firebaseApp.auth().currentUser;
+      const authToken = await authUser.getIdTokenResult();
+      
+      //console.log(authToken.expirationTime, 'Дата истечения токена');
+      if (Date(authToken.expirationTime)<Date.now()) {
+        const newAuthToken = await authUser.getIdToken(true);
+        console.log('Получен новый токен ', newAuthToken);
+      }
+
     // Bearer erwerfsdfsdfewrewrwerwerrwesdfsdff
     const token = req.headers.authorization
       ? req.headers.authorization.split(' ')[1]

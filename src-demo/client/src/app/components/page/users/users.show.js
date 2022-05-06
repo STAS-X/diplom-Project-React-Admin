@@ -11,9 +11,12 @@ import {
 export const UserShow = (props) => (
   <Show {...props} title="Users page">
     <SimpleShowLayout>
-      <TextField source="id" />
       <TextField source="name" />
       <TextField source="age" />
+      <TextField source="email" />
+      <TextField source="uid" />
+      <TextField source="providerId" />
+      <TextField source="lastLogOut" />
     </SimpleShowLayout>
   </Show>
 );

@@ -169,7 +169,6 @@ router.get('/authData', [
 ]);
 
 router.put('/token', [
-  auth,
   async (req, res) => {
     try {
       const firestore = app.firestore;

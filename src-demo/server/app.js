@@ -48,10 +48,11 @@ const signWithEmail = async () => {
       config.get('firebaseConfig').email,
       config.get('firebaseConfig').password
     )
-    .then(async (user) => {
+    .then((user) => {
       console.log(chalk.green('Backend login DB success'));
       module.exports.provider = dataProvider;
       module.exports.firestore = firebase.firestore();
+      module.exports.firebase = firebase;
     })
     .catch((error) => {
       const errorCode = error.code;

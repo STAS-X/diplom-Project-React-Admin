@@ -125,11 +125,12 @@ export const UserEdit = (props) => {
         variant="standard"
         margin="normal"
       >
-        <TextInput disabled source="id" />
-        <TextInput disabled source="createdate" />
-        <TextInput disabled source="lastupdate" />
-        <TextInput source="name" />
-        <TextInput source="age" />
+          <TextInput source="name" />
+          <TextInput source="age" />
+          <TextInput source="email" />
+          <TextInput source="uid" />
+          <TextInput source="providerId" />
+          <TextInput source="lastLogOut" />
         <FormGroupContextProvider name="options">
           <Accordion>
             <AccordionSummary
