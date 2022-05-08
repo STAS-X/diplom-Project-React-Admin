@@ -1,0 +1,27 @@
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/storage';
+export declare type FireUser = firebase.User;
+export declare type FireApp = firebase.app.App;
+export declare type FireStorage = firebase.storage.Storage;
+export declare type FireStorageReference = firebase.storage.Reference;
+export declare type FireUploadTaskSnapshot = firebase.storage.UploadTaskSnapshot;
+export declare type FireUploadTask = firebase.storage.UploadTask;
+export declare type FireStoragePutFileResult = {
+    task: FireUploadTask;
+    taskResult: Promise<FireUploadTaskSnapshot>;
+    downloadUrl: Promise<string>;
+};
+export declare type FireAuth = firebase.auth.Auth;
+export declare type FireAuthUserCredentials = firebase.auth.UserCredential;
+export declare type FireStore = firebase.firestore.Firestore;
+export declare type FireStoreBatch = firebase.firestore.WriteBatch;
+export declare type FireStoreTimeStamp = firebase.firestore.FieldValue;
+export declare type FireStoreDocumentRef = firebase.firestore.DocumentReference;
+export declare type FireStoreDocumentSnapshot = firebase.firestore.DocumentSnapshot<firebase.firestore.DocumentData>;
+export declare type FireStoreCollectionRef = firebase.firestore.CollectionReference;
+export declare type FireStoreQueryDocumentSnapshot = firebase.firestore.QueryDocumentSnapshot;
+export declare type FireStoreQuery = firebase.firestore.Query;
+export declare type FireStoreQueryOrder = firebase.firestore.OrderByDirection;
+export declare const TASK_PAUSED: string;
+export declare const TASK_RUNNING: string;
+export declare const TASK_CANCELED: string;
