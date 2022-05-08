@@ -97,7 +97,7 @@ const AppLoader = ({ children }) => {
         );
 
         //dispatch(setAuthLogout());
-        handleLogout();
+        // handleLogout();
       } else {
         dispatch(setAppError(null));
         dispatch(setAuthError(null));

@@ -6,19 +6,21 @@ import {
   SelectInput,
   ReferenceInput,
 } from 'react-admin';
+import RichTextInput from 'ra-input-rich-text';
 
 export const CommentEdit = (props) => (
   <Edit {...props}>
     <SimpleForm>
-      <TextInput source="id" />
-      <RichTextInput source="text" />
+      <TextInput disabled source="id" />
+      <TextInput source="publishing_state" />
+      <RichTextInput source="body" />
       <ReferenceInput
         label="Post"
-        source="post_ref"
-        reference="posts"
+        source="postto"
+        reference="users"
         // filter={{ isAdmin: true }}
       >
-        <SelectInput label="User" optionText="title" />
+        <SelectInput label="User" optionText="name" />
       </ReferenceInput>
     </SimpleForm>
   </Edit>

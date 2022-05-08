@@ -39,6 +39,8 @@ import { getAuthData, setAuthLogout } from '../../../store/authcontext';
 import CustomTitle from './customTitle';
 
 import ThemeButton from '../styled/themButton';
+import ColorizedButton from '../styled/colorButton';
+import LoadingButton from '../styled/loadingButton';
 
 const pages = [
   { title: 'Главная', icon: DefaultIcon, resource: '/main' },
@@ -240,6 +242,8 @@ const CustomAppBar = (props) => {
         </Box> */}
 
         <Box sx={{ flexGrow: 0, display: 'flex', mr: 3 }}>
+          <LoadingButton />
+          <ColorizedButton/>
           <ThemeButton />
           <Tooltip title={authUser ? authUser.displayName : '-XXX-'}>
             <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>

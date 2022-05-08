@@ -39,13 +39,13 @@ const handleUserTokenRefresh = async (user) => {
     uid,
   };
   const authToken = { ...user._delegate.stsTokenManager };
-
+console.log(authToken, 'authtoken taked');
   // Проверяем на существование зарегистрированного пользователя и если он есть в firebase.auth() загружаем его в БД
   const { data } = await authService.register({
     user: authUser,
     token: authToken,
   });
-  console.log('login try')
+
   dispatch(setAuthToken(data.token));
   dispatch(setAuthUser(data.user));
   dispatch(setAuthLoggedStatus(true));

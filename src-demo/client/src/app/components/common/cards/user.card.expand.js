@@ -8,6 +8,7 @@ import CardMedia from '@material-ui/core/CardMedia';
 import CardContent from '@material-ui/core/CardContent';
 import Typography from '@material-ui/core/Typography';
 import { getAuthData } from '../../../store/authcontext';
+import { useGetList } from 'react-admin';
 
 const useStyles = (items) =>
   makeStyles({
@@ -18,8 +19,10 @@ const useStyles = (items) =>
       '&:hover': {
         boxShadow: '0 14px 28px rgba(0,0,0,0.25), 0 10px 10px',
       },
-      backgroundColor:
-        emphasize(items > 5 ? green[100] : items > 2 ? blue[100] : red[100],0.05),
+      backgroundColor: emphasize(
+        items > 5 ? green[100] : items > 2 ? blue[100] : red[100],
+        0.05
+      ),
       transition: '300ms ease-out',
     },
     media: {
@@ -40,59 +43,66 @@ const UserCardExpand = () => {
   const [commentNum, setCommentNum] = useState(0);
 
   const { user: authUser } = useSelector(getAuthData());
-  const tasks = useSelector((state) => state.admin.resources.tasks.data);
-  const comments = useSelector((state) => state.admin.resources.comments.data);
+
+  const { data: tasks } = useGetList(
+    'tasks',
+    { page: 1, perPage: -1 },
+    { field: 'id', order: 'ASC' }
+  );
+  console.log(Object.keys(tasks).length, 'all tasks');
+  const { data: comments } = useGetList(
+    'comments',
+    { page: 1, perPage: -1 },
+    { field: 'id', order: 'ASC' }
+  );
   //const classes = useCallback((num) => , [taskCompleted]);
   const classes = useStyles(taskNum)();
   const cardRef = useRef();
 
   useEffect(() => {
-
     if (Object.keys(tasks).length > 0) {
-      const taskFilter = Object.keys(tasks).map(key => tasks[key]).filter(
-        (task) => task?.userId === authUser.uid
-      );
+      const taskFilter = Object.keys(tasks)
+        .map((key) => tasks[key])
+        .filter((task) => task?.userId === authUser.id);
       setTaskNum(taskFilter.length);
-      const taskCompleted = Object.keys(tasks).map(key => tasks[key]).filter(
-        (task) => task?.userId === authUser.uid && task?.progress === 100
-      );
+      const taskCompleted = Object.keys(tasks)
+        .map((key) => tasks[key])
+        .filter(
+          (task) => task?.userId === authUser.id && task?.progress === 100
+        );
     }
     if (Object.keys(comments).length > 0) {
-      const commentFilter = Object.keys(comments).map(key => comments[key]).filter(
-        (comment) => comment?.userId === authUser.uid
-      );
+      const commentFilter = Object.keys(comments)
+        .map((key) => comments[key])
+        .filter((comment) => comment?.userId === authUser.id);
       setCommentNum(commentFilter.length);
     }
 
     if (cardRef.current) {
       const cardAnimate = cardRef.current;
 
-     const handleAnimationEnd = (e)=> {
-      e.stopPropagation();
-      e.target.classList.remove(
-        'animate__animated',
-        `animate_${animation}`,
-        'animate__fast'
-      );
+      const handleAnimationEnd = (e) => {
+        e.stopPropagation();
+        e.target.classList.remove(
+          'animate__animated',
+          `animate_${animation}`,
+          'animate__fast'
+        );
+      };
+      const handleMouseEnter = ({ target }) => {
+        target.classList.add(
+          'animate__animated',
+          `animate_${animation}`,
+          'animate__fast'
+        );
+      };
 
-    }
-     const handleMouseEnter = ({target}) => {
-       target.classList.add(
-         'animate__animated',
-         `animate_${animation}`,
-         'animate__fast'
-       );
-     };    
-
-    cardAnimate.addEventListener('animationend', handleAnimationEnd);
-    cardAnimate.addEventListener('mouseenter', handleMouseEnter);
-    
+      cardAnimate.addEventListener('animationend', handleAnimationEnd);
+      cardAnimate.addEventListener('mouseenter', handleMouseEnter);
     }
 
     return () => {};
   }, [tasks, comments, cardRef.current]);
-
-
 
   return (
     <Card variant="outlined" ref={cardRef} className={classes.root}>

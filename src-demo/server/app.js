@@ -24,7 +24,7 @@ const dataProvider = FirebaseDataProvider(config.firebaseConfig, {
   // watch: ['posts'];
   // dontwatch: ['comments'];
   persistence: 'local',
-  disableMeta: false,
+  disableMeta: true,
   dontAddIdFieldToDoc: false,
   lazyLoading: {
     enabled: false,
@@ -159,43 +159,3 @@ app.listen(PORT, () => {
   signWithEmail();
   console.log(chalk.green(`Server has been starte on ${PORT} port`));
 });
-
-// module.exports = async () => {
-//   const isLogIn = await signWithEmail();
-//   if (isLogIn) return (module.exports = dataProvider);
-// };
-// ('backenduserfirebase@firebase.com', 'qQ123456')
-// .then((user) => console.log(user, 'Backend loggin DB success'));
-
-//const authEmail = new auth(firebaseApp);
-// const auth = require('firebase/auth').getAuth;
-// const signInWithCustomToken = require('firebase/auth');
-
-//  const customToken = async () => {
-//    return await firebaseApp.auth().createCustomToken(fireCreditial.uid);
-//  };
-
-// authEmail
-//   .signInWithEmailAndPassword('backenduserfirebase@firebase.com', 'qQ123456')
-//   .then((user) => console.log(user, 'Backend loggin DB success'))
-//   .catch((error) => {
-//     const errorCode = error.code;
-//     const errorMessage = error.message;
-//     console.log(chalk.red(errorMessage));
-//     process.exit(1);
-//     // ...
-//   });
-
-//console.log(firebase.auth(), authEmail);
-
-// const printUsers = async () => {
-//   const userCollection = 'posts';
-//   console.log(
-//     chalk.green(`Initialize db FireBase success. Now we get users collection`)
-//   );
-//   const userQuerySnapshot = await db.collection(userCollection).get();
-//   userQuerySnapshot.forEach((doc) => console.log(doc));
-//   console.log(chalk.blue(`We find ${userQuerySnapshot.length} users in DB`));
-// };
-
-// printUsers();

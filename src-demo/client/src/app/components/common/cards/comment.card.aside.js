@@ -30,7 +30,7 @@ const useStyles = (item, bgcolor) =>
     },
   });
 
-const TaskAsideCard = ({ id }) => {
+const CommentAsideCard = ({ id }) => {
 
   const rnd = (Math.random() * 10).toFixed();
   const classes = useStyles(id, rnd)();
@@ -39,13 +39,13 @@ const TaskAsideCard = ({ id }) => {
     <Card className={classes.root}>
       <CardMedia
         className={classes.media}
-        image={waveImg }
-        component='img'
+        image={waveImg}
+        component="img"
         title="Солнечная сторона"
       ></CardMedia>
       <CardContent>
         <Typography gutterBottom variant="h5" component="h2">
-          Task Card Aside Example
+          Comment Card Aside Example
         </Typography>
         <Typography variant="body2" color="textSecondary" component="p">
           The CardMedia component sets a background image to cover available
@@ -55,4 +55,4 @@ const TaskAsideCard = ({ id }) => {
     </Card>
   );
 };
-export default TaskAsideCard;
+export default CommentAsideCard;

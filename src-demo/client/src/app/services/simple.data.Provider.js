@@ -19,13 +19,35 @@ const verifyLoggedStatus = () => {
 export default {
   getList: (resource, params) => {
     const url = `${apiUrl}/${resource}`;
-    console.log(verifyLoggedStatus(), 'verify status');
-    if (!verifyLoggedStatus()) return new Promise((resolve) => resolve({ data: [], total: 0 }));
+    if (!verifyLoggedStatus())
+      return new Promise((resolve) => resolve({ data: [], total: 0 }));
+
+    const filter = params.filter;
+    const operators = { _gte: '>=', _lte: '<=', _neq: '!=' };
+    // filters is like [
+    //    { field: "commentable", operator: "=", value: true},
+    //    { field: "released", operator: ">=", value: '2018-01-01'}
+    // ]
+
+    const filters = Object.keys(filter).map((key) => {
+      const operator = operators[key.slice(-4)];
+      return operator
+        ? { field: key.slice(0, -4), operator, value: filter[key] }
+        : {
+            field: key,
+            operator: '==',
+            value: key === 'q' ? escape(filter[key]) : filter[key],
+          };
+    });
+
     return httpClient
       .get(url, {
         headers: {
           ProviderRequest: 'getList',
-          ProviderParams: JSON.stringify(params),
+          ProviderParams: JSON.stringify({
+            ...params,
+            filter:filters.length>0?filters:filter
+          }),
         },
       })
       .then(({ status, statusText, data }) => {
@@ -145,9 +167,9 @@ export default {
 
   create: (resource, params) => {
     const url = `${apiUrl}/${resource}`;
+
     return httpClient
       .post(url, {
-        body: JSON.stringify(params.data),
         data: JSON.stringify(params),
         headers: {
           ProviderRequest: 'create',

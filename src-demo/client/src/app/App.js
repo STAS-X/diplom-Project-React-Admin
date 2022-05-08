@@ -27,6 +27,7 @@ import { TaskCreate } from './components/page/tasks/tasks.create';
 
 import { UserList } from './components/page/users/users.list';
 import { UserShow } from './components/page/users/users.show';
+import { UserTabbetShow } from './components/page/users/tabbet.user.form';
 import { UserEdit } from './components/page/users/users.edit';
 
 import CustomLayout from './components/common/custom/customLayout';
@@ -128,7 +129,7 @@ const App = (props) => {
         name="users"
         icon={UserIcon}
         list={UserList}
-        show={UserShow}
+        show={UserTabbetShow}
         edit={UserEdit}
       />
       <Resource

@@ -128,7 +128,7 @@ export const UserEdit = (props) => {
           <TextInput source="name" />
           <TextInput source="age" />
           <TextInput source="email" />
-          <TextInput source="uid" />
+          <TextInput source="id" />
           <TextInput source="providerId" />
           <TextInput source="lastLogOut" />
         <FormGroupContextProvider name="options">

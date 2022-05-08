@@ -61,6 +61,7 @@ router.post('/signIn', [
           ...user,
           id: newId,
         });
+        userDB = { ...userDB, id: newId };
       } else {
         querySnapshot.forEach(async (doc) => {
           userDB = doc.data();
@@ -105,10 +106,9 @@ router.delete('/signOut', [
         );
         const querySnapshot = await getDocs(q);
         querySnapshot.forEach(async (doc) => {
-          const id = doc.id;
           await firestore
             .collection('users')
-            .doc(id)
+            .doc(doc.id)
             .update({ lastLogOut: Date.now() });
         });
 
@@ -148,10 +148,10 @@ router.get('/authData', [
         );
         const querySnapshot = await getDocs(q);
         querySnapshot.forEach(async (doc) => {
-            user = doc.data();
-            console.log(user, 'get auth data from firestore')
-          });
-        }
+          user = doc.data();
+          console.log(user, 'get auth data from firestore');
+        });
+      }
       //console.log(tokenSnap.data(), userSnap.data(), 'from db');
 
       return res.status(200).send({

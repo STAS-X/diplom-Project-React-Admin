@@ -6,146 +6,145 @@ import Loading from '../../ui/loading/loading';
 import { green, blue, red } from '@mui/material/colors';
 import {
   Datagrid,
-  DatagridBody,
-  DatagridHeader,
-  List,
-  Filter,
+  ListBase,
   TextField,
-  TextInput,
   ShowButton,
   EditButton,
+  DeleteButton,
+  RichTextField,
+  FilterButton,
+  FilterForm,
+  CreateButton,
+  Pagination,
+  DateField,
+  TextInput,
+  SortButton,
   FunctionField,
-  RecordContextProvider,
-  useRecordContext,
+  useGetOne,
+  useListContext,
+  useTranslate,
 } from 'react-admin';
-import { TableHead, TableCell, TableRow, Checkbox } from '@mui/material';
+import { Stack, Chip } from '@mui/material';
 import UserCardExpand from '../../common/cards/user.card.expand';
 import { getAuthData } from '../../../store/authcontext';
+import { getAppColorized, getAppLoading } from '../../../store/appcontext';
 
-// const MyDatagridRow = ({
-//   record,
-//   id,
-//   onToggleItem,
-//   children,
-//   selected,
-//   selectable,
-// }) => (
-//   <RecordContextProvider value={record}>
-//     <TableRow style={{ backgroundColor: 'red' }}>
-//       {/* first column: selection checkbox */}
-//       <TableCell padding="none">
-//         <Checkbox
-//           disabled={selectable}
-//           checked={selected}
-//           onClick={(event) => onToggleItem(id, event)}
-//         />
-//       </TableCell>
-//       {/* data columns based on children */}
-//       {React.Children.map(children, (field) => {
-//         console.log(id, field);
-//         return (
-//           <TableCell key={`${id}-${field.props.source}`}>{field}</TableCell>
-//         );
-//       })}
-//     </TableRow>
-//   </RecordContextProvider>
-// );
-
-// const MyDatagridHeader = ({ children }) => (
-//   <TableHead>
-//     <TableRow>
-//       <TableCell>
-//         <Checkbox />
-//       </TableCell>{' '}
-//       {/* empty cell to account for the select row checkbox in the body */}
-//       {React.Children.map(children, (child) => (
-//         <TableCell key={child.props.source}>{child.props.source}</TableCell>
-//       ))}
-//     </TableRow>
-//   </TableHead>
-// );
-
-// const MyDatagridBody = (props) => (
-//   <DatagridBody {...props} row={<MyDatagridRow />} />
-// );
-// const MyDatagrid = (props) => (
-//   <Datagrid
-//     {...props}
-//     header={<MyDatagridHeader />}
-//     body={<MyDatagridBody />}
-//   />
-// );
-
-const UserFilter = (props) => (
-  <Filter {...props}>
-    <TextInput label="Search" source="name" alwaysOn />
-  </Filter>
-);
-
-const UserExpandData = () => {
-  const record = useRecordContext();
-
-  return <div dangerouslySetInnerHTML={{ __html: record.providerId }} />;
+const QuickFilter = ({ label }) => {
+  const translate = useTranslate();
+  return <Chip sx={{ marginBottom: 1 }} label={translate(label)} />;
 };
 
+const UserPagination = () => (
+  <Pagination rowsPerPageOptions={[10, 25, 50, 100]} />
+);
+
+function dateWithMonths(months) {
+  const date = new Date();
+  date.setMonth(date.getMonth() + months);
+
+  return date.toISOString().slice(0, 10);
+}
+
+const userFilters = [
+  <TextInput label="Search" source="q" alwaysOn />,
+  <TextInput
+    label="Email"
+    resettable
+    source="email"
+    defaultValue="xxx@xxx.xxx"
+  />,
+  <QuickFilter
+    source="loggedOut_gte"
+    label="Last login"
+    defaultValue={dateWithMonths(-1)}
+  />,
+  <QuickFilter
+    source="id"
+    label="Current user"
+    defaultValue={'DTGCdToJ3SloFowi6ffX'}
+  />,
+];
+
+const UserToolbar = () => (
+  <Stack direction="row" justifyContent="space-between">
+    <FilterForm filters={userFilters} />
+    <div>
+      <SortButton fields={['name', 'email', 'loggedOut']} />
+      <FilterButton filters={userFilters} />
+      <CreateButton />
+    </div>
+  </Stack>
+);
+
 export const UserList = (props) => {
-  const [userUid, setUserUid] = React.useState();
-  let uid = null;
   const userRef = React.useRef();
+  const userList = userRef.current;
 
   const { loadedOnce: isLoading } = useSelector(
     (state) => state.admin.resources.users.list
   );
 
   const { user: authUser } = useSelector(getAuthData());
+  const isAppColorized = useSelector(getAppColorized());
+  const isAppLoading = useSelector(getAppLoading());
 
-  const postRowStyle = (uid) => (record, index) => {
-    
+  const postRowStyle = (id) => (record, index) => {
     return {
-      backgroundColor: record.uid === uid ? green[200] : red[100],
+      backgroundColor: record.id === id ? green[200] : red[100],
     };
   };
 
-
   React.useEffect(() => {
-    const userList = userRef.current;
-
     if (userList) {
       const ths = userList.querySelectorAll('thead>tr>th');
-      for (const userTh of ths) userTh.style.backgroundColor = blue[100];
+      for (const userTh of ths)
+        userTh.style.backgroundColor = isAppColorized
+          ? blue[100]
+          : 'whitesmoke';
+      const paging = userList.nextSibling?.querySelector('div.MuiToolbar-root');
+      if (paging)
+        paging.style.backgroundColor = isAppColorized
+          ? blue[200]
+          : 'whitesmoke';
     }
     return () => {};
-  }, [userRef.current]);
+  }, [userList, isAppColorized, authUser]);
 
   return (
     <>
-      <List
-        {...props}
-        filters={<UserFilter />}
-        style={!isLoading ? { height: '0px' } : {}}
-      >
-        <Datagrid
-          ref={userRef}
-          isRowExpandable={(row) => row.uid === authUser.uid}
-          rowStyle={postRowStyle(authUser?.uid)}
-          expand={<UserCardExpand />}
-        >
-          <TextField source="name" />
-          <TextField source="age" />
-          <TextField source="email" />
-          <TextField source="uid" />
-          <TextField source="providerId" />
-          <TextField source="lastLogOut" />
-          <ShowButton label="" />
-          <FunctionField
-            label=""
-            render={(record) => {
-              if (record.uid === authUser.uid) return <EditButton label="" />;
-            }}
-          />
-        </Datagrid>
-      </List>
-      {!isLoading && <Loading />}
+      {authUser && (
+        <ListBase {...props} sort={{ field: 'id', order: 'ASC' }}
+          style=
+          {!isLoading && isAppLoading ? { height: '0px', display: 'none' } : {}}
+          >{!(!isLoading && isAppLoading) && <UserToolbar />}
+          {!(!isLoading && isAppLoading) && (
+            <Datagrid
+              ref={userRef}
+              isRowExpandable={(row) =>
+                authUser ? row.id === authUser.id : false
+              }
+              rowStyle={isAppColorized ? postRowStyle(authUser.id) : () => {}}
+              expand={<UserCardExpand />}
+            >
+              <TextField source="id" />
+              <TextField source="name" />
+              <TextField source="age" />
+              <TextField source="email" />
+              <TextField source="providerId" />
+              <TextField source="lastLogOut" />
+              <ShowButton label="" />
+              <FunctionField
+                label=""
+                render={(record) => {
+                  if (record.id === authUser.id) return <EditButton label="" />;
+                }}
+              />
+            </Datagrid>
+          )}
+          {!(!isLoading && isAppLoading) && <UserPagination />}
+        </ListBase>
+      )}
+      {!isLoading && isAppLoading && <Loading />}
     </>
   );
 };

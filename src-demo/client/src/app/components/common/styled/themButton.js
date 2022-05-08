@@ -13,8 +13,6 @@ import { getAppTheme, setAppTheme } from '../../../store/appcontext';
 
 import Tooltip from '@mui/material/Tooltip';
 
-import { CustomAppConsumer } from '../context/themProvider';
-
 const MaterialUISwitch = styled(Switch)(({ mode }) => {
   return {
     width: 62,
@@ -72,7 +70,7 @@ const ThemeButton = ({ ...props }) => {
   // const isLight = theme === 'light';
   return (
     <div style={{ marginLeft: 'auto' }}>
-      <Tooltip title="Change theme">
+      <Tooltip title="Сменить тему">
         <MaterialUISwitch
           {...props}
           checked={theme==="dark"}

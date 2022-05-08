@@ -14,7 +14,7 @@ export const UserShow = (props) => (
       <TextField source="name" />
       <TextField source="age" />
       <TextField source="email" />
-      <TextField source="uid" />
+      <TextField source="id" />
       <TextField source="providerId" />
       <TextField source="lastLogOut" />
     </SimpleShowLayout>

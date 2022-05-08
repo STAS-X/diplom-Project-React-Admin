@@ -33,15 +33,15 @@ http.interceptors.request.use(
       //const token  = useStore((state) => state.authContext.token);
       const token = getState().authContext.token;
 
-      const { expirationTime=0, refreshToken=null, accessToken=null } = token;
+      const { expirationTime, refreshToken, accessToken } = token;
       
       //const authToken =
       //  firebaseApp.auth().currentUser._delegate.stsTokenManager;
       if (refreshToken && expirationTime < Date.now()) {
-        const { stsTokenManager: authToken, uid } = (
+        const { stsTokenManager: authToken } = (
           await authProvider.checkAuth()
         )._delegate;
-        const data = await dispatch(setAuthRefreshToken({ ...authToken }));
+        const data = await dispatch(setAuthRefreshToken(authToken));
 
         if (data) {
           config.headers = {
