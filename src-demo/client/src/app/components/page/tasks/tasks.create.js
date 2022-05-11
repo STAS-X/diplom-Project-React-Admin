@@ -1,4 +1,5 @@
 import * as React from "react";
+import {useSelector} from "react-redux";
 import {
   Create,
   ImageField,
@@ -11,59 +12,47 @@ import {
   FileField,
   ArrayInput,
   SimpleFormIterator,
+  useCreate,
+  useNotify,
+  useRedirect,
   DateInput,
 } from "react-admin";
 import RichTextInput from "ra-input-rich-text";
+import { getAuthData } from '../../../store/authcontext';
 
 
-export const TaskCreate = (props) => (
-  <Create {...props}>
-    <SimpleForm>
-      <TextInput source="id" />
-      <TextInput source="title" />
-      <RichTextInput source="body" />
-      <DateInput source="date" parse={val => new Date(val)} />
-      <ReferenceInput
-        label="User Id"
-        source="user_id"
-        reference="users"
-        // filter={{ isAdmin: true }}
-      >
-        <SelectInput optionText="name" />
-      </ReferenceInput>
-      {/*<ReferenceInput
-        label="User Ref"
-        source="user_ref.___refid"
-        reference="users"
-      >
-        <SelectInput optionText="name" />
-      </ReferenceInput>
-       Or use the easier <FirebaseReferenceInput>
-       <FirebaseReferenceInput
-        label="User Ref (Firebase)"
-        source="user_ref"
-        reference="users"
-      >
-        <SelectInput optionText="name" />
-      </FirebaseReferenceInput> */}
-      <FileInput source="files_multiple" multiple label="Files with (multiple)">
-        <FileField source="src" title="title" />
-      </FileInput>
-      <ArrayInput source="files">
-        <SimpleFormIterator>
-          <FileInput source="file" label="Array Form Files">
-            <FileField source="src" title="title" />
-          </FileInput>
-        </SimpleFormIterator>
-      </ArrayInput>
-      <ArrayInput source="sections.mySection.items" label="Section items">
-        <SimpleFormIterator>
-          <TextInput source="name" label="Name" />
-          <ImageInput source="image" label="Image" accept="image/*">
-            <ImageField source="src" title="title" />
-          </ImageInput>
-        </SimpleFormIterator>
-      </ArrayInput>
-    </SimpleForm>
-  </Create>
-);
+
+export const TaskCreate = (props) => {
+    const { user: authUser } = useSelector(getAuthData());
+    const notify = useNotify();
+    const redirect = useRedirect();
+
+    const transform = (data) => ({ ...data, userId: authUser.id});
+
+    const onSuccess = ({data}) => {
+      notify(`Task '${data.id}' created successfully`); // default message is 'ra.notification.created'
+      redirect('show', '/tasks', data.id, data);
+    };
+  return (
+    <Create {...props} onSuccess={onSuccess} transform={transform}>
+      <SimpleForm>
+        <TextInput disabled source="id" />
+        <TextInput source="title" defaultValue={'Пример заголовка'} />
+        <RichTextInput source="body" defaultValue={'Пример описания'} />
+        <DateInput
+          source="created"
+          parse={(val) => new Date(val)}
+          defaultValue={new Date()}
+        />
+        <ReferenceInput
+          label="User Id"
+          source="userId"
+          reference="users"
+          defaultValue={'1'}
+          // filter={{ isAdmin: true }}
+        >
+          <SelectInput optionText="name" />
+        </ReferenceInput>
+      </SimpleForm>
+    </Create>
+  );};

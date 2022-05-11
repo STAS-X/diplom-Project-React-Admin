@@ -108,15 +108,19 @@ export const UserList = (props) => {
           : 'whitesmoke';
     }
     return () => {};
-  }, [userList, isAppColorized, authUser]);
+  }, [userList, isAppColorized, isLoading]);
 
   return (
     <>
       {authUser && (
-        <ListBase {...props} sort={{ field: 'id', order: 'ASC' }}
-          style=
-          {!isLoading && isAppLoading ? { height: '0px', display: 'none' } : {}}
-          >{!(!isLoading && isAppLoading) && <UserToolbar />}
+        <ListBase
+          {...props}
+          sort={{ field: 'id', order: 'ASC' }}
+          style={
+            !isLoading && isAppLoading ? { height: '0px', display: 'none' } : {}
+          }
+        >
+          {!(!isLoading && isAppLoading) && <UserToolbar />}
           {!(!isLoading && isAppLoading) && (
             <Datagrid
               ref={userRef}

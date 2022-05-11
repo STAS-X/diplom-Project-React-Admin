@@ -19,19 +19,19 @@ export const TaskEdit = (props) => (
   <Edit {...props}>
     <SimpleForm>
       <TextInput disabled source="id" />
-      <DateField source="createdate" />
-      <DateField source="lastupdate" />
-      <TextInput source="title" />
-      <RichTextInput source="body" />
+      <DateField source="createdate" defaultValue={new Date()} />
+      <DateField source="lastupdate" defaultValue={new Date()} />
+      <TextInput source="title" defaultValue={'Заголовок'} />
+      <RichTextInput source="body" defaultValue={'Тескт описания к задаче'} />
       <ReferenceInput
         label="User Id"
-        source="user_id"
+        source="userId"
         reference="users"
         // filter={{ isAdmin: true }}
       >
-        <SelectInput optionText="name" />
+        <SelectInput optionText="displayName" defaultValue={1} />
       </ReferenceInput>
-      <ReferenceInput
+      {/* <ReferenceInput
         label="User Ref"
         source="user_ref.___refid"
         reference="users"
@@ -62,7 +62,7 @@ export const TaskEdit = (props) => (
             <ImageField source="src" title="title" />
           </ImageInput>
         </SimpleFormIterator>
-      </ArrayInput>
+      </ArrayInput> */}
     </SimpleForm>
   </Edit>
 );

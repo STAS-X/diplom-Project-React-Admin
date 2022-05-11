@@ -17,12 +17,6 @@ export const TaskShow = (props) => (
       <TextField source="lastupdate" />
       <TextField source="title" />
       <RichTextField source="body" />
-
-      <FileField
-        source="files_multiple.src"
-        title="files_multiple.title"
-        multiple
-      />
     </SimpleShowLayout>
   </Show>
 );

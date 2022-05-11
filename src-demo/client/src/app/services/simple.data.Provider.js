@@ -46,7 +46,7 @@ export default {
           ProviderRequest: 'getList',
           ProviderParams: JSON.stringify({
             ...params,
-            filter:filters.length>0?filters:filter
+            filter: filters.length > 0 ? filters : filter,
           }),
         },
       })
@@ -150,7 +150,7 @@ export default {
     const url = `${apiUrl}/${resource}?${stringify(query)}`;
     return httpClient
       .put(url, {
-        data: JSON.stringify(params),
+        data: JSON.stringify(params.ids),
         headers: {
           ProviderRequest: 'updateMany',
         },
@@ -159,9 +159,7 @@ export default {
         if (status < 200 || status >= 300) {
           return { status, message: (error && error.message) || statusText };
         }
-        return {
-          data,
-        };
+        return data;
       });
   },
 
@@ -208,22 +206,21 @@ export default {
     const query = {
       filter: JSON.stringify({ id: params.ids }),
     };
+    console.log(params, 'ids to delete');
     const url = `${apiUrl}/${resource}?${stringify(query)}`;
 
     return httpClient
       .delete(url, {
         headers: {
           ProviderRequest: 'deleteMany',
-          ProviderParams: JSON.stringify(params),
+          ProviderParams: JSON.stringify(params.ids),
         },
       })
       .then(({ status, statusText, data }) => {
         if (status < 200 || status >= 300) {
           return { status, message: (error && error.message) || statusText };
         }
-        return {
-          data,
-        };
+        return {data};
       });
   },
 };

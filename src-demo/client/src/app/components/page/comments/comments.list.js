@@ -154,14 +154,16 @@ export const CommentList = (props) => {
         commentTh.style.backgroundColor = isAppColorized
           ? blue[100]
           : 'whitesmoke';
-      const paging = commentList.nextSibling?.querySelector('div.MuiToolbar-root')
+      const paging = commentList.nextSibling?.querySelector(
+        'div.MuiToolbar-root'
+      );
       if (paging)
         paging.style.backgroundColor = isAppColorized
           ? blue[200]
           : 'whitesmoke';
     }
     return () => {};
-  }, [commentList, isAppColorized, authUser]);
+  }, [commentList, isAppColorized, isLoading]);
 
   const { loadedOnce: isLoading } = useSelector(
     (state) => state.admin.resources.comments.list
