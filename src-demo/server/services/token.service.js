@@ -1,78 +1,89 @@
 const jwt = require('jsonwebtoken');
 const config = require('config');
 //const Token = require('../models/Token');
-const { getDoc, doc } = require('firebase/firestore');
-const app = require('../app.js');
+const { getDoc, collection, doc } = require('firebase/firestore');
 
 class TokenService {
-  // return accessToken, refreshToken, exporesIn
+	// return accessToken, refreshToken, exporesIn
+	#firestore;
+	app;
 
-  generate(payload) {
-    const expirationTime = payload.expirationTime;
-    const accessToken = jwt.sign(payload, config.get('accessSecret'), {
-      expiresIn: 3600,
-    });
+	generate(payload) {
+		this.app = require('../app.js');
+		this.#firestore = this.app.firestore;
 
-    const refreshToken = jwt.sign(payload, config.get('refreshSecret'));
+		const currentTime = new Date();
+		currentTime.setHours(currentTime.getHours() + 1);
+		const expirationTime = currentTime.getTime();
 
-    return {
-      accessToken,
-      refreshToken,
-      expirationTime,
-    };
-  }
+		const accessToken = jwt.sign(payload, config.get('accessSecret'), {
+			expiresIn: 3600,
+		});
 
-  // async save(userId, refreshToken) {
-  // 	const data = await Token.findOne({ userId });
+		const refreshToken = jwt.sign(payload, config.get('refreshSecret'));
 
-  // 	if (data) {
-  // 		data.refreshToken = refreshToken;
-  // 		return await data.save();
-  // 	}
-  // 	const token = await Token.create({
-  // 		userId,
-  // 		refreshToken,
-  // 	});
-  // 	return token;
-  // }
+		return {
+			accessToken,
+			refreshToken,
+			expirationTime,
+		};
+	}
 
-  async validateRefresh(refreshToken) {
-    try {
-      const firestore = app.firestore;
-      const tokenSnap = await getDoc(doc(firestore, 'auth', 'token'));
-      if (tokenSnap.exists() > 0) {
-        const token= tokenSnap.data();
+	// async save(userId, refreshToken) {
+	// 	const data = await Token.findOne({ userId });
 
-        return (
-          jwt.verify(refreshToken, config.get('refreshSecret')).refreshToken ===
-          jwt.verify(token.refreshToken, config.get('refreshSecret'))
-            .refreshToken
-        );
-      }
-      return false;
-    } catch (error) {
-      return null;
-    }
-  }
+	// 	if (data) {
+	// 		data.refreshToken = refreshToken;
+	// 		return await data.save();
+	// 	}
+	// 	const token = await Token.create({
+	// 		userId,
+	// 		refreshToken,
+	// 	});
+	// 	return token;
+	// }
 
-  async validateAccess(accessToken) {
-    try {
-      const firestore = app.firestore;
-      const tokenSnap = await getDoc(doc(firestore, 'auth', 'token'));
+	async validateRefresh(refreshToken) {
+		try {
+			const tokenSnap = await getDoc(
+				doc(collection(this.#firestore, 'auth'), 'token')
+			);
 
-      if (tokenSnap.exists() > 0) {
-        const token = tokenSnap.data();
+			if (tokenSnap.exists()) {
+				const token = tokenSnap.data();
 
-        return (
-          jwt.verify(accessToken, config.get('accessSecret')).accessToken ===
-          jwt.verify(token.accessToken, config.get('accessSecret')).accessToken
-        );
-      }
-      return false;
-    } catch (error) {
-      return null;
-    }
-  }
+				return (
+					jwt.verify(refreshToken, config.get('refreshSecret')).refreshToken ===
+					jwt.verify(token.refreshToken, config.get('refreshSecret'))
+						.refreshToken
+				);
+			}
+			return false;
+		} catch (error) {
+			return null;
+		}
+	}
+
+	async validateAccess(accessToken) {
+		try {
+			const tokenSnap = await getDoc(
+				doc(collection(this.#firestore, 'auth'), 'token')
+			);
+
+			if (tokenSnap.exists()) {
+				const token = tokenSnap.data();
+
+				return (
+					jwt.verify(accessToken, config.get('accessSecret')).accessToken ===
+					jwt.verify(token.accessToken, config.get('accessSecret')).accessToken
+				);
+			}
+			return false;
+		} catch (error) {
+			console.log(error, 'error occured');
+			return false;
+		}
+	}
 }
 
 module.exports = new TokenService();

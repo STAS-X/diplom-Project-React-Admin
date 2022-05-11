@@ -133,8 +133,9 @@ router.delete('/:id?', [
       const dataProvider = app.provider;
       const query = req.headers['providerrequest'];
       const params = JSON.parse(req.headers['providerparams']);
+      console.log(params, 'delete many');
 
-      const { data } = await dataProvider[query](resource, params);
+      const {data}  = await dataProvider[query](resource, params);
       res.status(200).send(data);
     } catch (e) {
       res.status(500).send({

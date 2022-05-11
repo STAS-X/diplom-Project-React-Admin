@@ -183,12 +183,13 @@ router.put('/token', [
           message: 'Unautorized',
         });
       }
+      delete data.oldRefresh;
 
       const colRef = collection(firestore, 'auth');
       const validateToken = tokenService.generate(data);
       await setDoc(doc(colRef, 'token'), validateToken);
 
-      res.status(200).send({ token: { ...validateToken }, refresh: true });
+      res.status(200).send({ token: validateToken, refresh: true });
     } catch (error) {
       res.status(400).send({
         code: 400,
