@@ -245,7 +245,7 @@ const CustomAppBar = (props) => {
           <LoadingButton />
           <ColorizedButton/>
           <ThemeButton />
-          <Tooltip title={authUser ? authUser.displayName : '-XXX-'}>
+          <Tooltip title={authUser ? authUser.name : '-XXX-'}>
             <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
               <StyledBadge
                 overlap="circular"
@@ -261,7 +261,7 @@ const CustomAppBar = (props) => {
                   /*title={`${authUser?.email ? authUser?.email : 'email empty'}`}*/
                   sx={{ width: 48, height: 48 }}
                   src={
-                    authUser?.photoURL ? authUser.photoURL : '/broken-image.jpg'
+                    authUser?.url ? authUser.url : '/broken-image.jpg'
                   }
                 >
                   TR

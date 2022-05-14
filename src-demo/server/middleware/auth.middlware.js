@@ -42,8 +42,9 @@ module.exports = async (req, res, next) => {
       const user = userSnap.data();
       //req.userId = user.uid;
       if (req.method === 'PUT' || req.method === 'DELETE') {
-        const { data } = req.body;
+        const { data }  = JSON.parse(req.body.data);
         if (data) {
+          console.log(data, user, 'test for permission')
           if (data.userId !== user.uid) {
             return res.status(400).send({
               code: 400,

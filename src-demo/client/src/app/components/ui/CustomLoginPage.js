@@ -20,18 +20,18 @@ const handleUserTokenRefresh = async (user) => {
   //const logout = getHook('logout');
 
   const {
-    displayName,
+    displayName:name,
     email,
-    photoURL,
+    photoURL:url,
     uid,
     providerData: [{ providerId }],
   } = user._delegate;
 
   const authUser = {
-    displayName: displayName ? displayName : 'John Dow',
+    name: name ? name : 'John Dow',
     email,
-    photoURL: photoURL
-      ? photoURL
+    url: url
+      ? url
       : `https://avatars.dicebear.com/api/avataaars/${(Math.random() + 1)
           .toString(36)
           .substring(7)}.svg`,

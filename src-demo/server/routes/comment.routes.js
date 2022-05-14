@@ -32,7 +32,7 @@ router.get('/:id?', [
         params.pagination.perPage = usersSnap.size;
       }
 
-      if (Array.isArray(params.filter)) {
+      if (query==='getList' && Array.isArray(params.filter)) {
         const firestore = app.firestore;
         const colRef = collection(firestore, resource);
         let wheres = [];

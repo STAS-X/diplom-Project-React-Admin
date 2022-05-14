@@ -21,6 +21,7 @@
     "react-admin-firebase": "3",
     "react-dom": "^17.x",
     "react-firebaseui": "^6.0.0",
+    "react-hook-form": "^7.31.1",
     "react-router-dom": "^5.x",
     "react-scripts": "^5.0.0",
     "react-toastify": "^8.2.0",

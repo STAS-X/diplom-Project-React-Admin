@@ -23,22 +23,52 @@ export default {
       return new Promise((resolve) => resolve({ data: [], total: 0 }));
 
     const filter = params.filter;
-    const operators = { _gte: '>=', _lte: '<=', _neq: '!=' };
+    const operators = {
+      _gte: '>=',
+      _lte: '<=',
+      _neq: '!=',
+    };
     // filters is like [
     //    { field: "commentable", operator: "=", value: true},
     //    { field: "released", operator: ">=", value: '2018-01-01'}
     // ]
-
-    const filters = Object.keys(filter).map((key) => {
-      const operator = operators[key.slice(-4)];
-      return operator
-        ? { field: key.slice(0, -4), operator, value: filter[key] }
-        : {
-            field: key,
-            operator: '==',
-            value: key === 'q' ? escape(filter[key]) : filter[key],
-          };
+    const filters = [];
+    Object.keys(filter).forEach((key) => {
+      if (typeof filter[key] === 'object') {
+        const innerFilter = filter[key];
+        Object.keys(innerFilter).forEach((innerKey) => {
+          const operator = operators[innerKey.slice(-4)];
+          filters.push(
+            operator
+              ? {
+                  field: innerKey.slice(0, -4),
+                  operator,
+                  value: innerFilter[innerKey],
+                }
+              : {
+                  field: innerKey,
+                  operator: '==',
+                  value:
+                    innerKey === 'q'
+                      ? escape(innerFilter[innerKey])
+                      : innerFilter[innerKey],
+                }
+          );
+        });
+      } else {
+        const operator = operators[key.slice(-4)];
+        filters.push(
+          operator
+            ? { field: key.slice(0, -4), operator, value: filter[key] }
+            : {
+                field: key,
+                operator: '==',
+                value: key === 'q' ? escape(filter[key]) : filter[key],
+              }
+        );
+      }
     });
+    console.log(filters, 'get filters');
 
     return httpClient
       .get(url, {
@@ -63,6 +93,7 @@ export default {
   },
 
   getOne: (resource, params) => {
+    console.log(params, 'params id for getOne');
     const url = `${apiUrl}/${resource}/${params.id}`;
 
     return httpClient
@@ -85,6 +116,7 @@ export default {
 
   getMany: (resource, params) => {
     const url = `${apiUrl}/${resource}`;
+    console.log(resource, params, 'getMany');
     return httpClient
       .get(url, {
         headers: {
@@ -105,6 +137,7 @@ export default {
 
   getManyReference: (resource, params) => {
     const url = `${apiUrl}/${resource}`;
+        console.log(resource, params, 'getManyRefs');
     return httpClient
       .get(url, {
         headers: {
@@ -220,7 +253,7 @@ export default {
         if (status < 200 || status >= 300) {
           return { status, message: (error && error.message) || statusText };
         }
-        return {data};
+        return { data };
       });
   },
 };

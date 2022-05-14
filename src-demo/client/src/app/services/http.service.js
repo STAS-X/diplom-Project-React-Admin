@@ -25,7 +25,6 @@ const http = axios.create({
 http.interceptors.request.use(
   async function (config) {
     if (configFile.isFireBase) {
-
       const { getState } = getHook('store');
       const dispatch = getHook('dispatch');
 
@@ -33,8 +32,12 @@ http.interceptors.request.use(
       //const token  = useStore((state) => state.authContext.token);
       const token = getState().authContext.token;
 
-      const { expirationTime=null, refreshToken=null, accessToken=null } = token;
-      
+      const {
+        expirationTime = null,
+        refreshToken = null,
+        accessToken = null,
+      } = token;
+
       //const authToken =
       //  firebaseApp.auth().currentUser._delegate.stsTokenManager;
       if (refreshToken && expirationTime && expirationTime < Date.now()) {
@@ -90,7 +93,7 @@ http.interceptors.request.use(
 
 http.interceptors.response.use(
   (res) => {
-    console.log(res, res.data, 'request response')
+    console.log(res, res.data, 'request response');
     return res;
   },
   function (error) {

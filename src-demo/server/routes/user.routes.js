@@ -24,7 +24,7 @@ router.get('/:id?', [
       const dataProvider = app.provider;
       const query = req.headers['providerrequest'];
       const params = JSON.parse(req.headers['providerparams']);
-
+        console.log(query,params, 'get params client');
       // Если идет запрос на все документы в коллекции подменяем количество запрашиваемых данных
       if (params.pagination?.perPage < 0) {
         const firestore = app.firestore;
@@ -32,7 +32,7 @@ router.get('/:id?', [
         params.pagination.perPage = usersSnap.size;
       }
 
-      if (Array.isArray(params.filter)) {
+      if (query==='getList' && Array.isArray(params.filter)) {
         const firestore = app.firestore;
         const colRef = collection(firestore, resource);
         let wheres = [];
@@ -72,6 +72,7 @@ router.get('/:id?', [
         res.status(200).send(items);
       } else {
         const { data } = await dataProvider[query](resource, params);
+        console.log(data, 'get from server')
         res.status(200).send(data);
       }
     } catch (e) {
@@ -132,10 +133,11 @@ router.post('/', [
       const dataProvider = app.provider;
       const query = req.body.headers.ProviderRequest;
       const params = JSON.parse(req.body.data);
-
+console.log(params,'get one user');
       const { data } = await dataProvider[query](resource, params);
       res.status(200).send(data);
     } catch (e) {
+      console.log(e,'get error user');
       res.status(500).send({
         code: 500,
         name: 'ServerError',

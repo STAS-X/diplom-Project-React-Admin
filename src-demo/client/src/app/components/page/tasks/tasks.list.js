@@ -1,7 +1,16 @@
 import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
+import { styled } from '@mui/material/styles';
 import DeleteIcon from '@material-ui/icons/DeleteRounded';
 import UnSelectedIcon from '@material-ui/icons/UndoRounded';
+import MailIcon from '@material-ui/icons/MailOutline';
+import TagFacesIcon from '@material-ui/icons/TagFaces';
+
+import {
+  getRandomInt,
+  dateWithMonths,
+  dateWithDays,
+} from '../../../utils/getRandomInt';
 import { green, blue, red } from '@mui/material/colors';
 import {
   Datagrid,
@@ -15,12 +24,15 @@ import {
   FilterForm,
   CreateButton,
   Pagination,
+  ChipField,
   DateField,
   TextInput,
   SortButton,
   FunctionField,
   useListContext,
   DatagridBody,
+  ArrayField,
+  NumberField,
   RecordContextProvider,
   useUnselectAll,
   DeleteWithConfirmButton,
@@ -28,20 +40,26 @@ import {
   useGetOne,
   useRefresh,
   useNotify,
+  useGetMany,
   useRecordContext,
   useTranslate,
 } from 'react-admin';
 import {
   TableCell,
   TableRow,
+  Box,
+  CircularProgress,
   Stack,
   Chip,
   Button,
+  Divider,
+  Avatar,
   Checkbox,
 } from '@mui/material';
 import Loading from '../../ui/loading/loading';
 import TaskAsideCard from '../../common/cards/task.card.aside';
 import { getAuthData } from '../../../store/authcontext';
+import TaskProgressBar from '../../common/progressbar/task.progress';
 import { getAppColorized, getAppLoading } from '../../../store/appcontext';
 
 const Aside = ({ id }) => {
@@ -67,47 +85,57 @@ const QuickFilter = ({ label }) => {
 };
 
 const TaskPagination = () => (
-  <Pagination rowsPerPageOptions={[10, 25, 50, 100]} />
+  <Pagination rowsPerPageOptions={[10, 15, 20, 50]} />
 );
 
-function dateWithMonths(months) {
-  const date = new Date();
-  date.setMonth(date.getMonth() + months);
-
-  return date.toISOString().slice(0, 10);
-}
-
-const taskFilters = [
-  <TextInput label="Search" source="q" alwaysOn />,
+const taskFilters = (userId) => [
+  <TextInput label="Search" icon={<MailIcon />} source="q" alwaysOn />,
   <TextInput
-    label="Title"
     resettable
     source="title"
+    label="По наименованию"
     defaultValue="Hello, World!"
   />,
   <QuickFilter
     source="publish_gte"
-    label="Last month"
+    label="За последний месяц"
     defaultValue={dateWithMonths(-1)}
   />,
   <QuickFilter
     source="publish_lte"
-    label="Least month"
+    label="Ранее 1 месяца"
     defaultValue={dateWithMonths(-1)}
   />,
   <QuickFilter
-    source="id"
-    label="By current user"
-    defaultValue={'DTGCdToJ3SloFowi6ffX'}
+    source="progress"
+    label="Завешенные"
+    defaultValue={{
+      executeAt_lte: new Date(),
+      progress: 100,
+    }}
+  />,
+  <QuickFilter
+    source="progress_lte"
+    label="Незавершенные"
+    defaultValue={{
+      executeAt_gte: new Date(),
+      progress_lte: 100,
+    }}
+  />,
+  <QuickFilter
+    source="userId"
+    label="Создано пользователем"
+    defaultValue={userId}
   />,
 ];
 
 const DeleteTasksButton = ({ tasksIds, setTasksIds }) => {
   const refresh = useRefresh();
   const notify = useNotify();
-  const [deleteMany, { isLoading, total, error }] = useDeleteMany('tasks', {
-    ids: tasksIds,
-  });
+  const [deleteMany, { isLoading, total, error }] = useDeleteMany(
+    'tasks',
+    tasksIds
+  );
   const handleClick = () => {
     if (confirm('Уверены, что хотите удалить задачи?')) {
       deleteMany();
@@ -115,13 +143,13 @@ const DeleteTasksButton = ({ tasksIds, setTasksIds }) => {
   };
 
   useEffect(() => {
-    if (error) {
-      console.log(total, error, 'всего удалено задач');
+    //console.info(isLoading, total, error,'test for delete many');
+    if (total === undefined) {
       notify(`Задачи ${tasksIds} удалены успешно`);
       setTasksIds([]);
       refresh();
     }
-  }, [total, error]);
+  }, [total, error, isLoading]);
 
   return (
     <Button
@@ -167,18 +195,82 @@ const UnselectButton = ({ setTasksIds }) => {
   );
 };
 
-const TaskToolbar = ({ tasksIds, setTasksIds }) => (
-  <Stack direction="row" justifyContent="space-between">
-    <FilterForm filters={taskFilters} />
-    <div>
-      <SortButton fields={['title', 'publish', 'progress']} />
-      <FilterButton filters={taskFilters} />
-      <CreateButton />
-      <DeleteTasksButton tasksIds={tasksIds} setTasksIds={setTasksIds} />
-      {tasksIds.length > 0 && <UnselectButton setTasksIds={setTasksIds} />}
-    </div>
-  </Stack>
-);
+const TaskToolbar = ({ tasksIds, setTasksIds, userId }) => {
+  const filters = taskFilters(userId);
+
+  return (
+    <Stack direction="row" justifyContent="space-between">
+      <FilterForm filters={filters} />
+      <div>
+        <SortButton fields={['title', 'createdAt', 'progress']} />
+        <FilterButton filters={filters} />
+        <CreateButton />
+        <DeleteTasksButton tasksIds={tasksIds} setTasksIds={setTasksIds} />
+        {tasksIds.length > 0 && <UnselectButton setTasksIds={setTasksIds} />}
+      </div>
+    </Stack>
+  );
+};
+
+const ExecutorsField = ({ ids }) => {
+  if (!ids) return <h5>Исполнители не назначены</h5>;
+
+  const { data, loading, loaded, error } = useGetMany('users', ids);
+  const [users, setUsers] = React.useState()
+
+  React.useEffect(() => {
+    if (data && loaded) {
+      setUsers(data);
+    }
+  }, [data, loaded]);
+
+  if (loading || !loaded) return <CircularProgress color="inherit" />;
+
+  if (error) {
+    return <p>ERROR</p>;
+  }
+console.log(!!users, users, 'check users')
+  return (
+    <>
+    { !!users && (<Stack
+      direction="row"
+      /*divider={<Divider orientation="vertical" flexItem />} */
+
+      sx={{
+        maxWidth: 'min-content',
+        justifyContent: 'flex-start',
+        alignContent: 'space-between',
+        gap: 1,
+        flexWrap: 'wrap',
+      }}
+    >
+      {users.map((user, ind) => (
+        <Chip
+          key={ind}
+          label={user.name ? user.name : '-XXX-'}
+          avatar={
+            <Avatar
+              alt="Пользователь"
+              src={
+                user.url ? user.url : `https://i.pravatar.cc/150?u=${user.id}`
+              }
+              sx={{ width: 24, height: 24 }}
+            />
+          }
+          style={{
+            backgroundColor: blue[100],
+            flexBasis: '33%',
+            color: green[500],
+            display: 'inline-flex',
+            fontWeight: 'bold',
+            fontSize: 14,
+          }}
+        />
+      ))}
+    </Stack>)}
+    </>
+  );
+};
 
 export const TaskList = (props) => {
   const [tasksIds, setTasksIds] = React.useState([]);
@@ -190,13 +282,12 @@ export const TaskList = (props) => {
   const { loadedOnce: isLoading } = useSelector(
     (state) => state.admin.resources.tasks.list
   );
-  
+
   const { user: authUser } = useSelector(getAuthData());
   const isAppColorized = useSelector(getAppColorized());
   const isAppLoading = useSelector(getAppLoading());
 
   React.useEffect(() => {
-    console.log(taskList, 'get task list element');
     if (taskList) {
       const ths = taskList.querySelectorAll('thead>tr>th');
       for (const taskTh of ths)
@@ -230,7 +321,11 @@ export const TaskList = (props) => {
           }
         >
           {!(!isLoading && isAppLoading) && (
-            <TaskToolbar tasksIds={tasksIds} setTasksIds={setTasksIds} />
+            <TaskToolbar
+              tasksIds={tasksIds}
+              setTasksIds={setTasksIds}
+              userId={authUser.uid}
+            />
           )}
           {!(!isLoading && isAppLoading) && (
             // <Datagrid
@@ -254,7 +349,7 @@ export const TaskList = (props) => {
             // </Datagrid>
             <MyDatagrid
               isAppColorized={isAppColorized}
-              authId={authUser.id}
+              authId={authUser.uid}
               tasksIds={tasksIds}
               setTasksIds={setTasksIds}
               taskRef={taskRef}
@@ -273,6 +368,12 @@ export const TaskList = (props) => {
 
 const MyDatagridBody = (props) => (
   <DatagridBody {...props} row={<MyDatagridRow />} />
+);
+
+const ProgressBarField = (id, progress) => (
+  <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+    <TaskProgressBar id={id} value={progress} />
+  </Box>
 );
 
 const MyDatagrid = ({
@@ -323,7 +424,7 @@ const MyDatagrid = ({
     );
     return () => {};
   }, []);
-  console.log(props, 'new record');
+
   return (
     <Datagrid
       {...props}
@@ -347,7 +448,6 @@ const MyDatagrid = ({
             disabled={record.userId !== authId}
             checked={tasksIds.findIndex((id) => id === record.id) > -1}
             onClick={(event) => {
-              console.log(tasksIds);
               if (tasksIds.findIndex((id) => id === record.id) < 0) {
                 tasksIds.push(record.id);
               } else {
@@ -360,21 +460,62 @@ const MyDatagrid = ({
         )}
       />
 
-      <TextField source="id" />
-      <TextField source="title" />
-      <TextField source="publishing_state" />
-      <TextField source="updatedby" />
-      <TextField source="createdby" />
-      <RichTextField source="body" />
+      <TextField label="Название" source="title" />
+      <TextField label="Описание" source="description" />
+      <TextField label="Дата создания" source="createdAt" />
+      <FunctionField
+        label="Статус"
+        render={(record) => <ExecutorsField ids={record.executors} />}
+      />
+
+      <TextField label="Дата исполнения" source="executeAt" />
+      <FunctionField
+        label="Статус"
+        render={(record) =>
+          ProgressBarField(record.progressType?record.progressType:1, record.progress)
+        }
+      />
+      <FunctionField
+        label="Статус"
+        render={(record) => {
+          if (record.status) {
+            if (new Date(record.finishedAt) <= new Date(record.executeAt)) {
+              return '👍 Завершено';
+            } else {
+              return '✌️ Завершено вне сроков';
+            }
+          } else {
+            if (new Date(record.executeAt) < new Date()) {
+              if (record.progress < 100) {
+                return '😬 Просрочено';
+              } else {
+                return '😪 Завершено но открыто';
+              }
+            } else {
+              return '💪 На исполнении';
+            }
+          }
+        }}
+      />
+      <FunctionField
+        label="Комментарии"
+        render={(record) => {
+          if (record.commentable) {
+            return '✔️';
+          } else {
+            return '✖️';
+          }
+        }}
+      />
+
       <ShowButton label="" />
       <FunctionField
         label=""
         render={(record) => {
-          console.log(record, 'record data');
           return (
             record.userId === authId && (
-              <>
-                <EditButton label="" />
+              <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+                <EditButton basePath="/tasks" label="" record={record} />
                 <DeleteWithConfirmButton
                   record={record}
                   label=""
@@ -382,7 +523,7 @@ const MyDatagrid = ({
                   confirmContent="Подтверждаете удаление задачи?"
                   redirect={false}
                 />
-              </>
+              </Box>
             )
           );
         }}

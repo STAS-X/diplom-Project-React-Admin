@@ -42,14 +42,7 @@ export const CommentCreate = (props) => {
     return convertDateToString(new Date(value));
   };
 
-  const dateParser = (value) => {
-    //value is a string of "YYYY-MM-DD" format
-    const match = dateParseRegex.exec(value);
-    if (match === null) return;
-    const d = new Date(match[1], parseInt(match[2], 10) - 1, match[3]);
-    if (isNaN(d.getDate())) return;
-    return d;
-  };
+
 
   const handleClick = () => {
     console.info('You clicked the Chip.');
@@ -98,7 +91,7 @@ export const CommentCreate = (props) => {
           helperText="Дата создания коммента"
           source="publish"
           format={dateFormatter}
-          parse={dateParser}
+          parse={convertDateToString}
           defaultValue={new Date()}
         />
         <RichTextInput label="Body" source="body" />

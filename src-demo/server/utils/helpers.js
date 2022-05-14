@@ -14,4 +14,5 @@ function generateUserData() {
 
 module.exports = {
 	generateUserData,
+	getRandomInt,
 };

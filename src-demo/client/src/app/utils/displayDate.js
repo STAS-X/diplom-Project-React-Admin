@@ -1,4 +1,4 @@
-export function displayDate(data) {
+const displayDate = (data) => {
     const date = new Date(data);
     const dateNow = new Date();
     const yearDif = dateNow.getFullYear() - date.getFullYear();
@@ -28,3 +28,28 @@ export function displayDate(data) {
         date.getFullYear() + "." + (date.getMonth() + 1) + "_" + date.getDate()
     );
 }
+  const dateFormatRegex = /^\d{4}-\d{2}-\d{2}$/;
+  const dateParseRegex = /(\d{4})-(\d{2})-(\d{2})/;
+
+  const convertDateToString = (value) => {
+    // value is a `Date` object
+    if (!(value instanceof Date) || isNaN(value.getDate())) return '';
+    const pad = '00';
+    const yyyy = value.getFullYear().toString();
+    const MM = (value.getMonth() + 1).toString();
+    const dd = value.getDate().toString();
+    return `${yyyy}-${(pad + MM).slice(-2)}-${(pad + dd).slice(-2)}`;
+  };
+
+  const dateFormatter = (value) => {
+    // null, undefined and empty string values should not go through dateFormatter
+    // otherwise, it returns undefined and will make the input an uncontrolled one.
+    if (value == null || value === '') return '';
+    if (value instanceof Date) return convertDateToString(value);
+    // Valid dates should not be converted
+    if (dateFormatRegex.test(value)) return value;
+
+    return convertDateToString(new Date(value));
+  };
+
+  export { displayDate, dateFormatter };

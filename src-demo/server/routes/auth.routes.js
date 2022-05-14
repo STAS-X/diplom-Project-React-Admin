@@ -56,12 +56,13 @@ router.post('/signIn', [
       );
       const querySnapshot = await getDocs(q);
       if (querySnapshot.size === 0) {
-        const newId = nanoid();
-        await setDoc(doc(collection(firestore, 'users'), newId), {
+        //const newId = nanoid();
+        await setDoc(doc(collection(firestore, 'users'), user.uid), {
           ...user,
-          id: newId,
+          createdAt: Date.now(),
+          id: user.uid,
         });
-        userDB = { ...userDB, id: newId };
+        userDB = { ...user, id: user.uid };
       } else {
         querySnapshot.forEach(async (doc) => {
           userDB = doc.data();

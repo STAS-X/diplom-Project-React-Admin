@@ -108,7 +108,7 @@ const UserCardExpand = () => {
     <Card variant="outlined" ref={cardRef} className={classes.root}>
       <CardMedia
         className={classes.media}
-        image={authUser.photoURL}
+        image={authUser.url}
         component="img"
         title="Avatar"
       ></CardMedia>
@@ -119,7 +119,7 @@ const UserCardExpand = () => {
           variant="h6"
           component="h2"
         >
-          Информация пользователя {authUser.displayName}
+          Информация пользователя {authUser.name}
         </Typography>
         <Typography variant="body2" color="primary" component="p">
           Всего создано заданий : {taskNum}

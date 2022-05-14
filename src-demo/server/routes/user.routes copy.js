@@ -13,9 +13,11 @@ router.get('/:id?', async (req, res) => {
     const query = req.headers['providerrequest'];
     const params = JSON.parse(req.headers['providerparams']);
 
+    console.log(params, query, 'users init');
     const { data } = await dataProvider[query](resource, params);
     res.status(200).send(data);
   } catch (e) {
+          console.log(e, 'error users')
     res.status(500).send({
       code: 500,
       name: 'ServerError',
