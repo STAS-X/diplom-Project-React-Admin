@@ -86,6 +86,7 @@ export const CommentCreate = (props) => {
       { id: 'photography', name: 'Photography' },
     ]}
   /> */}
+        <TextInput label="Идентификатор" source="taskId" defaultValue={localStorage.getItem('currentTaskId')?localStorage.getItem('currentTaskId'):''} disabled/>
         <DateInput
           label={false}
           helperText="Дата создания коммента"

@@ -3,6 +3,7 @@ const express = require('express');
 const auth = require('../middleware/auth.middlware');
 const { generateUserData } = require('../utils/helpers');
 const router = express.Router({ mergeParams: true });
+const app = require('../app.js');
 const {
   getDoc,
   setDoc,
@@ -13,7 +14,7 @@ const {
   getDocs,
   collection,
 } = require('firebase/firestore');
-const app = require('../app.js');
+
 
 const resource = 'comments';
 

@@ -28,7 +28,7 @@ const handleUserTokenRefresh = async (user) => {
   } = user._delegate;
 
   const authUser = {
-    name: name ? name : 'John Dow',
+    name: name ? name : email,
     email,
     url: url
       ? url

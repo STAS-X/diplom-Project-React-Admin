@@ -21,6 +21,7 @@ const Loading = () => {
         <span style={{ '--i': 14 }} />
         <span style={{ '--i': 15 }} />
         <span style={{ '--i': 16 }} />
+        <span style={{ '--i': 17 }} />
         <span style={{ '--i': 18 }} />
         <span style={{ '--i': 19 }} />
         <span style={{ '--i': 20 }} />
@@ -42,6 +43,7 @@ const Loading = () => {
         <span style={{ '--i': 14 }} />
         <span style={{ '--i': 15 }} />
         <span style={{ '--i': 16 }} />
+        <span style={{ '--i': 17 }} />
         <span style={{ '--i': 18 }} />
         <span style={{ '--i': 19 }} />
         <span style={{ '--i': 20 }} />

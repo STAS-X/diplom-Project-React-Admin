@@ -1,3 +1,4 @@
+import { useThemeProps } from '@mui/material';
 import {
   Show,
   TabbedShowLayout,
@@ -13,19 +14,30 @@ import {
 } from 'react-admin';
 
 export const UserTabbetShow = (props) => {
+  console.log(props, 'current props')
+  const { pathname } = props.history.location;
+  if (pathname.slice(-4)==="show") props.history.location.pathname = props.history.location.pathname+'/users';
+
+  //if (newPath.slice(-4)==="show")
 
 return (
   <Show {...props}>
-    <TabbedShowLayout syncWithLocation={false}>
+    <TabbedShowLayout
+      syncWithLocation={true}
+      variant="scrollable"
+      //scrollButtons="auto"
+      spacing={2}
+    >
       <Tab label="summary" path="users">
         <TextField label="Id" source="id" />
         <TextField source="name" />
         <TextField source="email" />
+        <TextField label="Props" />
       </Tab>
-      <Tab label="body" path="users">
+      <Tab label="body" path="card" value={2}>
         <RichTextField source="name" label="richBody" />
       </Tab>
-      <Tab label="Miscellaneous" path="tasks">
+      <Tab label="Miscellaneous" path="body" value={3}>
         <TextField label="Body" source="body" />
         <DateField label="Publication date" source="published_at" />
         <NumberField source="id" />
@@ -36,7 +48,7 @@ return (
         />
         <TextField label="Created by" source="createdBy" />
       </Tab>
-      <Tab label="tasks">
+      <Tab label="tasks" path="tasks">
         <ReferenceManyField
           sort={{ field: 'publishAt', order: 'ASC' }}
           perPage={10}
@@ -59,20 +71,20 @@ return (
           </Datagrid>
         </ReferenceManyField>
       </Tab>
-      <Tab label="comments">
+      <Tab label="comments" value={5} path="comments">
         <ReferenceManyField
           sort={{ field: 'publishAt', order: 'ASC' }}
           perPage={10}
           reference="comments"
           target="userId"
-          label="Refmanycomment"
+          label={`Таблица с комментариями пользователя ${props.id}`}
         >
           <Datagrid>
             <TextField source="body" />
             <TextField source="publishing_state" />
             <DateField
               locales="ru-Ru"
-              options="{ dateStyle: 'long', timeStyle: 'medium' }"
+              options={{ dateStyle: 'long', timeStyle: 'medium' }}
               source="publishAt"
             />
             <EditButton />

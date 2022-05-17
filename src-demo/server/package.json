@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "start": "cross-env NODE_ENV=production node app.js",
-    "serve": "cross-env NODE_ENV=development nodemon app.js",
+    "serve": "cross-env NODE_ENV=development nodemon --harmony app.js",
     "client": "cd ../client && cross-env NODE_ENV=development BROWSER=none PORT=3000 npx react-scripts start",
     "dev": "concurrently \"npm run serve\" \"npm run client\"",
     "prod": "concurrently \"npm run start\" \"npm run client\""

@@ -68,6 +68,23 @@ import { getAuthData } from '../../../store/authcontext';
 import TaskProgressBar from '../../common/progressbar/task.progress';
 import { getAppColorized, getAppLoading } from '../../../store/appcontext';
 
+const Aside = ({ id }) => {
+  //const { data, isLoading } = useGetOne('tasks', {id: "1"});
+  const { data } = id
+    ? useGetOne('tasks', id)
+    : { data: { title: 'not found' } };
+
+  return (
+    // <div className="aside" style={{ width: id?'200px':'0px', opacity: id?1:0, marginLeft: '1.6em',  transition: '300ms ease-out' }} >
+    //     <Typography variant="h6">Posts stats</Typography>
+    //     <Typography variant="body2">
+    //         Current post title: {data?.title}
+    //     </Typography>
+    // </div>
+    <TaskAsideCard id={id} />
+  );
+};
+
 const QuickFilter = ({ label }) => {
   const translate = useTranslate();
   return <Chip sx={{ marginBottom: 1 }} label={translate(label)} />;
@@ -305,7 +322,7 @@ export const TaskList = (props) => {
     return () => {};
   }, [taskList, isAppColorized, isLoading]);
 
-  const taskRowStyle = (id) => (record, index) => {
+  const postRowStyle = (id) => (record, index) => {
     return {
       backgroundColor:
         record.userId === id
@@ -323,8 +340,8 @@ export const TaskList = (props) => {
       {authUser && (
         <ListBase
           {...props}
-          sort={{ field: 'createdAt', order: 'ASC' }}
-          //aside={<TaskAsideCard id={hoverId} />}
+          sort={{ field: 'publish', order: 'ASC' }}
+          aside={<TaskAsideCard id={hoverId} />}
           style={
             !isLoading && isAppLoading ? { height: '0px', display: 'none' } : {}
           }
@@ -345,7 +362,7 @@ export const TaskList = (props) => {
               taskRef={taskRef}
               hoverId={hoverId}
               setHoverId={setHoverId}
-              taskRowStyle={taskRowStyle}
+              postRowStyle={postRowStyle}
             />
           )}
           {!(!isLoading && isAppLoading) && <TaskPagination />}
@@ -384,10 +401,9 @@ const ControlButtons = ({ record, authId }) => {
         //const { data, isLoading } = useGetOne('tasks', {id: "1"});
 
         return (
+          record.userId === authId && (
             <Box sx={{ position: 'relative', display: 'inline-flex' }}>
               <ShowButton basePath="/tasks" label="" record={record} />
-              {record.userId === authId && (
-              <>
               <EditButton basePath="/tasks" label="" record={record} />
               {loading && !loaded && <CircularProgress color="inherit" />}
               {loaded && total > 0 && (
@@ -412,10 +428,9 @@ const ControlButtons = ({ record, authId }) => {
                 confirmContent="Подтверждаете удаление задачи?"
                 redirect={false}
               />
-              </>)
-              }
             </Box>
-          );
+          )
+        );
       }}
     />
   );
@@ -425,7 +440,7 @@ const MyDatagrid = ({
   isAppColorized,
   authId,
   taskRef,
-  taskRowStyle,
+  postRowStyle,
   setTasksIds,
   tasksIds,
   hoverId,
@@ -491,7 +506,7 @@ const MyDatagrid = ({
         }}
         isRowSelectable={(row) => authId === row.userId}
         ref={taskRef}
-        rowStyle={isAppColorized ? taskRowStyle(authId) : () => {}}
+        rowStyle={isAppColorized ? postRowStyle(authId) : () => {}}
         sx={{
           '& .RaDatagrid-row': { color: 'green', backgroundColor: 'red' },
           '& .RaDatagrid-selectable': {
@@ -578,7 +593,7 @@ const MyDatagrid = ({
 
         <ControlButtons authId={authId} />
       </Datagrid>
-      {hoverId && <TaskAsideCard id={hoverId} />}
+      {hoverId && <Aside id={hoverId} />}
     </Stack>
   );
 };

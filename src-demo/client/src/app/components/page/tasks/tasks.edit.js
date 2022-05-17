@@ -5,6 +5,7 @@ import {
   BooleanInput,
   DateInput,
   SaveButton,
+  EditButton,
   SimpleForm,
   TextInput,
   SelectInput,
@@ -21,6 +22,7 @@ import {
   ReferenceArrayInput,
   FormDataConsumer,
   Toolbar,
+  useEditContext,
   Title,
   useRefresh,
   required,
@@ -30,7 +32,7 @@ import {
   maxValue,
   number,
 } from 'react-admin';
-import { useFormState } from 'react-hook-form';
+//import { useFormState } from 'react-hook-form';
 import { Box, Typography } from '@mui/material';
 import AddCommentIcon from '@material-ui/icons/AddCommentRounded';
 import TaskProgressBar from '../../common/progressbar/task.progress';
@@ -64,9 +66,32 @@ const CustomToolbar = (props) => {
   //const notify = useNotify();
   //const redirect = useRedirect();
   //const refresh = useRefresh();
-  //const { invalid: isInvalid , handleSubmit, handleSubmitWithRedirect } = props;
-  console.log(props, 'props edit');
-  const { invalid: isInvalid, handleSubmit, handleSubmitWithRedirect } = props;
+  const redirect = useRedirect();
+  const {
+    invalid: isInvalid,
+    pristine,
+    handleSubmit,
+    handleSubmitWithRedirect,
+  } = props;
+  console.log(
+    handleSubmit,
+    handleSubmitWithRedirect,
+    props,
+    'submit functions'
+  );
+  const { record, saving, setOnSuccess } = useEditContext();
+
+  const handleSuccess = () => {
+    //const { saving: statusSave } = useEditContext();
+    console.info(`Данные задачи ${record.id} сохранены успешно`);
+    // if (saving)
+    //   if (localStorage.getItem('redirectTo')) {
+    //     const redirectTo = localStorage.getItem('redirectTo');
+    //     console.log(redirectTo);
+    //     localStorage.removeItem('redirectTo');
+    //     redirect('/comments/create');
+    //   } else redirect(`/tasks/${record.id}/show`);
+  };
 
   return (
     <Toolbar
@@ -78,11 +103,14 @@ const CustomToolbar = (props) => {
       }}
     >
       <SaveButton
-        label="Редактировать"
+        label="Сохранить"
+        key={1}
         onClick={() => {
           handleSubmit();
+          //setOnSuccess(handleSuccess);
         }}
-        disabled={isInvalid}
+        redirect={'show'}
+        disabled={isInvalid || pristine}
       />
       <FormDataConsumer>
         {({ formData, ...rest }) => (
@@ -90,9 +118,14 @@ const CustomToolbar = (props) => {
             label="Перейти к комментарию"
             icon={<AddCommentIcon />}
             onClick={() => {
-              localStorage.setItem('redirectTo', '/comments/create');
+              //localStorage.setItem('redirectTo', 'comments');
+              console.log(record, 'record context');
+              localStorage.setItem('currentTaskId', record.id);
               handleSubmit();
+              //setOnSuccess(handleSuccess);
             }}
+            redirect={'/comments/create'}
+            handleSubmitWithRedirect={handleSubmitWithRedirect}
             disabled={!formData.commentable || isInvalid}
           />
         )}
@@ -128,13 +161,11 @@ const validateExecDate = (value, allValues) => {
 
 export const TaskEdit = (props) => {
   //const notify = useNotify();
-  const redirect = useRedirect();
   //const rec= useRecordContext();
-  //console.log(rec)
-
   const { user: authUser } = useSelector(getAuthData());
 
   const transform = (data) => {
+    console.log(data, 'transform data from edit');
     return {
       ...data,
       userId: authUser.uid,
@@ -142,15 +173,12 @@ export const TaskEdit = (props) => {
     };
   };
 
-  const handleSuccess = () => {
-    if (localStorage.getItem('redirectTo')) {
-      const redirectTo = localStorage.getItem('redirectTo');
-      localStorage.removeItem('redirectTo');
-      if (redirectTo) redirect(redirectTo);
-    }
+  const handleError = ({ error }) => {
+    notify(`Возникла ошибка: ${error?.message}`, { type: 'error' }); // default message is 'ra.notification.created'
+    refresh();
   };
 
-  const handleError = ({ error }) => {
+  const handleFailure = ({ error }) => {
     notify(`Возникла ошибка: ${error.message}`, { type: 'error' }); // default message is 'ra.notification.created'
     refresh();
   };
@@ -160,7 +188,7 @@ export const TaskEdit = (props) => {
       {authUser && (
         <Edit
           {...props}
-          mutationMode="undoable"
+          //mutationMode="undoable"
           //warnWhenUnsavedChanges
           transform={transform}
           // queryOptions={{
@@ -170,15 +198,15 @@ export const TaskEdit = (props) => {
           //     console.log(data, 'new data refetch on edit component');
           //   },
           // }}
-          onSuccess={handleSuccess}
-          onError={handleError}
+          //redirect={false}
+          //onSuccess={handleSuccess}
+          onFailure={handleFailure}
         >
           <SimpleForm
             mode="onBlur"
             warnWhenUnsavedChanges
             toolbar={<CustomToolbar />}
           >
-            <Title>Тестовый титл формы</Title>
             <TextInput disabled label="Идентификатор" source="id" />
 
             <TextInput

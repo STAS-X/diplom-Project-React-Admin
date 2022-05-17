@@ -27,6 +27,7 @@ export default {
       _gte: '>=',
       _lte: '<=',
       _neq: '!=',
+      _arr: 'array-contains',
     };
     // filters is like [
     //    { field: "commentable", operator: "=", value: true},
