@@ -24,7 +24,7 @@ router.get('/:id?', [
     try {
       const dataProvider = app.provider;
       const query = req.headers['providerrequest'];
-      const params = JSON.parse(req.headers['providerparams']);
+      const params = JSON.parse(unescape(req.headers['providerparams']));
 
       // Если идет запрос на все документы в коллекции подменяем количество запрашиваемых данных
       if (params.pagination?.perPage < 0) {
@@ -32,14 +32,14 @@ router.get('/:id?', [
         const usersSnap = await firestore.collection(resource).get();
         params.pagination.perPage = usersSnap.size;
       }
-
+      console.log(params.filter, 'filter comments');
       if (query==='getList' && Array.isArray(params.filter)) {
         const firestore = app.firestore;
         const colRef = collection(firestore, resource);
         let wheres = [];
         let search = null;
         params.filter.forEach((f) => {
-          if (f.field !== 'q') {
+          if (f.field !== 'q' && f.field !== 'body') {
             wheres.push(where(f.field, f.operator, f.value));
           } else {
             search = unescape(f.value);
@@ -63,7 +63,11 @@ router.get('/:id?', [
               const data = doc.data();
               let isSearch = false;
               Object.keys(data).forEach((key) => {
-                if (data[key].toString().search(search) > -1) isSearch = true;
+                try {
+									if (data[key].toString().search(search) > -1) isSearch = true;
+								} catch(error) {
+									isSearch = false;
+								}
               });
               if (isSearch) items.push(data);
             }

@@ -23,7 +23,7 @@ router.get('/:id?', [
     try {
       const dataProvider = app.provider;
       const query = req.headers['providerrequest'];
-      const params = JSON.parse(req.headers['providerparams']);
+      const params = JSON.parse(unescape(req.headers['providerparams']));
         console.log(query,params, 'get params client');
       // Если идет запрос на все документы в коллекции подменяем количество запрашиваемых данных
       if (params.pagination?.perPage < 0) {
@@ -38,7 +38,7 @@ router.get('/:id?', [
         let wheres = [];
         let search = null;
         params.filter.forEach((f) => {
-          if (f.field !== 'q') {
+          if (f.field !== 'q' && f.field !== 'name') {
             wheres.push(where(f.field, f.operator, f.value));
           } else {
             search = unescape(f.value);
@@ -62,7 +62,11 @@ router.get('/:id?', [
               const data = doc.data();
               let isSearch = false;
               Object.keys(data).forEach((key) => {
-                if (data[key].toString().search(search) > -1) isSearch = true;
+                try {
+									if (data[key].toString().search(search) > -1) isSearch = true;
+								} catch(error) {
+									isSearch = false;
+								}
               });
               if (isSearch) items.push(data);
             }

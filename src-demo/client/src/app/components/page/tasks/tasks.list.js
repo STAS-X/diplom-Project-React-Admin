@@ -8,7 +8,8 @@ import CreateCommentIcon from '@material-ui/icons/AddCommentRounded';
 import EditCommentIcon from '@material-ui/icons/EditAttributesRounded';
 import MailIcon from '@material-ui/icons/MailOutline';
 import TagFacesIcon from '@material-ui/icons/TagFaces';
-
+import ChevronLeft from '@material-ui/icons/ChevronLeft';
+import ChevronRight from '@material-ui/icons/ChevronRight';
 import {
   getRandomInt,
   dateWithMonths,
@@ -47,10 +48,13 @@ import {
   useGetList,
   useRecordContext,
   useTranslate,
+  Pagination as RaPagination,
+  PaginationActions as RaPaginationActions,
 } from 'react-admin';
 import {
   TableCell,
   TableRow,
+  Toolbar,
   Box,
   CircularProgress,
   Stack,
@@ -61,6 +65,7 @@ import {
   Avatar,
   Checkbox,
 } from '@mui/material';
+import { makeStyles } from '@material-ui/core/styles';
 import { dateFormatter } from '../../../utils/displayDate';
 import Loading from '../../ui/loading/loading';
 import TaskAsideCard from '../../common/cards/task.card.aside';
@@ -73,17 +78,48 @@ const QuickFilter = ({ label }) => {
   return <Chip sx={{ marginBottom: 1 }} label={translate(label)} />;
 };
 
-const TaskPagination = () => (
-  <Pagination rowsPerPageOptions={[10, 15, 20, 50]} />
-);
+
+const TaskPagination = () => {
+    const {perPage, page, setPage, data} = useListContext();
+    const {total, loaded} = useGetList('tasks', { page: 1, perPage: -1 },
+    { field: 'id', order: 'ASC' },
+    {});
+    
+    console.log(total, page, perPage, 'all lists available');
+
+
+    return (
+        <Toolbar sx={{justifyContent:'flex-end'}}>
+            <Pagination rowsPerPageOptions={[10, 15, 20, 50]} />
+            <Button 
+                key="previous"
+                disabled={!loaded || page===1}
+                color="primary"                
+                onClick={() => setPage(page - 1)}
+                startIcon={<ChevronLeft />}
+            >
+                Предыдущая
+            </Button>
+            <Button 
+                key="next"
+                disabled={!loaded || page===Math.ceil(total/perPage)}
+                color="primary"
+                onClick={() => setPage(page + 1)}
+                endIcon={<ChevronRight />}
+            >
+               Следующая
+            </Button>
+        </Toolbar>
+    );
+}
 
 const taskFilters = (userId) => [
-  <TextInput label="Search" icon={<MailIcon />} source="q" alwaysOn />,
+  <TextInput label="Глобальный поиск" source="q" alwaysOn />,
   <TextInput
     resettable
     source="title"
     label="По наименованию"
-    defaultValue="Hello, World!"
+    defaultValue="Заголовок"
   />,
   <QuickFilter
     source="createdAt_gte"
@@ -208,7 +244,7 @@ const TaskToolbar = ({ tasksIds, setTasksIds, userId }) => {
     <Stack direction="row" justifyContent="space-between">
       <FilterForm filters={filters} />
       <div>
-        <SortButton fields={['description', 'createdAt']} />
+        <SortButton fields={['title', 'createdAt', 'executeAt', 'status', 'progress', 'commentable']} />
         <FilterButton filters={filters} />
         <CreateButton />
         <DeleteTasksButton tasksIds={tasksIds} setTasksIds={setTasksIds} />
@@ -218,7 +254,75 @@ const TaskToolbar = ({ tasksIds, setTasksIds, userId }) => {
   );
 };
 
-const ExecutorsField = ({ ids }) => {
+const getTaskResult = (data) => {
+      if (data.status) {
+        if (new Date(data.finishedAt) <= new Date(data.executeAt)) {
+          return 1;
+        } else {
+          return 0;
+        }
+      } else {
+        if (new Date(data.executeAt) < new Date()) {
+          if (data.progress < 100) {
+            return -1;
+          } else {
+            return 1;
+          }
+        } else {
+          return 0;
+        }
+      }
+}
+
+const KeywordsField = ({ keywords }) => {
+  console.log(keywords);
+  if (!keywords) return <h5>Тэги не заданы</h5>;
+
+  const tagsCount = keywords.length;
+
+  return (
+    <>
+      {keywords && (
+        <Stack
+          direction="row"
+          /*divider={<Divider orientation="vertical" flexItem />} */
+
+          sx={{
+            maxWidth: 'min-content',
+            justifyContent: 'flex-start',
+            alignContent: 'space-between',
+            gap: 1,
+            flexWrap: 'wrap',
+          }}
+        >
+          {keywords.map((key, ind) => (
+            <Chip
+              key={ind}
+              label={key}
+              sx={{'&':{
+                backgroundColor: tagsCount>4 ? green[200]: tagsCount>2 ? blue[200]: red[200],
+                color: tagsCount>4 ? red[600]: tagsCount>2 ? green[600]: blue[600],
+                display: 'inline-flex',
+                fontWeight: 'bold',
+                fontSize: 14,
+                transition: '150ms ease-out',
+                'span:after': {content: tagsCount>4? '" 😃"': tagsCount>2 ? '" 😐"':'"  😉"' },
+                '&:hover': {
+                  opacity: 0.7,
+                  boxShadow:
+                    '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
+              }}}}
+
+            />
+          ))}
+        </Stack>
+      )}
+    </>
+  );
+};
+
+
+const ExecutorsField = ({ executors:ids, ...data }) => {
   if (!ids) return <h5>Исполнители не назначены</h5>;
 
   const { data: users, loading, loaded, error } = useGetMany('users', ids);
@@ -228,6 +332,8 @@ const ExecutorsField = ({ ids }) => {
   if (error) {
     return <p>ERROR</p>;
   }
+  const result = getTaskResult(data);
+
   return (
     <>
       {users && (
@@ -246,7 +352,20 @@ const ExecutorsField = ({ ids }) => {
           {users.map((user, ind) => (
             <Chip
               key={ind}
-              label={user.name ? user.name : '-XXX-'}
+              label={user.name + '' ? user.name : '-XXX-'}
+              sx={{'&':{
+                backgroundColor: result === 1? blue[200]: green[200],
+                color: result === 1? green[600]: result === 0 ? blue[600]:red[600],
+                display: 'inline-flex',
+                fontWeight: 'bold',
+                fontSize: 14,
+                transition: '50ms ease-out',
+                'span:after': {content: result === 1? '" 😃"': result === 0 ? '" 😐"':'"  😉"' },
+                '&:hover': {
+                  opacity: 0.9,
+                  boxShadow:
+                    '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
+              }}}}
               avatar={
                 <Avatar
                   alt="Пользователь"
@@ -258,14 +377,6 @@ const ExecutorsField = ({ ids }) => {
                   sx={{ width: 24, height: 24 }}
                 />
               }
-              style={{
-                backgroundColor: blue[100],
-                flexBasis: '33%',
-                color: green[500],
-                display: 'inline-flex',
-                fontWeight: 'bold',
-                fontSize: 14,
-              }}
             />
           ))}
         </Stack>
@@ -302,7 +413,7 @@ export const TaskList = (props) => {
           ? blue[200]
           : 'whitesmoke';
     }
-    return () => {};
+    //return () => {};
   }, [taskList, isAppColorized, isLoading]);
 
   const taskRowStyle = (id) => (record, index) => {
@@ -324,6 +435,7 @@ export const TaskList = (props) => {
         <ListBase
           {...props}
           sort={{ field: 'createdAt', order: 'ASC' }}
+          disableSyncWithLocation
           //aside={<TaskAsideCard id={hoverId} />}
           style={
             !isLoading && isAppLoading ? { height: '0px', display: 'none' } : {}
@@ -386,9 +498,6 @@ const ControlButtons = ({ record, authId }) => {
         return (
             <Box sx={{ position: 'relative', display: 'inline-flex' }}>
               <ShowButton basePath="/tasks" label="" record={record} />
-              {record.userId === authId && (
-              <>
-              <EditButton basePath="/tasks" label="" record={record} />
               {loading && !loaded && <CircularProgress color="inherit" />}
               {loaded && total > 0 && (
                 <EditButton
@@ -405,6 +514,9 @@ const ControlButtons = ({ record, authId }) => {
                   label=""
                 />
               )}
+              {record.userId === authId && (
+              <>
+              <EditButton basePath="/tasks" label="" record={record} />
               <DeleteWithConfirmButton
                 record={record}
                 label=""
@@ -433,7 +545,6 @@ const MyDatagrid = ({
   ...props
 }) => {
   //const [isTransition, setTransition]=React.useState(false);
-  const { loaded: isLoaded, data: tasks } = useListContext();
   //useSelector((state) => state.admin.resources.tasks.list);
 
   // React.useEffect(() => {
@@ -442,6 +553,7 @@ const MyDatagrid = ({
   //     console.info('Внимание список задач изменился');
   //   }
   // }, [tasks]);
+
 
   const handleUpdateId = (id) => {
     setHoverId(id);
@@ -520,15 +632,16 @@ const MyDatagrid = ({
           )}
         />
 
-        <TextField label="" source="id" style={{ display: 'none' }} />
+        <TextField label="" sortable={false} source="id" style={{ display: 'none' }} />
         <TextField label="Название" source="title" />
-        <TextField label="Описание" source="description" />
+        <TextField label="Описание" sortable={false} source="description" />
         <DateField label="Дата создания" source="createdAt" lacales="ru" />
         <DateField label="Дата исполнения" source="executeAt" locales="ru" />
         <FunctionField
           label="Исполнители"
+          sortable={false}
           source="executors"
-          render={(record) => <ExecutorsField ids={record.executors} />}
+          render={(record) => <ExecutorsField {...record} />}
         />
 
         <FunctionField
@@ -537,29 +650,41 @@ const MyDatagrid = ({
           render={(record) =>
             ProgressBarField(
               record.progressType ? record.progressType : 1,
-              record.progress
+              !isNaN(record.progress)?record.progress: 0
             )
           }
         />
+
+        <FunctionField
+          label="Тэги"
+          sortable={false}
+          source="keywords"
+          render={(record) => <KeywordsField keywords={record.keywords} />}
+        />
+
         <FunctionField
           label="Статус"
           source="status"
           render={(record) => {
             if (record.status) {
               if (new Date(record.finishedAt) <= new Date(record.executeAt)) {
-                return '👍 Завершено';
+                return (<><strong style={{fontSize: 16, color:"green"}}>👍</strong> Завершено</>);
               } else {
-                return '✌️ Завершено вне сроков';
+                return (<><strong style={{fontSize: 16, color:"green"}}>✌️</strong> Завершено вне сроков</>);
               }
             } else {
               if (new Date(record.executeAt) < new Date()) {
                 if (record.progress < 100) {
-                  return '😬 Просрочено';
+                  return  (<><strong style={{fontSize: 16, color:"red"}}>✌️</strong> Просрочено</>);
                 } else {
-                  return '😪 Завершено но открыто';
+                  return (<><strong style={{fontSize: 16, color:"red"}}>✌️</strong> Завершено но открыто</>);
                 }
               } else {
-                return '💪 На исполнении';
+                return (
+                  <>
+                    <strong style={{fontSize: 16, color:"blue"}}>✌️</strong> На исполнении
+                  </>
+                );
               }
             }
           }}
@@ -569,9 +694,9 @@ const MyDatagrid = ({
           source="commantable"
           render={(record) => {
             if (record.commentable) {
-              return '✔️';
+              return <strong style={{fontSize: 16, color:"green"}}>✔️</strong>;
             } else {
-              return '✖️';
+              return <strong style={{fontSize: 16, color:"red"}}>✖️</strong>;
             }
           }}
         />

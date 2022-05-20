@@ -28,6 +28,7 @@ export default {
       _lte: '<=',
       _neq: '!=',
       _arr: 'array-contains',
+      _nar: 'not-in'
     };
     // filters is like [
     //    { field: "commentable", operator: "=", value: true},
@@ -35,7 +36,7 @@ export default {
     // ]
     const filters = [];
     Object.keys(filter).forEach((key) => {
-      if (typeof filter[key] === 'object') {
+      if (!Array.isArray(filter[key]) && typeof filter[key] === 'object') {
         const innerFilter = filter[key];
         Object.keys(innerFilter).forEach((innerKey) => {
           const operator = operators[innerKey.slice(-4)];
@@ -49,10 +50,7 @@ export default {
               : {
                   field: innerKey,
                   operator: '==',
-                  value:
-                    innerKey === 'q'
-                      ? escape(innerFilter[innerKey])
-                      : innerFilter[innerKey],
+                  value: innerFilter[innerKey],
                 }
           );
         });
@@ -64,21 +62,20 @@ export default {
             : {
                 field: key,
                 operator: '==',
-                value: key === 'q' ? escape(filter[key]) : filter[key],
+                value: filter[key],
               }
         );
       }
     });
-    console.log(filters, 'get filters');
-
+    console.log(filters, 'filter for query LIST')
     return httpClient
       .get(url, {
         headers: {
           ProviderRequest: 'getList',
-          ProviderParams: JSON.stringify({
+          ProviderParams: escape(JSON.stringify({
             ...params,
             filter: filters.length > 0 ? filters : filter,
-          }),
+          })),
         },
       })
       .then(({ status, statusText, data }) => {

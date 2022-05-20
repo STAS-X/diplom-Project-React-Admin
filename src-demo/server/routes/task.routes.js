@@ -23,7 +23,7 @@ router.get('/:id?', [
 		try {
 			const dataProvider = app.provider;
 			const query = req.headers['providerrequest'];
-			const params = JSON.parse(req.headers['providerparams']);
+			const params = JSON.parse(unescape(req.headers['providerparams']));
 
 			// Если идет запрос на все документы в коллекции подменяем количество запрашиваемых данных
 			if (params.pagination?.perPage < 0) {
@@ -31,7 +31,7 @@ router.get('/:id?', [
 				const usersSnap = await firestore.collection(resource).get();
 				params.pagination.perPage = usersSnap.size;
 			}
-
+			console.log(params.filter, 'filter tasks');
 			if (query === 'getList' && Array.isArray(params.filter)) {
 				const firestore = app.firestore;
 				const colRef = collection(firestore, resource);
@@ -39,8 +39,9 @@ router.get('/:id?', [
 				const items = [];
 				let queryAddition = '';
 				let search = null;
+				console.log(params, 'params by query')
 				params.filter.forEach((f) => {
-					if (f.field !== 'q') {
+					if (f.field !== 'q' && f.field !== 'title') {
 						if (f.field === 'progress') {
 							if (f.operator === '==') {
 								queryAddition = 'progress_eq';
@@ -51,7 +52,7 @@ router.get('/:id?', [
 							wheres.push(where(f.field, f.operator, f.value));
 						}
 					} else {
-						search = unescape(f.value);
+						search = f.value;
 					}
 				});
 
@@ -82,13 +83,17 @@ router.get('/:id?', [
 							const data = doc.data();
 							let isSearch = false;
 							Object.keys(data).forEach((key) => {
-								if (data[key].toString().search(search) > -1) isSearch = true;
+								try {
+									if (data[key].toString().search(search) > -1) isSearch = true;
+								} catch(error) {
+									isSearch = false;
+								}
 							});
 							if (isSearch) items.push(data);
 						}
 					});
 				}
-
+				console.log(items, 'get list tasks by filter');
 				res.status(200).send(items);
 			} else {
 				const { data } = await dataProvider[query](resource, params);

@@ -67,7 +67,7 @@ const CommentPagination = () => (
 );
 
 const commentFilters = (userId) => [
-  <TextInput label="Search" source="q" alwaysOn />,
+  <TextInput label="Глобальный поиск" source="q" alwaysOn />,
   <TextInput
     label="Название"
     resettable
@@ -162,7 +162,7 @@ const TaskToolbar = ({ commentsIds, setCommentsIds, userId }) => {
     <Stack direction="row" justifyContent="space-between">
       <FilterForm filters={filters} />
       <div>
-        <SortButton fields={['description', 'createdAt']} />
+        <SortButton fields={['title', 'createdAt']} />
         <FilterButton filters={filters} />
         <CreateButton />
         <DeleteTasksButton commentsIds={commentsIds} setCommentsIds={setCommentsIds} />
@@ -457,25 +457,26 @@ const MyDatagrid = ({
             />
           )}
         />
-              <TextField source="id" style={{display:'none'}}/>
+              <TextField label="" sortable={false} source="id" style={{display:'none'}}/>
               <TextField source="title" label="Название" />
-              <TextField source="createdby" />
-                            <DateField label="Дата создания" source="createdAt" lacales="ru" />
-                                    <FunctionField
-          label="Автор комментария"
-          source="userId"
-          render={(record) => <CommentAuthorField userId={record.userId} />}
-        />
-        <FunctionField
-          label="Задача"
-          source="taskId"
-          render={(record) => <CommentTaskField taskId={record.taskId} />}
-        />
-              <RichTextField source="body" label="Текст комментария"/>
+              <DateField label="Дата создания" source="createdAt" lacales="ru" />
+              <FunctionField
+                label="Автор комментария"
+                sortable={false}
+                source="userId"
+                render={(record) => <CommentAuthorField userId={record.userId} />}
+              />
+              <FunctionField
+                label="Задача"
+                sortable={false}
+                source="taskId"
+                render={(record) => <CommentTaskField taskId={record.taskId} />}
+              />
+              <RichTextField label="Текст комментария" sortable={false} source="body"/>
 
-        <ControlButtons authId={authId} />
-      </Datagrid>
-      {hoverId && <CommentAsideCard id={hoverId} />}
-    </Stack>
+              <ControlButtons authId={authId} />
+          </Datagrid>
+          {hoverId && <CommentAsideCard id={hoverId} />}
+        </Stack>
   );
 };

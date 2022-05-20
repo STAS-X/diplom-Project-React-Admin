@@ -25,6 +25,7 @@ import {
   Title,
   ReferenceArrayInput,
   FormDataConsumer,
+  useGetList,
   required,
   minLength,
   maxLength,
@@ -33,9 +34,12 @@ import {
   number,
 } from 'react-admin';
 //import { useFormState, useFormContext, useController, useWatch } from 'react-hook-form';
-import { Box, Typography, Button } from '@mui/material';
+import { Box, Typography, Chip, Stack, Avatar, Button } from '@mui/material';
 import AddCommentIcon from '@material-ui/icons/AddCommentRounded';
+import DeleteIcon from '@material-ui/icons/DeleteRounded';
 import TaskProgressBar from '../../common/progressbar/task.progress';
+import TagsField from '../../common/fields/task.tags';
+import { green, blue, red } from '@mui/material/colors';
 import { getAuthData } from '../../../store/authcontext';
 import {
   getRandomInt,
@@ -61,6 +65,50 @@ const ProgressBarField = (id, progress) => (
     </Typography>
   </Box>
 );
+
+const getTaskResult = (data) => {
+      if (data.status) {
+        if (new Date(data.finishedAt) <= new Date(data.executeAt)) {
+          return 1;
+        } else {
+          return 0;
+        }
+      } else {
+        if (new Date(data.executeAt) < new Date()) {
+          if (data.progress < 100) {
+            return -1;
+          } else {
+            return 1;
+          }
+        } else {
+          return 0;
+        }
+      }
+}
+
+const ExecutorChipSelector = ({ id, name, data }) => {
+  //const record = useRecordContext();
+
+  return (
+    <Chip
+      label={name ? name : '-XXX-'}
+      avatar={
+        <Avatar
+          alt="Пользователь"
+          src={`https://i.pravatar.cc/150?u=${id}`}
+          sx={{ width: 24, height: 24 }}
+        />
+      }
+      sx={{
+        id: { id },
+        fontWeight: 'bold',
+        fontSize: 14,
+        'span:after': {content: result===1? '" ✔️"': '" 😐"', color: result>=0?'green':'inherit' },
+
+      }}
+    />
+  );
+};
 
 const CustomToolbar = (props) => {
   const notify = useNotify();
@@ -125,6 +173,7 @@ const validateExecDate = (value, allValues) => {
 export const TaskCreate = (props) => {
   //const notify = useNotify();
   //const refresh = useRefresh();
+  const {id: taskId} = props;
 
   const { user: authUser } = useSelector(getAuthData());
 
@@ -152,6 +201,7 @@ export const TaskCreate = (props) => {
           title="Создание новой задачи"
           onError={handleError}
           transform={transform}
+          hasShow={false}
           redirect={false}
         >
           <SimpleForm
@@ -159,7 +209,7 @@ export const TaskCreate = (props) => {
             warnWhenUnsavedChanges
             toolbar={<CustomToolbar />}
           >
-            <Title>Тестовый титл формы</Title>
+            <h2 className="titleDialog">Создание задачи #{taskId} </h2>
             <TextInput
               label="Наименование"
               source="title"
@@ -174,50 +224,58 @@ export const TaskCreate = (props) => {
             />
             <FormDataConsumer>
               {({ formData, ...rest }) => {
-                console.log(formData, 'data of formconsumer');
                 return (
-                  <SelectInput
-                    resettable={true}
-                    label="Прогресс бар"
-                    source="progressType"
-                    validate={required('Необходимо выбрать прогрессбар')}
-                    //validate={required('Необходимо выбрать прогрессбар')}
-                    optionText={(choise) =>
-                      ProgressBarField(
-                        choise.id,
-                        formData.progress
-                          ? formData.progress
-                          : getRandomInt(30, 80)
-                      )
-                    }
-                    choices={[
-                      { id: 1, name: 'Круговой' },
-                      { id: 2, name: 'Линейчатый' },
-                      { id: 3, name: 'Анимированный' },
-                    ]}
-                  />
+                  <Stack direction="row" display="inline-grid">
+                    <SelectInput
+                      resettable={true}
+                      label="Прогресс бар"
+                      source="progressType"
+                      validate={required('Необходимо выбрать прогрессбар')}
+                      //validate={required('Необходимо выбрать прогрессбар')}
+                      optionText={(choise) =>
+                        ProgressBarField(
+                          choise.id,
+                          !isNaN(formData.progress)
+                            ? formData.progress
+                            : getRandomInt(30, 80)
+                        )
+                      }
+                      choices={[
+                        { id: 1, name: 'Круговой' },
+                        { id: 2, name: 'Линейчатый' },
+                        { id: 3, name: 'Анимированный' },
+                      ]}
+                    />
+
+                    <ReferenceArrayInput
+                      label="Исполнители"
+                      allowEmpty={false}
+                      source="executors"
+                      reference="users"
+                      filter={{ id_neq: authUser.uid }}
+                      validate={required('Необходимо выбрать исполнителей')}
+                      sort={{ field: 'name', order: 'ASC' }}
+                      formData={formData.status}
+                    >
+                      <SelectArrayInput
+                        name="executors"
+                        optionText={(choise) => (
+                          <ExecutorChipSelector {...choise} data={formData} />
+                        )}
+                        helperText="Выберите исполнителей"
+                      />
+                    </ReferenceArrayInput>
+
+                    <TagsField {...props.record} />
+                  </Stack>
                 );
               }}
             </FormDataConsumer>
-            <ReferenceArrayInput
-              label="Исполнители"
-              allowEmpty={false}
-              source="executors"
-              reference="users"
-              validate={required('Необходимо выбрать исполнителей')}
-              helperText="Выберите тип графика"
-              filter={{ id_neq: authUser.uid }}
-              sort={{ field: 'name', order: 'ASC' }}
-            >
-              <SelectArrayInput
-                optionText="name"
-                helperText="Выберите исполнтелей"
-              />
-            </ReferenceArrayInput>
 
             <NumberInput
               label="Готовность (%)"
               source="progress"
+              step={10}
               parse={(value) => normalise(value, 0, 100)}
               validate={validateProgress}
               defaultValue={0}

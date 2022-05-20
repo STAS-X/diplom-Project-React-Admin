@@ -11,7 +11,7 @@ import {
   ShowButton,
   EditButton,
   DeleteButton,
-  RichTextField,
+  EmailField,
   FilterButton,
   FilterForm,
   CreateButton,
@@ -45,36 +45,39 @@ function dateWithMonths(months) {
   return date.toISOString().slice(0, 10);
 }
 
-const userFilters = [
-  <TextInput label="Search" source="q" alwaysOn />,
+const userFilters = (userId) =>  ([
+  <TextInput label="Глобальный поиск" source="q" alwaysOn />,
   <TextInput
-    label="Email"
+    label="Почта"
     resettable
     source="email"
-    defaultValue="xxx@xxx.xxx"
+    defaultValue="test@test.com"
   />,
   <QuickFilter
     source="loggedOut_gte"
-    label="Last login"
+    label="Вход не далее месяца"
     defaultValue={dateWithMonths(-1)}
   />,
   <QuickFilter
     source="id"
-    label="Current user"
-    defaultValue={'DTGCdToJ3SloFowi6ffX'}
+    label="Текущий пользователь"
+    defaultValue={userId}
   />,
-];
+]);
 
-const UserToolbar = () => (
+const UserToolbar = ({userId}) => {
+  const filters = userFilters(userId);
+  return (
   <Stack direction="row" justifyContent="space-between">
-    <FilterForm filters={userFilters} />
+    <FilterForm filters={filters} />
     <div>
       <SortButton fields={['name', 'email', 'loggedOut']} />
-      <FilterButton filters={userFilters} />
-      <CreateButton />
+      <FilterButton filters={filters} />
+      {/*<CreateButton />*/}
     </div>
   </Stack>
-);
+  )
+};
 
 export const UserList = (props) => {
   const userRef = React.useRef();
@@ -115,12 +118,12 @@ export const UserList = (props) => {
       {authUser && (
         <ListBase
           {...props}
-          sort={{ field: 'id', order: 'ASC' }}
+          sort={{ field: 'name', order: 'ASC' }}
           style={
             !isLoading && isAppLoading ? { height: '0px', display: 'none' } : {}
           }
         >
-          {!(!isLoading && isAppLoading) && <UserToolbar />}
+          {!(!isLoading && isAppLoading) && <UserToolbar userId={authUser.uid} />}
           {!(!isLoading && isAppLoading) && (
             <Datagrid
               ref={userRef}
@@ -130,12 +133,12 @@ export const UserList = (props) => {
               rowStyle={isAppColorized ? postRowStyle(authUser.id) : () => {}}
               expand={<UserCardExpand />}
             >
-              <TextField source="id" />
-              <TextField source="name" />
-              <TextField source="age" />
-              <TextField source="email" />
-              <TextField source="providerId" />
-              <TextField source="lastLogOut" />
+              <TextField label="" sortable={false} source="id" style={{display:'none'}}/>
+              <TextField label="Имя" source="name" />
+              <TextField label="Возраст" sortable={false} source="age" defaultValue={'не указан'}/>
+              <EmailField label="Почта" sortable={false} source="email" />
+              <TextField label="Провайдер входа" sortable={false} source="providerId" />
+              <DateField label="Дата последнего входа" source="lastLogOut" lacales="ru"/>
               <ShowButton label="" />
               <FunctionField
                 label=""

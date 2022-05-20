@@ -15,6 +15,16 @@ div.aside {
   transition: width 300ms ease-out, opacity 300ms ease-out;
 }
 
+.avatar_image img {
+  max-height: fit-content !important;
+  object-fit: unset;
+}
+.titleDialog {
+  margin-bottom: 20px;
+  width: 100% !important;
+  text-decoration: underline; 
+}
+
 .rotateMenu {
   animation: spin 300ms;
   transform: rotate(180deg);

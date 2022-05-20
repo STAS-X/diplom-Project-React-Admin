@@ -42,7 +42,6 @@ const PostShowLayout = () => {
 
   return (
     <>
-      <h1>{defaultTitle}</h1>
       <SimpleShowLayout spacing={2} divider={<Divider flexItem />}>
         <TextField source="id" />
         <ChipField

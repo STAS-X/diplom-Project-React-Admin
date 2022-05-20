@@ -23,6 +23,7 @@ import {
   FormDataConsumer,
   Toolbar,
   useEditContext,
+  useGetList ,
   Title,
   useRefresh,
   required,
@@ -32,10 +33,14 @@ import {
   maxValue,
   number,
 } from 'react-admin';
+import { makeStyles } from '@material-ui/core/styles';
 //import { useFormState } from 'react-hook-form';
-import { Box, Typography } from '@mui/material';
+import { green, blue, red } from '@mui/material/colors';
+import { Stack, Box, Typography, Avatar, Chip } from '@mui/material';
 import AddCommentIcon from '@material-ui/icons/AddCommentRounded';
+import DeleteIcon from '@material-ui/icons/DeleteRounded';
 import TaskProgressBar from '../../common/progressbar/task.progress';
+import TagsField from '../../common/fields/task.tags';
 import { getAuthData } from '../../../store/authcontext';
 import {
   getRandomInt,
@@ -62,7 +67,50 @@ const ProgressBarField = (id, progress) => (
   </Box>
 );
 
-const CustomToolbar = (props) => {
+const getTaskResult = (data) => {
+      if (data.status) {
+        if (new Date(data.finishedAt) <= new Date(data.executeAt)) {
+          return 1;
+        } else {
+          return 0;
+        }
+      } else {
+        if (new Date(data.executeAt) < new Date()) {
+          if (data.progress < 100) {
+            return -1;
+          } else {
+            return 0;
+          }
+        } else {
+          return 0;
+        }
+      }
+}
+
+const ExecutorChipSelector = ({ id, name, data }) => {
+  const result = getTaskResult(data)
+
+  return (
+    <Chip
+      label={name ? name : '-XXX-'}
+      avatar={
+        <Avatar
+          alt="Пользователь"
+          src={`https://i.pravatar.cc/150?u=${id}`}
+          sx={{ width: 24, height: 24 }}
+        />
+      }
+      sx={{
+        fontWeight: 'bold',
+        fontSize: 14,
+        'span:after': {content: result===1? '" ✔️"': '" 😐"', color: result>=0?'green':'inherit' },
+
+      }}
+    />
+  );
+};
+
+const CustomToolbar = ({authId, ...props}) => {
   //const notify = useNotify();
   //const redirect = useRedirect();
   //const refresh = useRefresh();
@@ -70,19 +118,22 @@ const CustomToolbar = (props) => {
   const {
     invalid: isInvalid,
     pristine,
+    record,
     handleSubmit,
     handleSubmitWithRedirect,
   } = props;
-  console.log(
-    handleSubmit,
-    handleSubmitWithRedirect,
-    props,
-    'submit functions'
+
+  const { data: comments, total, loaded } = useGetList(
+    'comments',
+    { page: 1, perPage: 1 },
+    { field: 'id', order: 'ASC' },
+    { userId: authId, taskId: record.id}
   );
-  const { record, saving, setOnSuccess } = useEditContext();
+
+  //const { record, saving, setOnSuccess } = useEditContext();
 
   const handleSuccess = () => {
-    //const { saving: statusSave } = useEditContext();
+
     console.info(`Данные задачи ${record.id} сохранены успешно`);
     // if (saving)
     //   if (localStorage.getItem('redirectTo')) {
@@ -115,16 +166,17 @@ const CustomToolbar = (props) => {
       <FormDataConsumer>
         {({ formData, ...rest }) => (
           <SaveButton
+            disabled={!loaded}
             label="Перейти к комментарию"
             icon={<AddCommentIcon />}
             onClick={() => {
               //localStorage.setItem('redirectTo', 'comments');
-              console.log(record, 'record context');
+              //console.log(record, 'record context');
               localStorage.setItem('currentTaskId', record.id);
               handleSubmit();
               //setOnSuccess(handleSuccess);
             }}
-            redirect={'/comments/create'}
+            redirect={loaded && total>1?`comments/${comment[Object.key(comments)[0]].id}`:'/comments/create'}
             handleSubmitWithRedirect={handleSubmitWithRedirect}
             disabled={!formData.commentable || isInvalid}
           />
@@ -159,9 +211,14 @@ const validateExecDate = (value, allValues) => {
   return undefined;
 };
 
+
 export const TaskEdit = (props) => {
   //const notify = useNotify();
   //const rec= useRecordContext();
+  const {id: taskId} = props;
+
+  //const fstate = useFormState();
+  //console.log(fstate, 'get state of form')
   const { user: authUser } = useSelector(getAuthData());
 
   const transform = (data) => {
@@ -171,11 +228,6 @@ export const TaskEdit = (props) => {
       userId: authUser.uid,
       finishedAt: data.status ? dateFormatter(Date.now()) : '',
     };
-  };
-
-  const handleError = ({ error }) => {
-    notify(`Возникла ошибка: ${error?.message}`, { type: 'error' }); // default message is 'ra.notification.created'
-    refresh();
   };
 
   const handleFailure = ({ error }) => {
@@ -188,25 +240,19 @@ export const TaskEdit = (props) => {
       {authUser && (
         <Edit
           {...props}
-          //mutationMode="undoable"
-          //warnWhenUnsavedChanges
+          mutationMode="undoable"
           transform={transform}
-          // queryOptions={{
-          //   refetchOnReconnect: true,
-          //   retry: 3,
-          //   onSuccess: (data) => {
-          //     console.log(data, 'new data refetch on edit component');
-          //   },
-          // }}
-          //redirect={false}
-          //onSuccess={handleSuccess}
           onFailure={handleFailure}
+          hasShow={false}
+          redirect={false}
         >
           <SimpleForm
             mode="onBlur"
             warnWhenUnsavedChanges
-            toolbar={<CustomToolbar />}
+            toolbar={<CustomToolbar authId={authUser.uid} />}
           >
+            <h2 className="titleDialog">Редактирование задачи #{taskId} </h2>
+
             <TextInput disabled label="Идентификатор" source="id" />
 
             <TextInput
@@ -214,7 +260,8 @@ export const TaskEdit = (props) => {
               source="title"
               validate={validateTitle}
               defaultValue={'Заголовок'}
-            />
+            ></TextInput>
+
             <TextInput
               label="Описание"
               source="description"
@@ -229,47 +276,62 @@ export const TaskEdit = (props) => {
               //defaultValue={dateFormatter(new Date())}
             />
             <FormDataConsumer>
-              {({ formData, ...rest }) => (
-                <SelectInput
-                  resettable
-                  label="Прогресс бар"
-                  source="progressType"
-                  optionText={(choise) =>
-                    ProgressBarField(
-                      choise.id,
-                      formData.progress
-                        ? formData.progress
-                        : getRandomInt(30, 80)
-                    )
-                  }
-                  validate={required('Необходимо выбрать прогрессбар')}
-                  helperText="Выберите тип графика"
-                  choices={[
-                    { id: 1, name: 'Круговой' },
-                    { id: 2, name: 'Линейчатый' },
-                    { id: 3, name: 'Анимированный' },
-                  ]}
-                />
-              )}
+              {({ formData, ...rest }) => {
+                return (
+                  <Stack direction="row" display="inline-grid">
+                    <SelectInput
+                      resettable={true}
+                      label="Прогресс бар"
+                      source="progressType"
+                      validate={required('Необходимо выбрать прогрессбар')}
+                      //validate={required('Необходимо выбрать прогрессбар')}
+                      optionText={(choise) =>
+                        ProgressBarField(
+                          choise.id,
+                          !isNaN(formData.progress)
+                            ? formData.progress
+                            : getRandomInt(30, 80)
+                        )
+                      }
+                      choices={[
+                        { id: 1, name: 'Круговой' },
+                        { id: 2, name: 'Линейчатый' },
+                        { id: 3, name: 'Анимированный' },
+                      ]}
+                    />
+
+                    <ReferenceArrayInput
+                      label="Исполнители"
+                      allowEmpty={false}
+                      source="executors"
+                      reference="users"
+                      filter={{ id_neq: authUser.uid }}
+                      validate={required('Необходимо выбрать исполнителей')}
+                      sort={{ field: 'name', order: 'ASC' }}
+                    >
+                      <SelectArrayInput
+                        name="executors"
+                        style={{ display: 'block-flex' }}
+                        optionText={(choise) => (
+                          <ExecutorChipSelector
+                            {...choise}
+                            data={{ ...formData }}
+                          />
+                        )}
+                        helperText="Выберите исполнителей"
+                      />
+                    </ReferenceArrayInput>
+
+                    <TagsField {...props.record} />
+                  </Stack>
+                );
+              }}
             </FormDataConsumer>
-            <ReferenceArrayInput
-              label="Исполнители"
-              allowEmpty={false}
-              source="executors"
-              reference="users"
-              filter={{ id_neq: authUser.uid }}
-              validate={required('Необходимо выбрать исполнителей')}
-              sort={{ field: 'name', order: 'ASC' }}
-            >
-              <SelectArrayInput
-                optionText="name"
-                helperText="Выберите исполнителей"
-              />
-            </ReferenceArrayInput>
 
             <NumberInput
               label="Готовность (%)"
               source="progress"
+              step={10}
               parse={(value) => normalise(value, 0, 100)}
               validate={validateProgress}
               defaultValue={0}
@@ -287,6 +349,7 @@ export const TaskEdit = (props) => {
               source="status"
               defaultValue={false}
             />
+
             <BooleanInput
               label="Комментарии"
               source="commentable"
