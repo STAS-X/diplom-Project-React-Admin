@@ -23,14 +23,15 @@ router.get('/:id?', [
     try {
       const dataProvider = app.provider;
       const query = req.headers['providerrequest'];
-      const params = JSON.parse(unescape(req.headers['providerparams']));
-        console.log(query,params, 'get params client');
-      // Если идет запрос на все документы в коллекции подменяем количество запрашиваемых данных
-      if (params.pagination?.perPage < 0) {
-        const firestore = app.firestore;
-        const usersSnap = await firestore.collection(resource).get();
-        params.pagination.perPage = usersSnap.size;
-      }
+      const params = JSON.parse(req.headers['providerparams']);
+
+			const firestore = app.firestore;
+			const usersSnap = await firestore.collection(resource).get();
+			const total = usersSnap ? usersSnap.size : 0;
+
+			// Если идет запрос на все документы в коллекции подменяем количество запрашиваемых данных
+			if (params.pagination?.perPage < 0)
+				params.pagination.perPage = usersSnap.size;
 
       if (query==='getList' && Array.isArray(params.filter)) {
         const firestore = app.firestore;
@@ -38,7 +39,7 @@ router.get('/:id?', [
         let wheres = [];
         let search = null;
         params.filter.forEach((f) => {
-          if (f.field !== 'q' && f.field !== 'name') {
+          if (f.field !== 'q') {
             wheres.push(where(f.field, f.operator, f.value));
           } else {
             search = unescape(f.value);
@@ -62,22 +63,24 @@ router.get('/:id?', [
               const data = doc.data();
               let isSearch = false;
               Object.keys(data).forEach((key) => {
-                try {
-									if (data[key].toString().search(search) > -1) isSearch = true;
-								} catch(error) {
-									isSearch = false;
-								}
+                if (data[key].toString().search(search) > -1) isSearch = true;
               });
               if (isSearch) items.push(data);
             }
           });
         }
 
-        res.status(200).send(items);
-      } else {
-        const { data } = await dataProvider[query](resource, params);
-        console.log(data, 'get from server')
-        res.status(200).send(data);
+				res
+					.status(200)
+					.send({
+						data: items,
+						total: query === 'getList' ? total : items?.length,
+					});
+			} else {
+				const { data } = await dataProvider[query](resource, params);
+				res
+					.status(200)
+					.send({ data, total: query === 'getList' ? total : data?.length });
       }
     } catch (e) {
       res.status(500).send({

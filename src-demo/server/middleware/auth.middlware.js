@@ -42,12 +42,12 @@ module.exports = async (req, res, next) => {
       const user = userSnap.data();
       //req.userId = user.uid;
       if (req.method === 'PUT' || req.method === 'DELETE') {
-        const { data }  = req.body.data?JSON.parse(req.body.data):{};
+        const { data }  = JSON.parse(req.body.data);
         if (data) {
           console.log(data, user, 'test for permission')
           if (data.userId !== user.uid) {
-            return res.status(400).send({
-              code: 400,
+            return res.status(403).send({
+              code: 403,
               name: 'PermissionError',
               description:
                 'Обновление или удаление данных доступно только для владельца',
@@ -61,8 +61,8 @@ module.exports = async (req, res, next) => {
     next();
   } catch (error) {
     console.log(error, 'error trying');
-    return res.status(401).send({
-      code: 401,
+    return res.status(400).send({
+      code: 400,
       message: `На сервере поризошла ошибка ${error.message}. Попробуйте позже.`,
     });
   }

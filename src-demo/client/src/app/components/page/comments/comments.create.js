@@ -29,7 +29,8 @@ import {
   minValue,
   maxValue,
   number,
-  useGetList
+  useGetList,
+  FunctionField,
 } from 'react-admin';
 import RichTextInput from 'ra-input-rich-text';
 import { makeStyles } from '@material-ui/core/styles';
@@ -99,7 +100,6 @@ const TaskForCommentSelector = ({ id, title, ...data }) => {
 };
 
 const CustomToolbar = ({ authId, ...props }) => {
-  console.log(props, 'Комментарий через контекст диалога');
 
   const redirect = useRedirect();
 
@@ -165,11 +165,15 @@ const validateDescription = [
 export const CommentCreate = (props) => {
   const { user: authUser } = useSelector(getAuthData());
 
-  const { data: comments, total, loaded } = useGetList(
+  const {
+    data: comments,
+    total,
+    loaded,
+  } = useGetList(
     'comments',
     { page: 1, perPage: -1 },
     { field: 'id', order: 'ASC' },
-    { userId: authUser.uid }
+    { userId: authUser.uid, commentable: true }
   );
 
   const transform = (data) => {
@@ -189,66 +193,73 @@ export const CommentCreate = (props) => {
   return (
     <>
       {authUser && (
-      <Create
-        {...props}
-        transform={transform}
-        onFailure={handleFailure}
-        hasShow={false}
-        redirect={false}
-      >
-        <SimpleForm
-          mode="onBlur"
-          warnWhenUnsavedChanges
-          toolbar={<CustomToolbar authId={authUser.uid} />}
+        <Create
+          {...props}
+          transform={transform}
+          onFailure={handleFailure}
+          hasShow={false}
+          redirect={false}
         >
-          <h2 className="titleDialog">
-            Создание комментария 
-          </h2>
+          <SimpleForm
+            mode="onBlur"
+            warnWhenUnsavedChanges
+            toolbar={<CustomToolbar authId={authUser.uid} />}
+          >
+            <h2 className="titleDialog">Создание комментария</h2>
 
-           <TextInput
-            label="Описание"
-            source="description"
-            validate={validateDescription}
-            defaultValue={'Текст описания к задаче'}
-          />
+            <TextInput
+              label="Описание"
+              source="description"
+              validate={validateDescription}
+              defaultValue={'Текст описания к задаче'}
+            />
 
-          <FormDataConsumer>
-            {({ formData, ...rest }) => {
-              console.log(formData, 'data form edit');
-              return (
-                <>
-                {loaded && (<ReferenceInput
-                  label="Комментируемая задача"
-                  allowEmpty={false}
-                  source="taskId"
-                  reference="tasks"
-                  filter={total>0?{id_nar: Object.keys(comments)}:{}}
-                  validate={required('Необходимо выбрать задачу  для комментария')}
-                  sort={{ field: 'title', order: 'ASC' }}
-                >
-                  <SelectInput
-                    name="tasks"
-                    optionText={(choise) => (
-                      <TaskForCommentSelector {...choise} />
+            <FormDataConsumer>
+              {({ formData, ...rest }) => {
+                console.log(formData, 'data form edit');
+                return (
+                  <>
+                    {loaded && (
+                      <ReferenceInput
+                        label="Комментируемая задача"
+                        allowEmpty={false}
+                        source="taskId"
+                        reference="tasks"
+                        filter={
+                          total > 0 ? { id_nar: Object.keys(comments) } : {}
+                        }
+                        validate={required(
+                          total > 0?'Задача не должна иметь комментариев пользователя':'Необходимо выбрать задачу  для комментария'
+                        )}
+                        sort={{ field: 'title', order: 'ASC' }}
+                      >
+                        <SelectInput
+                          name="tasks"
+                          optionText={(choise) => (
+                            <TaskForCommentSelector {...choise}/>
+                          )}
+                          helperText={
+                            'Выберите задачу для комментирования'
+                          }
+                        />
+                      </ReferenceInput>
                     )}
-                    helperText="Выберите задачу для комментирования"
-                  />
-                </ReferenceInput>)}
-                {!loaded && (<CircularProgress color="inherit"/>)}
-                </>
-              );
-            }}
-          </FormDataConsumer>
+                    {!loaded && <CircularProgress color="inherit" />}
+                  </>
+                );
+              }}
+            </FormDataConsumer>
 
-          <RichTextInput
-            label="Комментарий"
-            source="body"
-            validate={validateBody}
-            defaultValue={'Комментарий к задаче'}
-            helperText="Введите текст комментария"
-          />
-        </SimpleForm>
-      </Create>)}
+            <RichTextInput
+              label="Комментарий"
+              source="body"
+              validate={validateBody}
+              defaultValue={'Комментарий к задаче'}
+              helperText="Введите текст комментария"
+            />
+          </SimpleForm>
+        </Create>
+      )}
     </>
   );
 };

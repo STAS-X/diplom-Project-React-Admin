@@ -23,15 +23,16 @@ router.get('/:id?', [
 		try {
 			const dataProvider = app.provider;
 			const query = req.headers['providerrequest'];
-			const params = JSON.parse(unescape(req.headers['providerparams']));
+			const params = JSON.parse(req.headers['providerparams']);
+
+			const firestore = app.firestore;
+			const tasksSnap = await firestore.collection(resource).get();
+			const total = tasksSnap ? tasksSnap.size : 0;
 
 			// Если идет запрос на все документы в коллекции подменяем количество запрашиваемых данных
-			if (params.pagination?.perPage < 0) {
-				const firestore = app.firestore;
-				const usersSnap = await firestore.collection(resource).get();
-				params.pagination.perPage = usersSnap.size;
-			}
-			console.log(params.filter, 'filter tasks');
+			if (params.pagination?.perPage < 0)
+				params.pagination.perPage = tasksSnap.size;
+
 			if (query === 'getList' && Array.isArray(params.filter)) {
 				const firestore = app.firestore;
 				const colRef = collection(firestore, resource);
@@ -39,9 +40,8 @@ router.get('/:id?', [
 				const items = [];
 				let queryAddition = '';
 				let search = null;
-				console.log(params, 'params by query')
 				params.filter.forEach((f) => {
-					if (f.field !== 'q' && f.field !== 'title') {
+					if (f.field !== 'q') {
 						if (f.field === 'progress') {
 							if (f.operator === '==') {
 								queryAddition = 'progress_eq';
@@ -52,7 +52,7 @@ router.get('/:id?', [
 							wheres.push(where(f.field, f.operator, f.value));
 						}
 					} else {
-						search = f.value;
+						search = unescape(f.value);
 					}
 				});
 
@@ -83,21 +83,23 @@ router.get('/:id?', [
 							const data = doc.data();
 							let isSearch = false;
 							Object.keys(data).forEach((key) => {
-								try {
-									if (data[key].toString().search(search) > -1) isSearch = true;
-								} catch(error) {
-									isSearch = false;
-								}
+								if (data[key].toString().search(search) > -1) isSearch = true;
 							});
 							if (isSearch) items.push(data);
 						}
 					});
 				}
-				console.log(items, 'get list tasks by filter');
-				res.status(200).send(items);
+				res
+					.status(200)
+					.send({
+						data: items,
+						total: query === 'getList' ? total : items?.length,
+					});
 			} else {
 				const { data } = await dataProvider[query](resource, params);
-				res.status(200).send(data);
+				res
+					.status(200)
+					.send({ data, total: query === 'getList' ? total : data?.length });
 			}
 		} catch (e) {
 			console.log(e, 'error to resolve');

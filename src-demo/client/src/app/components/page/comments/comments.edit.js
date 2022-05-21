@@ -157,11 +157,15 @@ export const CommentEdit = (props) => {
 
   const { user: authUser } = useSelector(getAuthData());
 
-  const { data: comments, total, loaded } = useGetList(
+  const {
+    data: comments,
+    total,
+    loaded,
+  } = useGetList(
     'comments',
     { page: 1, perPage: 10 },
     { field: 'id', order: 'ASC' },
-    { userId: authUser.uid }
+    { userId: authUser.uid, commentable: true }
   );
 
   const {id: commentId} = props;

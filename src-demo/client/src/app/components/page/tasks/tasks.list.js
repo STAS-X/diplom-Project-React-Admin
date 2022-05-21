@@ -27,7 +27,6 @@ import {
   FilterButton,
   FilterForm,
   CreateButton,
-  Pagination,
   ChipField,
   DateField,
   TextInput,
@@ -78,40 +77,26 @@ const QuickFilter = ({ label }) => {
   return <Chip sx={{ marginBottom: 1 }} label={translate(label)} />;
 };
 
+const PaginationActions = (props) => {
+  //console.log(props, 'pagination inside props');
+  return (
+    <RaPaginationActions
+      {...props}
+      // these props are passed down to the MUI <Pagination> component
+      color="primary"
+    />
+  );
+};
 
-const TaskPagination = () => {
-    const {perPage, page, setPage, data} = useListContext();
-    const {total, loaded} = useGetList('tasks', { page: 1, perPage: -1 },
-    { field: 'id', order: 'ASC' },
-    {});
-    
-    console.log(total, page, perPage, 'all lists available');
-
-
-    return (
-        <Toolbar sx={{justifyContent:'flex-end'}}>
-            <Pagination rowsPerPageOptions={[10, 15, 20, 50]} />
-            <Button 
-                key="previous"
-                disabled={!loaded || page===1}
-                color="primary"                
-                onClick={() => setPage(page - 1)}
-                startIcon={<ChevronLeft />}
-            >
-                Предыдущая
-            </Button>
-            <Button 
-                key="next"
-                disabled={!loaded || page===Math.ceil(total/perPage)}
-                color="primary"
-                onClick={() => setPage(page + 1)}
-                endIcon={<ChevronRight />}
-            >
-               Следующая
-            </Button>
-        </Toolbar>
-    );
-}
+const TaskPagination = (props) => {
+  return (
+    <RaPagination
+      {...props}
+      rowsPerPageOptions={[10, 15, 20]}
+      ActionsComponent={RaPaginationActions}
+    />
+  );
+};
 
 const taskFilters = (userId) => [
   <TextInput label="Глобальный поиск" source="q" alwaysOn />,
@@ -244,7 +229,16 @@ const TaskToolbar = ({ tasksIds, setTasksIds, userId }) => {
     <Stack direction="row" justifyContent="space-between">
       <FilterForm filters={filters} />
       <div>
-        <SortButton fields={['title', 'createdAt', 'executeAt', 'status', 'progress', 'commentable']} />
+        <SortButton
+          fields={[
+            'title',
+            'createdAt',
+            'executeAt',
+            'status',
+            'progress',
+            'commentable',
+          ]}
+        />
         <FilterButton filters={filters} />
         <CreateButton />
         <DeleteTasksButton tasksIds={tasksIds} setTasksIds={setTasksIds} />
@@ -255,24 +249,24 @@ const TaskToolbar = ({ tasksIds, setTasksIds, userId }) => {
 };
 
 const getTaskResult = (data) => {
-      if (data.status) {
-        if (new Date(data.finishedAt) <= new Date(data.executeAt)) {
-          return 1;
-        } else {
-          return 0;
-        }
+  if (data.status) {
+    if (new Date(data.finishedAt) <= new Date(data.executeAt)) {
+      return 1;
+    } else {
+      return 0;
+    }
+  } else {
+    if (new Date(data.executeAt) < new Date()) {
+      if (data.progress < 100) {
+        return -1;
       } else {
-        if (new Date(data.executeAt) < new Date()) {
-          if (data.progress < 100) {
-            return -1;
-          } else {
-            return 1;
-          }
-        } else {
-          return 0;
-        }
+        return 1;
       }
-}
+    } else {
+      return 0;
+    }
+  }
+};
 
 const KeywordsField = ({ keywords }) => {
   console.log(keywords);
@@ -299,20 +293,39 @@ const KeywordsField = ({ keywords }) => {
             <Chip
               key={ind}
               label={key}
-              sx={{'&':{
-                backgroundColor: tagsCount>4 ? green[200]: tagsCount>2 ? blue[200]: red[200],
-                color: tagsCount>4 ? red[600]: tagsCount>2 ? green[600]: blue[600],
-                display: 'inline-flex',
-                fontWeight: 'bold',
-                fontSize: 14,
-                transition: '150ms ease-out',
-                'span:after': {content: tagsCount>4? '" 😃"': tagsCount>2 ? '" 😐"':'"  😉"' },
-                '&:hover': {
-                  opacity: 0.7,
-                  boxShadow:
-                    '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
-              }}}}
-
+              sx={{
+                '&': {
+                  backgroundColor:
+                    tagsCount > 4
+                      ? green[200]
+                      : tagsCount > 2
+                      ? blue[200]
+                      : red[200],
+                  color:
+                    tagsCount > 4
+                      ? red[600]
+                      : tagsCount > 2
+                      ? green[600]
+                      : blue[600],
+                  display: 'inline-flex',
+                  fontWeight: 'bold',
+                  fontSize: 14,
+                  transition: '150ms ease-out',
+                  'span:after': {
+                    content:
+                      tagsCount > 4
+                        ? '" 😃"'
+                        : tagsCount > 2
+                        ? '" 😐"'
+                        : '"  😉"',
+                  },
+                  '&:hover': {
+                    opacity: 0.7,
+                    boxShadow:
+                      '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
+                  },
+                },
+              }}
             />
           ))}
         </Stack>
@@ -321,8 +334,7 @@ const KeywordsField = ({ keywords }) => {
   );
 };
 
-
-const ExecutorsField = ({ executors:ids, ...data }) => {
+const ExecutorsField = ({ executors: ids, ...data }) => {
   if (!ids) return <h5>Исполнители не назначены</h5>;
 
   const { data: users, loading, loaded, error } = useGetMany('users', ids);
@@ -353,19 +365,34 @@ const ExecutorsField = ({ executors:ids, ...data }) => {
             <Chip
               key={ind}
               label={user.name + '' ? user.name : '-XXX-'}
-              sx={{'&':{
-                backgroundColor: result === 1? blue[200]: green[200],
-                color: result === 1? green[600]: result === 0 ? blue[600]:red[600],
-                display: 'inline-flex',
-                fontWeight: 'bold',
-                fontSize: 14,
-                transition: '50ms ease-out',
-                'span:after': {content: result === 1? '" 😃"': result === 0 ? '" 😐"':'"  😉"' },
-                '&:hover': {
-                  opacity: 0.9,
-                  boxShadow:
-                    '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
-              }}}}
+              sx={{
+                '&': {
+                  backgroundColor: result === 1 ? blue[200] : green[200],
+                  color:
+                    result === 1
+                      ? green[600]
+                      : result === 0
+                      ? blue[600]
+                      : red[600],
+                  display: 'inline-flex',
+                  fontWeight: 'bold',
+                  fontSize: 14,
+                  transition: '50ms ease-out',
+                  'span:after': {
+                    content:
+                      result === 1
+                        ? '" 😃"'
+                        : result === 0
+                        ? '" 😐"'
+                        : '"  😉"',
+                  },
+                  '&:hover': {
+                    opacity: 0.9,
+                    boxShadow:
+                      '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
+                  },
+                },
+              }}
               avatar={
                 <Avatar
                   alt="Пользователь"
@@ -389,9 +416,6 @@ export const TaskList = (props) => {
   const [tasksIds, setTasksIds] = React.useState([]);
   const [hoverId, setHoverId] = React.useState();
 
-  const taskRef = React.useRef();
-  const taskList = taskRef.current;
-
   const { loadedOnce: isLoading } = useSelector(
     (state) => state.admin.resources.tasks.list
   );
@@ -400,42 +424,12 @@ export const TaskList = (props) => {
   const isAppColorized = useSelector(getAppColorized());
   const isAppLoading = useSelector(getAppLoading());
 
-  React.useEffect(() => {
-    if (taskList) {
-      const ths = taskList.querySelectorAll('thead>tr>th');
-      for (const taskTh of ths)
-        taskTh.style.backgroundColor = isAppColorized
-          ? blue[100]
-          : 'whitesmoke';
-      const paging = taskList.nextSibling?.querySelector('div.MuiToolbar-root');
-      if (paging)
-        paging.style.backgroundColor = isAppColorized
-          ? blue[200]
-          : 'whitesmoke';
-    }
-    //return () => {};
-  }, [taskList, isAppColorized, isLoading]);
-
-  const taskRowStyle = (id) => (record, index) => {
-    return {
-      backgroundColor:
-        record.userId === id
-          ? record.status
-            ? green[500]
-            : green[200]
-          : record.status
-          ? red[300]
-          : red[100],
-    };
-  };
-
   return (
     <>
       {authUser && (
         <ListBase
           {...props}
           sort={{ field: 'createdAt', order: 'ASC' }}
-          disableSyncWithLocation
           //aside={<TaskAsideCard id={hoverId} />}
           style={
             !isLoading && isAppLoading ? { height: '0px', display: 'none' } : {}
@@ -454,10 +448,8 @@ export const TaskList = (props) => {
               authId={authUser.uid}
               tasksIds={tasksIds}
               setTasksIds={setTasksIds}
-              taskRef={taskRef}
               hoverId={hoverId}
               setHoverId={setHoverId}
-              taskRowStyle={taskRowStyle}
             />
           )}
           {!(!isLoading && isAppLoading) && <TaskPagination />}
@@ -496,38 +488,38 @@ const ControlButtons = ({ record, authId }) => {
         //const { data, isLoading } = useGetOne('tasks', {id: "1"});
 
         return (
-            <Box sx={{ position: 'relative', display: 'inline-flex' }}>
-              <ShowButton basePath="/tasks" label="" record={record} />
-              {loading && !loaded && <CircularProgress color="inherit" />}
-              {loaded && total > 0 && (
-                <EditButton
-                  basePath="/comments"
-                  icon={<EditCommentIcon />}
-                  label=""
-                  record={comment}
-                />
-              )}
-              {loaded && total === 0 && (
-                <CreateButton
-                  basePath="/comments"
-                  icon={<CreateCommentIcon />}
-                  label=""
-                />
-              )}
-              {record.userId === authId && (
-              <>
-              <EditButton basePath="/tasks" label="" record={record} />
-              <DeleteWithConfirmButton
-                record={record}
+          <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+            <ShowButton basePath="/tasks" label="" record={record} />
+            {loading && !loaded && <CircularProgress color="inherit" />}
+            {loaded && total > 0 && (
+              <EditButton
+                basePath="/comments"
+                icon={<EditCommentIcon />}
                 label=""
-                undoable={true}
-                confirmContent="Подтверждаете удаление задачи?"
-                redirect={false}
+                record={comment}
               />
-              </>)
-              }
-            </Box>
-          );
+            )}
+            {loaded && total === 0 && (
+              <CreateButton
+                basePath="/comments"
+                icon={<CreateCommentIcon />}
+                label=""
+              />
+            )}
+            {record.userId === authId && (
+              <>
+                <EditButton basePath="/tasks" label="" record={record} />
+                <DeleteWithConfirmButton
+                  record={record}
+                  label=""
+                  undoable={true}
+                  confirmContent="Подтверждаете удаление задачи?"
+                  redirect={false}
+                />
+              </>
+            )}
+          </Box>
+        );
       }}
     />
   );
@@ -536,31 +528,50 @@ const ControlButtons = ({ record, authId }) => {
 const MyDatagrid = ({
   isAppColorized,
   authId,
-  taskRef,
-  taskRowStyle,
   setTasksIds,
   tasksIds,
   hoverId,
   setHoverId,
   ...props
 }) => {
-  //const [isTransition, setTransition]=React.useState(false);
-  //useSelector((state) => state.admin.resources.tasks.list);
+  const taskRef = React.useRef();
+  const taskList = taskRef.current;
 
-  // React.useEffect(() => {
-  //   if (isLoaded) {
-  //     console.log(tasks, 'список задач из контекста');
-  //     console.info('Внимание список задач изменился');
-  //   }
-  // }, [tasks]);
+  const { loaded, loading } = useListContext();
 
+  React.useEffect(() => {
+    if (taskList) {
+      const ths = taskList.querySelectorAll('thead>tr>th');
+      for (const taskTh of ths)
+        taskTh.style.backgroundColor = isAppColorized
+          ? blue[100]
+          : 'whitesmoke';
+      const paging = taskList.parentNode.nextSibling?.querySelector('div.MuiToolbar-root');
+      if (paging) {
+        paging.style.backgroundColor = isAppColorized
+          ? blue[200]
+          : 'whitesmoke';
+        paging.querySelector('p').textContent = 'Строк на странице';
+        if (paging.querySelector('.previous-page'))
+          paging.querySelector('.previous-page').textContent = '< Предыдущая';
+        if (paging.querySelector('.next-page'))
+          paging.querySelector('.next-page').textContent = 'Следующая > ';
+      }
+    }
+    return () => {};
+  }, [taskList, isAppColorized, loading, loaded]);
+
+  const taskRowStyle = (id) => (record, index) => {
+    return {
+      backgroundColor: record.userId === id ? green[200] : red[100],
+    };
+  };
 
   const handleUpdateId = (id) => {
     setHoverId(id);
   };
 
   const handleMouseEnter = ({ target }) => {
-
     if (
       target.closest('tr') &&
       !target.closest('td')?.classList.contains('column-undefined') &&
@@ -632,7 +643,12 @@ const MyDatagrid = ({
           )}
         />
 
-        <TextField label="" sortable={false} source="id" style={{ display: 'none' }} />
+        <TextField
+          label=""
+          sortable={false}
+          source="id"
+          style={{ display: 'none' }}
+        />
         <TextField label="Название" source="title" />
         <TextField label="Описание" sortable={false} source="description" />
         <DateField label="Дата создания" source="createdAt" lacales="ru" />
@@ -650,7 +666,7 @@ const MyDatagrid = ({
           render={(record) =>
             ProgressBarField(
               record.progressType ? record.progressType : 1,
-              !isNaN(record.progress)?record.progress: 0
+              !isNaN(record.progress) ? record.progress : 0
             )
           }
         />
@@ -668,21 +684,42 @@ const MyDatagrid = ({
           render={(record) => {
             if (record.status) {
               if (new Date(record.finishedAt) <= new Date(record.executeAt)) {
-                return (<><strong style={{fontSize: 16, color:"green"}}>👍</strong> Завершено</>);
+                return (
+                  <>
+                    <strong style={{ fontSize: 16, color: 'green' }}>👍</strong>{' '}
+                    Завершено
+                  </>
+                );
               } else {
-                return (<><strong style={{fontSize: 16, color:"green"}}>✌️</strong> Завершено вне сроков</>);
+                return (
+                  <>
+                    <strong style={{ fontSize: 16, color: 'green' }}>✌️</strong>{' '}
+                    Завершено вне сроков
+                  </>
+                );
               }
             } else {
               if (new Date(record.executeAt) < new Date()) {
                 if (record.progress < 100) {
-                  return  (<><strong style={{fontSize: 16, color:"red"}}>✌️</strong> Просрочено</>);
+                  return (
+                    <>
+                      <strong style={{ fontSize: 16, color: 'red' }}>✌️</strong>{' '}
+                      Просрочено
+                    </>
+                  );
                 } else {
-                  return (<><strong style={{fontSize: 16, color:"red"}}>✌️</strong> Завершено но открыто</>);
+                  return (
+                    <>
+                      <strong style={{ fontSize: 16, color: 'red' }}>✌️</strong>{' '}
+                      Завершено но открыто
+                    </>
+                  );
                 }
               } else {
                 return (
                   <>
-                    <strong style={{fontSize: 16, color:"blue"}}>✌️</strong> На исполнении
+                    <strong style={{ fontSize: 16, color: 'blue' }}>✌️</strong>{' '}
+                    На исполнении
                   </>
                 );
               }
@@ -694,9 +731,11 @@ const MyDatagrid = ({
           source="commantable"
           render={(record) => {
             if (record.commentable) {
-              return <strong style={{fontSize: 16, color:"green"}}>✔️</strong>;
+              return (
+                <strong style={{ fontSize: 16, color: 'green' }}>✔️</strong>
+              );
             } else {
-              return <strong style={{fontSize: 16, color:"red"}}>✖️</strong>;
+              return <strong style={{ fontSize: 16, color: 'red' }}>✖️</strong>;
             }
           }}
         />

@@ -87,7 +87,7 @@ const AppLoader = ({ children }) => {
     const dispatch = getHook('dispatch');
 
     if (memoError) {
-      if (memoError.name === 'AuthorizationError') {
+      if (memoError.code === 401 || memoError.code === 403) {
         dispatch(setAppError(null));
         dispatch(setAuthError(null));
         dispatch(setAuthLoggedStatus(false));
@@ -96,8 +96,8 @@ const AppLoader = ({ children }) => {
           `Требуется повторная авторизация: ${memoError.message}`
         );
 
-        //dispatch(setAuthLogout());
-        // handleLogout();
+        dispatch(setAuthLogout());
+        handleLogout();
       } else {
         dispatch(setAppError(null));
         dispatch(setAuthError(null));

@@ -27,8 +27,6 @@ export default {
       _gte: '>=',
       _lte: '<=',
       _neq: '!=',
-      _arr: 'array-contains',
-      _nar: 'not-in'
     };
     // filters is like [
     //    { field: "commentable", operator: "=", value: true},
@@ -36,7 +34,7 @@ export default {
     // ]
     const filters = [];
     Object.keys(filter).forEach((key) => {
-      if (!Array.isArray(filter[key]) && typeof filter[key] === 'object') {
+      if (typeof filter[key] === 'object') {
         const innerFilter = filter[key];
         Object.keys(innerFilter).forEach((innerKey) => {
           const operator = operators[innerKey.slice(-4)];
@@ -50,7 +48,10 @@ export default {
               : {
                   field: innerKey,
                   operator: '==',
-                  value: innerFilter[innerKey],
+                  value:
+                    innerKey === 'q'
+                      ? escape(innerFilter[innerKey])
+                      : innerFilter[innerKey],
                 }
           );
         });
@@ -62,29 +63,29 @@ export default {
             : {
                 field: key,
                 operator: '==',
-                value: filter[key],
+                value: key === 'q' ? escape(filter[key]) : filter[key],
               }
         );
       }
     });
-    console.log(filters, 'filter for query LIST')
+
     return httpClient
       .get(url, {
         headers: {
           ProviderRequest: 'getList',
-          ProviderParams: escape(JSON.stringify({
+          ProviderParams: JSON.stringify({
             ...params,
             filter: filters.length > 0 ? filters : filter,
-          })),
+          }),
         },
       })
       .then(({ status, statusText, data }) => {
         if (status < 200 || status >= 300) {
           return { status, message: (error && error.message) || statusText };
         }
+        console.log(data, 'get data from server');
         return {
-          data,
-          total: data ? data.length : 0,
+          ...data,
         };
       })
       .catch((err) => console.log(err));
@@ -106,8 +107,7 @@ export default {
           return { status, message: (error && error.message) || statusText };
         }
         return {
-          data,
-          total: data ? data.length : 0,
+          ...data
         };
       });
   },
@@ -127,15 +127,14 @@ export default {
           return { status, message: (error && error.message) || statusText };
         }
         return {
-          data,
-          total: data ? data.length : 0,
+          ...data,
         };
       });
   },
 
   getManyReference: (resource, params) => {
     const url = `${apiUrl}/${resource}`;
-        console.log(resource, params, 'getManyRefs');
+    console.log(resource, params, 'getManyRefs');
     return httpClient
       .get(url, {
         headers: {
@@ -148,8 +147,7 @@ export default {
           return { status, message: (error && error.message) || statusText };
         }
         return {
-          data,
-          total: data ? data.length : 0,
+          ...data,
         };
       });
   },

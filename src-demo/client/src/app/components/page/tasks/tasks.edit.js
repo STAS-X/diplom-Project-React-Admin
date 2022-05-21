@@ -176,7 +176,7 @@ const CustomToolbar = ({authId, ...props}) => {
               handleSubmit();
               //setOnSuccess(handleSuccess);
             }}
-            redirect={loaded && total>1?`comments/${comment[Object.key(comments)[0]].id}`:'/comments/create'}
+            redirect={loaded && total>1?`comments/${comments[Object.key(comments)[0]].id}`:'/comments/create'}
             handleSubmitWithRedirect={handleSubmitWithRedirect}
             disabled={!formData.commentable || isInvalid}
           />

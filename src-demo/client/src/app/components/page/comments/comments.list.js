@@ -23,9 +23,20 @@ import {
   useNotify,
   useListContext,
   useDeleteMany,
-  useTranslate
+  useTranslate,
+  Pagination as RaPagination,
+  PaginationActions as RaPaginationActions,
 } from 'react-admin';
-import { Stack, Chip, Box, Checkbox , Avatar, Typography, CircularProgress, Button } from '@mui/material';
+import {
+  Stack,
+  Chip,
+  Box,
+  Checkbox,
+  Avatar,
+  Typography,
+  CircularProgress,
+  Button,
+} from '@mui/material';
 import {
   getRandomInt,
   dateWithMonths,
@@ -62,9 +73,26 @@ const QuickFilter = ({ label }) => {
   return <Chip sx={{ marginBottom: 1 }} label={translate(label)} />;
 };
 
-const CommentPagination = () => (
-  <Pagination rowsPerPageOptions={[10, 15, 20, 50]} />
-);
+const PaginationActions = (props) => {
+  //console.log(props, 'pagination inside props');
+  return (
+    <RaPaginationActions
+      {...props}
+      // these props are passed down to the MUI <Pagination> component
+      color="primary"
+    />
+  );
+};
+
+const CommentPagination = (props) => {
+  return (
+    <RaPagination
+      {...props}
+      rowsPerPageOptions={[10, 15, 20]}
+      ActionsComponent={RaPaginationActions}
+    />
+  );
+};
 
 const commentFilters = (userId) => [
   <TextInput label="Глобальный поиск" source="q" alwaysOn />,
@@ -106,7 +134,7 @@ const DeleteTasksButton = ({ commentsIds, setCommentsIds }) => {
 
   if (loaded && !error && data?.length > 0) {
     //console.info(isLoading, total, error,'test for delete many');
-    notify(`Задачи ${commentsIds} удалены успешно`, {type:'info'});
+    notify(`Задачи ${commentsIds} удалены успешно`, { type: 'info' });
     setCommentsIds([]);
     refresh();
   }
@@ -165,8 +193,13 @@ const TaskToolbar = ({ commentsIds, setCommentsIds, userId }) => {
         <SortButton fields={['title', 'createdAt']} />
         <FilterButton filters={filters} />
         <CreateButton />
-        <DeleteTasksButton commentsIds={commentsIds} setCommentsIds={setCommentsIds} />
-        {commentsIds.length > 0 && <UnselectButton setCommentsIds={setCommentsIds} />}
+        <DeleteTasksButton
+          commentsIds={commentsIds}
+          setCommentsIds={setCommentsIds}
+        />
+        {commentsIds.length > 0 && (
+          <UnselectButton setCommentsIds={setCommentsIds} />
+        )}
       </div>
     </Stack>
   );
@@ -185,28 +218,26 @@ const CommentAuthorField = ({ userId }) => {
   return (
     <>
       {user && (
-            <Chip
-              label={user.name ? user.name : '-XXX-'}
-              avatar={
-                <Avatar
-                  alt="Пользователь"
-                  src={
-                    user.url
-                      ? user.url
-                      : `https://i.pravatar.cc/150?u=${user.id}`
-                  }
-                  sx={{ width: 24, height: 24 }}
-                />
+        <Chip
+          label={user.name ? user.name : '-XXX-'}
+          avatar={
+            <Avatar
+              alt="Пользователь"
+              src={
+                user.url ? user.url : `https://i.pravatar.cc/150?u=${user.id}`
               }
-              style={{
-                backgroundColor: blue[100],
-                color: green[500],
-                display: 'inline-flex',
-                fontWeight: 'bold',
-                fontSize: 14,
-              }}
+              sx={{ width: 24, height: 24 }}
             />
-          )}
+          }
+          style={{
+            backgroundColor: blue[100],
+            color: green[500],
+            display: 'inline-flex',
+            fontWeight: 'bold',
+            fontSize: 14,
+          }}
+        />
+      )}
     </>
   );
 };
@@ -222,94 +253,44 @@ const CommentTaskField = ({ taskId }) => {
     return <p>ERROR</p>;
   }
   return (
-      task && (
-            <>
-            <Typography variant="body2" color="textPrimary" component="h3">
-              {`Задача: ${task.title}`} 
-            </Typography>
-             <Typography variant="body2" color="textSecondary" component="h4">
-              {`Id: ${task.id}`}
-            </Typography>
-            </>
-          )
-
+    task && (
+      <>
+        <Typography variant="body2" color="textPrimary" component="h3">
+          {`Задача: ${task.title}`}
+        </Typography>
+        <Typography variant="body2" color="textSecondary" component="h4">
+          {`Id: ${task.id}`}
+        </Typography>
+      </>
+    )
   );
 };
 
-
 export const CommentList = (props) => {
   const [commentsIds, setCommentsIds] = React.useState([]);
-    
-  const commentRef = React.useRef();
-  const commentList = commentRef.current;
+  const [hoverId, setHoverId] = React.useState();
 
   const { user: authUser } = useSelector(getAuthData());
-
   const isAppColorized = useSelector(getAppColorized());
   const isAppLoading = useSelector(getAppLoading());
-
-  const [hoverId, setHoverId] = React.useState();
-  //const [isTransition, setTransition]=React.useState(false);
-
-  const handleUpdateId = (id) => {
-    setHoverId(id);
-  };
-
-  const handleMouseEnter = ({ target }) => {
-    if (
-      target.closest('tr') &&
-      !target.closest('td')?.classList.contains('column-undefined') &&
-      target.closest('tr').querySelector('td.column-id')
-    ) {
-      if (
-        hoverId !==
-        target.closest('tr').querySelector('td.column-id').textContent
-      ) {
-        handleUpdateId(
-          target.closest('tr').querySelector('td.column-id').textContent
-        );
-        //setTransition(true);
-      }
-    }
-  };
-
-  React.useEffect(() => {
-    if (commentList) {
-      const ths = commentList.querySelectorAll('thead>tr>th');
-      for (const commentTh of ths)
-        commentTh.style.backgroundColor = isAppColorized
-          ? blue[100]
-          : 'whitesmoke';
-      const paging = commentList.nextSibling?.querySelector(
-        'div.MuiToolbar-root'
-      );
-      if (paging)
-        paging.style.backgroundColor = isAppColorized
-          ? blue[200]
-          : 'whitesmoke';
-    }
-    return () => {};
-  }, [commentList, isAppColorized, isLoading]);
 
   const { loadedOnce: isLoading } = useSelector(
     (state) => state.admin.resources.comments.list
   );
 
-  const commentRowStyle = (id) => (record, index) => {
-    return {
-      backgroundColor: record.userId === id ? green[200] : red[100],
-    };
-  };
-
+  //const [isTransition, setTransition]=React.useState(false);
 
   return (
     <>
       {authUser && (
-        <ListBase {...props} sort={{ field: 'createdAt', order: 'ASC' }}
+        <ListBase
+          {...props}
+          sort={{ field: 'createdAt', order: 'ASC' }}
           //aside={<CommentAsideCard id={hoverId} />}
-          style=
-          {!isLoading && isAppLoading ? { height: '0px', display: 'none' } : {}}
-          >
+          style={
+            !isLoading && isAppLoading ? { height: '0px', display: 'none' } : {}
+          }
+        >
           {!(!isLoading && isAppLoading) && (
             <TaskToolbar
               commentsIds={commentsIds}
@@ -323,10 +304,8 @@ export const CommentList = (props) => {
               authId={authUser.uid}
               commentsIds={commentsIds}
               setCommentsIds={setCommentsIds}
-              commentRef={commentRef}
               hoverId={hoverId}
               setHoverId={setHoverId}
-              commentRowStyle={commentRowStyle}
             />
           )}
           {!(!isLoading && isAppLoading) && <CommentPagination />}
@@ -337,9 +316,7 @@ export const CommentList = (props) => {
   );
 };
 
-
 const ControlButtons = ({ record, authId }) => {
-
   return (
     <FunctionField
       label=""
@@ -347,40 +324,70 @@ const ControlButtons = ({ record, authId }) => {
         //const { data, isLoading } = useGetOne('tasks', {id: "1"});
 
         return (
-            <Box sx={{ position: 'relative', display: 'inline-flex' }}>
-              <ShowButton basePath="/comments" label="" record={record} />
-              {record.userId === authId && (
+          <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+            <ShowButton basePath="/comments" label="" record={record} />
+            {record.userId === authId && (
               <>
-              <EditButton basePath="/comments" label="" record={record} />
-              <DeleteWithConfirmButton
-                record={record}
-                label=""
-                undoable={true}
-                confirmContent="Подтверждаете удаление задачи?"
-                redirect={false}
-              />
-              </>)}
-            </Box>
-          );
+                <EditButton basePath="/comments" label="" record={record} />
+                <DeleteWithConfirmButton
+                  record={record}
+                  label=""
+                  undoable={true}
+                  confirmContent="Подтверждаете удаление задачи?"
+                  redirect={false}
+                />
+              </>
+            )}
+          </Box>
+        );
       }}
     />
   );
 };
 
-
 const MyDatagrid = ({
   isAppColorized,
   authId,
-  commentRef,
-  commentRowStyle,
   setCommentsIds,
   commentsIds,
   hoverId,
   setHoverId,
   ...props
 }) => {
+  const commentRef = React.useRef();
+  const commentList = commentRef.current;
 
-  const { loaded: isLoaded, data: comments } = useListContext();
+  const { loaded, loading } = useListContext();
+
+  React.useEffect(() => {
+    if (commentList) {
+      const ths = commentList.querySelectorAll('thead>tr>th');
+      for (const commentTh of ths)
+        commentTh.style.backgroundColor = isAppColorized
+          ? blue[100]
+          : 'whitesmoke';
+      const paging = commentList.parentNode.nextSibling?.querySelector(
+        'div.MuiToolbar-root'
+      );
+      if (paging) {
+        paging.style.backgroundColor = isAppColorized
+          ? blue[200]
+          : 'whitesmoke';
+        paging.querySelector('p').textContent = 'Строк на странице';
+        if (paging.querySelector('.previous-page'))
+          paging.querySelector('.previous-page').textContent = '< Предыдущая';
+        if (paging.querySelector('.next-page'))
+          paging.querySelector('.next-page').textContent = 'Следующая > ';
+      }
+    }
+    return () => {};
+  }, [commentList, isAppColorized, loading, loaded]);
+
+  const commentRowStyle = (id) => (record, index) => {
+    return {
+      backgroundColor: record.userId === id ? green[200] : red[100],
+    };
+  };
 
   const handleUpdateId = (id) => {
     setHoverId(id);
@@ -438,7 +445,7 @@ const MyDatagrid = ({
           },
         }}
       >
-                <FunctionField
+        <FunctionField
           {...props}
           label="Выбрать"
           render={(record) => (
@@ -457,26 +464,35 @@ const MyDatagrid = ({
             />
           )}
         />
-              <TextField label="" sortable={false} source="id" style={{display:'none'}}/>
-              <TextField source="title" label="Название" />
-              <DateField label="Дата создания" source="createdAt" lacales="ru" />
-              <FunctionField
-                label="Автор комментария"
-                sortable={false}
-                source="userId"
-                render={(record) => <CommentAuthorField userId={record.userId} />}
-              />
-              <FunctionField
-                label="Задача"
-                sortable={false}
-                source="taskId"
-                render={(record) => <CommentTaskField taskId={record.taskId} />}
-              />
-              <RichTextField label="Текст комментария" sortable={false} source="body"/>
+        <TextField
+          label=""
+          sortable={false}
+          source="id"
+          style={{ display: 'none' }}
+        />
+        <TextField source="title" label="Название" />
+        <DateField label="Дата создания" source="createdAt" lacales="ru" />
+        <FunctionField
+          label="Автор комментария"
+          sortable={false}
+          source="userId"
+          render={(record) => <CommentAuthorField userId={record.userId} />}
+        />
+        <FunctionField
+          label="Задача"
+          sortable={false}
+          source="taskId"
+          render={(record) => <CommentTaskField taskId={record.taskId} />}
+        />
+        <RichTextField
+          label="Текст комментария"
+          sortable={false}
+          source="body"
+        />
 
-              <ControlButtons authId={authId} />
-          </Datagrid>
-          {hoverId && <CommentAsideCard id={hoverId} />}
-        </Stack>
+        <ControlButtons authId={authId} />
+      </Datagrid>
+      {hoverId && <CommentAsideCard id={hoverId} />}
+    </Stack>
   );
 };
