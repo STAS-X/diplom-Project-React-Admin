@@ -25,6 +25,10 @@ div.aside {
   text-decoration: underline; 
 }
 
+.MuiTab-wrapper {
+  flex-direction: row !important;
+}
+
 .rotateMenu {
   animation: spin 300ms;
   transform: rotate(180deg);

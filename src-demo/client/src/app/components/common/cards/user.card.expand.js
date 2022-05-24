@@ -35,7 +35,7 @@ const useStyles = (items) =>
     },
   });
 
-const UserCardExpand = () => {
+const UserCardExpand = ({style, ...props}) => {
   const animation = '_rubberBand';
 
   const [taskNum, setTaskNum] = useState(0);
@@ -105,7 +105,7 @@ const UserCardExpand = () => {
   }, [tasks, comments, cardRef.current]);
 
   return (
-    <Card variant="outlined" ref={cardRef} className={classes.root}>
+    <Card variant="outlined" ref={cardRef} className={classes.root} style={style}>
       <CardMedia
         className={classes.media}
         image={authUser.url}

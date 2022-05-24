@@ -10,6 +10,7 @@ import {
   SelectInput,
   NumberInput,
   ReferenceInput,
+  FunctionField,
   FileInput,
   FileField,
   ArrayInput,
@@ -30,7 +31,6 @@ import {
   maxValue,
   number,
   useGetList,
-  FunctionField,
 } from 'react-admin';
 import RichTextInput from 'ra-input-rich-text';
 import { makeStyles } from '@material-ui/core/styles';
@@ -186,7 +186,7 @@ export const CommentCreate = (props) => {
   };
 
   const handleFailure = ({ error }) => {
-    notify(`Возникла ошибка: ${error.message}`, { type: 'error' }); // default message is 'ra.notification.created'
+    notify(`Возникла ошибка: ${error}`, { type: 'warning' }); // default message is 'ra.notification.created'
     refresh();
   };
 
@@ -205,7 +205,7 @@ export const CommentCreate = (props) => {
             warnWhenUnsavedChanges
             toolbar={<CustomToolbar authId={authUser.uid} />}
           >
-            <h2 className="titleDialog">Создание комментария</h2>
+            <FunctionField addLabel={false} render={(record)=> <h3 className="titleDialog">Создание комментария #{record.id} </h3>} />
 
             <TextInput
               label="Описание"

@@ -469,7 +469,6 @@ const ProgressBarField = (id, progress) => (
 const ControlButtons = ({ record, authId }) => {
   const {
     data: comment,
-    total,
     loading,
     loaded,
     error,
@@ -479,7 +478,7 @@ const ControlButtons = ({ record, authId }) => {
     { field: 'id', order: 'ASC' },
     { taskId: record.id }
   );
-  if (loaded) console.info(comment, total, 'comments from hook');
+  if (loaded) console.info(comment, 'comments from hook');
 
   return (
     <FunctionField
@@ -491,15 +490,15 @@ const ControlButtons = ({ record, authId }) => {
           <Box sx={{ position: 'relative', display: 'inline-flex' }}>
             <ShowButton basePath="/tasks" label="" record={record} />
             {loading && !loaded && <CircularProgress color="inherit" />}
-            {loaded && total > 0 && (
+            {loaded && Object.keys(comment).length > 0 && (
               <EditButton
                 basePath="/comments"
                 icon={<EditCommentIcon />}
                 label=""
-                record={comment}
+                record={comment[Object.keys(comment)[0]]}
               />
             )}
-            {loaded && total === 0 && (
+            {loaded && Object.keys(comment).length === 0 && (
               <CreateButton
                 basePath="/comments"
                 icon={<CreateCommentIcon />}
@@ -559,7 +558,7 @@ const MyDatagrid = ({
       }
     }
     return () => {};
-  }, [taskList, isAppColorized, loading, loaded]);
+  }, [taskRef.current, isAppColorized, loading, loaded]);
 
   const taskRowStyle = (id) => (record, index) => {
     return {

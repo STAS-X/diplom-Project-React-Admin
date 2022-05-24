@@ -152,7 +152,6 @@ const MyDatagrid = ({
       backgroundColor: record.id === id ? green[200] : red[100],
     };
   };
-  console.log(loaded, loading, 'list context element');
 
   React.useEffect(() => {
     if (userList) {
@@ -176,7 +175,7 @@ const MyDatagrid = ({
       }
     }
     return () => {};
-  }, [userList, isAppColorized, loaded, loading]);
+  }, [userRef.current, isAppColorized, loaded, loading]);
 
 
   return (

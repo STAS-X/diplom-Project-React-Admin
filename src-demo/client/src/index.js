@@ -14,7 +14,7 @@ import { ToastContainer } from 'react-toastify';
 import { ReactHooksWrapper, setHook, getHook } from 'react-hooks-outside/lib';
 
 import { useDispatch, useSelector, useStore } from 'react-redux';
-import { useLogout } from 'react-admin';
+import { useLogout, useRedirect } from 'react-admin';
 
 import registerServiceWorker from './app/api/registerServiceWorker';
 import EventMonitor from './app/components/common/event/EventMonitor';
@@ -24,7 +24,8 @@ import localStorageService from './app/services/localStorage.service';
 setHook('dispatch', useDispatch)
 setHook('store', useStore)
   .setHook('selector', () => useSelector)
-  .setHook('logout', useLogout);
+  .setHook('logout', useLogout)
+  .setHook('redirect', useRedirect);
 
 const store =createAdminStore({
         authProvider,

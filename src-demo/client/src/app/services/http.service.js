@@ -31,6 +31,7 @@ http.interceptors.request.use(
       //console.log(useStore.getState);
       //const token  = useStore((state) => state.authContext.token);
       const token = getState().authContext.token;
+      const {uid} =getState().authContext.auth;
 
       const {
         expirationTime = null,
@@ -41,7 +42,7 @@ http.interceptors.request.use(
       //const authToken =
       //  firebaseApp.auth().currentUser._delegate.stsTokenManager;
       if (refreshToken && expirationTime && expirationTime < Date.now()) {
-        const { stsTokenManager: authToken } = (await authProvider.checkAuth())
+        const { stsTokenManager: authToken, uid } = (await authProvider.checkAuth())
           ._delegate;
         const data = await dispatch(setAuthRefreshToken(authToken));
 
@@ -49,19 +50,20 @@ http.interceptors.request.use(
           config.headers = {
             ...config.headers,
             Authorization: `Bearer ${data.accessToken}`,
-            // DataUserId: `${uid}`,
+            UserUid: `${uid}`,
           };
         } else {
           config.headers = {
             ...config.headers,
             Authorization: '',
-            // DataUserId: ''
+            UserUid: ''
           };
         }
       } else {
         config.headers = {
           ...config.headers,
           Authorization: accessToken ? `Bearer ${accessToken}` : '',
+          UserUid: accessToken ?`${uid}`:''
           // DataUserId: `${user.uid}`
         };
       }

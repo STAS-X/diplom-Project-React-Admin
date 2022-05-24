@@ -25,6 +25,7 @@ module.exports = async (req, res, next) => {
     const token = req.headers.authorization
       ? req.headers.authorization.split(' ')[1]
       : null;
+    const userUid=req.headers.useruid?req.headers.useruid:null
 
     const isValid = await tokenService.validateAccess(token);
 
@@ -42,10 +43,12 @@ module.exports = async (req, res, next) => {
       const user = userSnap.data();
       //req.userId = user.uid;
       if (req.method === 'PUT' || req.method === 'DELETE') {
-        const { data }  = JSON.parse(req.body.data);
-        if (data) {
-          console.log(data, user, 'test for permission')
-          if (data.userId !== user.uid) {
+        const { data }  = req.body.data?JSON.parse(req.body.data):{data:null};
+
+        if (data || userUid) {
+          console.log(data,user.uid,userUid,'get permissions')
+          const dataUid = data?.uid?data.uid:data?.id?data.id:null;
+          if (!(dataUid && dataUid === user.uid || userUid && userUid === user.uid)) {
             return res.status(403).send({
               code: 403,
               name: 'PermissionError',

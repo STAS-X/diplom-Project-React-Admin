@@ -85,14 +85,13 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
   },
 }));
 
-const CustomAppBar = (props) => {
+const CustomAppBar = (currentPage) => (props) => {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
   const dispatch = useDispatch();
   //const { getState } = useStore()
   const redirect = useRedirect();
   const theme = useSelector(getAppTheme());
-  const appTitle = useSelector(getAppTitle());
   const { user: authUser } = useSelector(getAuthData());
   const isOpen = useSelector((state) => state.admin.ui.sidebarOpen);
 
@@ -183,7 +182,7 @@ const CustomAppBar = (props) => {
               display: 'flex',
             }}
           >
-            {appTitle}
+            {currentPage}
           </Typography>
           <Menu
             id="menu-appbar"

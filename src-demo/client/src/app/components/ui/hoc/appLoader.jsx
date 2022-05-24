@@ -22,34 +22,56 @@ import {
   setAuthUser,
   setAuthToken,
 } from '../../../store/authcontext';
-import { getAppError, setAppError } from '../../../store/appcontext';
+import { getAppError, setAppError, setAppTitle } from '../../../store/appcontext';
 import authService from '../../../services/auth.service';
 import { getHook } from 'react-hooks-outside';
 import history from '../../../../app/utils/history';
-import { useLogout } from 'react-admin';
+import { useLogout, useRedirect } from 'react-admin';
+
+const handleLogout = () => {
+  //const logout = useLogout();
+  //logout();
+  authProvider.logout();
+    setTimeout(()=>history.push('/login'), 500);
+};
 
 const AppLoader = ({ children }) => {
   //const { getState } = useStore();
+  //const logout = useLogout();
   const { user: authUser, token: authToken } = useSelector(getAuthData());
   //const authUser = getState().authContext.user;
   //const authToken = getState().authContext.token;
   const isLogged = useSelector(getLoggedStatus());
+  const pathname = useSelector((state)=>state.router.location.pathname);
 
+    // if (!isLogged) {
+    //   handleLogout();
+    //   //return;
+    // }
   const authDBStatus = useSelector(getAuthDBStatus());
   const authError = useSelector(getAuthError());
   const appError = useSelector(getAppError());
-  const memoError = useMemo(() => authError || appError, [authError, appError]);
+  const memoError = authError || appError;
   // const memoLogged = useMemo(() => isLoggedIn, [isLoggedIn]);
 
-  //const dispatch = useDispatch();
-  //const dispatch = getHook('dispatch');
+ //const dispatch = getHook('dispatch');
   //let logout = useLogout();
-  const handleLogout = () => {
-    const dispatch = getHook('dispatch');
-    dispatch(setAuthLogout());
-    authProvider.logout();
-    //logout();
-  };
+  useEffect(() => {
+      const dispatch = getHook('dispatch');
+      dispatch(
+      setAppTitle(
+        pathname.split('/')[1] === 'users'
+          ? 'Пользователи'
+          : pathname.split('/')[1] === 'tasks'
+          ? 'Задачи'
+          : pathname.split('/')[1] === 'comments' 
+          ? 'Комментарии'
+          : pathname.split('/')[1] === 'main'
+          ?'Главная страница':'О проекте'
+        ) 
+      );
+      return ()=>{}
+  }, [pathname]);
 
   useEffect(() => {
     const unregisterAuthObserver = firebaseApp
@@ -66,7 +88,7 @@ const AppLoader = ({ children }) => {
               dispatch(setAuthFromDB(token.accessToken));
             } else {
               // Если данные уже были запрошены и они отсутствуют в базе, тогда выходим на авторизацию
-              //dispatch(setAuthLogout());
+              dispatch(setAuthLogout());
               handleLogout();
             }
           } else {
@@ -74,7 +96,7 @@ const AppLoader = ({ children }) => {
           }
         } else {
           // No user is signed in.
-          //dispatch(setAuthLogout());
+          dispatch(setAuthLogout());
           handleLogout();
         }
       });
@@ -95,9 +117,8 @@ const AppLoader = ({ children }) => {
           'Ошибка доступа:',
           `Требуется повторная авторизация: ${memoError.message}`
         );
-
-        dispatch(setAuthLogout());
-        handleLogout();
+          dispatch(setAuthLogout());
+          handleLogout();
       } else {
         dispatch(setAppError(null));
         dispatch(setAuthError(null));
@@ -107,6 +128,8 @@ const AppLoader = ({ children }) => {
         );
       }
     }
+
+    return () => {};
   }, [memoError]);
 
   return children;

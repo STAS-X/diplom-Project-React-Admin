@@ -171,7 +171,7 @@ const SignInScreen = ({ setData, ...props }) => {
   if (!isSignedIn) {
     return (
       <div>
-        <p style={{ marginLeft: '10px' }}>Please sign-in:</p>
+        <p style={{ marginLeft: '10px' }}>Выберите провайдер:</p>
         <StyledFirebaseAuth
           uiConfig={uiConfig}
           firebaseAuth={firebase.auth()}
@@ -191,11 +191,18 @@ const SignInScreen = ({ setData, ...props }) => {
 };
 
 const CustomLoginForm = ({ ...props }) => {
+  React.useEffect(()=>{
+    document.querySelector('.MuiButton-label').textContent='ВОЙТИ';
+    document.querySelector('#username-label').textContent='Пользователь';
+    document.querySelector('#password-label').textContent='Пароль';
+
+    return ()=>{}
+  },[])
   return (
     <div>
       <div style={{ fontFamily: 'monospace', marginLeft: '15px' }}>
-        <p>Username: test@example.com</p>
-        <p>Password: password</p>
+        <p>Пользователь: test@example.com</p>
+        <p>Пароль: password</p>
       </div>
       <LoginForm {...props} />
       <SignInScreen {...props} />

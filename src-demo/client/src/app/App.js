@@ -27,7 +27,7 @@ import { TaskCreate } from './components/page/tasks/tasks.create';
 
 import { UserList } from './components/page/users/users.list';
 import { UserShow } from './components/page/users/users.show';
-import { UserTabbetShow } from './components/page/users/tabbet.user.form';
+import { UserTabbetShow } from './components/page/users/users.tabbet.show';
 import { UserEdit } from './components/page/users/users.edit';
 
 import CustomLayout from './components/common/custom/customLayout';
@@ -87,28 +87,27 @@ const App = (props) => {
     });
   };
 
+  const switchToAppPage = (currentPage) => {
+    if (!loggedStatus) return '/login';
+    switch (currentPage) {
+      case 'Главная страница':
+        return '/main';
+      case 'Пользователи':
+        return '/users';
+      case 'Задачи':
+        return '/tasks';
+      case 'Комментарии':
+        return '/comments';
+      case 'О проекте':
+        return '/project';          
+      default:
+        return '/main';
+    }
+    //
+  };
+
   useEffect(() => {
-    const switchToAppPage = (currentPage) => {
-      if (!loggedStatus) return '/login';
-      switch (currentPage) {
-        case 'Главная страница':
-          return '/main';
-        case 'Пользователи':
-          return '/users';
-        case 'Задачи':
-          return '/tasks';
-        case 'Комментарии':
-          return '/comments';
-        case 'О проекте':
-          return '/project';          
-        default:
-          return '/main';
-      }
-      //
-    };
-
     props.history.replace(switchToAppPage(mainAppPage));
-
     return () => {};
   }, []);
 
@@ -119,7 +118,7 @@ const App = (props) => {
       authProvider={props.authProvider}
       dataProvider={props.dataProvider}
       theme={changeTheme(theme)}
-      layout={CustomLayout}
+      layout={CustomLayout(mainAppPage)}
       loginPage={CustomLoginPage}
       dashboard={DashBoardPage}
       history={props.history}

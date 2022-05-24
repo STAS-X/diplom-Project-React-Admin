@@ -6,10 +6,10 @@ import ProjectIcon from '@material-ui/icons/HelpRounded';
 import { setAppTitle } from '../../../store/appcontext';
 // import LabelIcon from '@material-ui/icons/Label';
 
-const CustomSideBar = (props) => {
-  const dispatch =  useDispatch();
+const CustomSideBar = ({onMenuClick, ...props}) => {
   const resources = useSelector((state)=>getResources(state));
   const isOpen = useSelector((state) => state.admin.ui.sidebarOpen);
+
   //if (!resources) return (<div> loading </div>)
   return (
     <Menu {...props}>
@@ -19,8 +19,7 @@ const CustomSideBar = (props) => {
         primaryText={'Главная страница'}
         leftIcon={<DefaultIcon />}
         onClick={() => {
-          dispatch(setAppTitle('Главная страница'));
-          props.onMenuClick;
+          onMenuClick;
         }}
         sidebarIsOpen={isOpen}
       />
@@ -39,16 +38,7 @@ const CustomSideBar = (props) => {
           }
           leftIcon={resource.icon ? <resource.icon /> : <DefaultIcon />}
           onClick={() => {
-            dispatch(
-              setAppTitle(
-                resource.name === 'users'
-                  ? 'Пользователи'
-                  : resource.name === 'tasks'
-                  ? 'Задачи'
-                  : 'Комментарии'
-              )
-            );
-            props.onMenuClick;
+            onMenuClick;
           }}
           sidebarIsOpen={isOpen}
         />
@@ -59,8 +49,7 @@ const CustomSideBar = (props) => {
         primaryText={'О проекте'}
         leftIcon={<ProjectIcon />}
         onClick={() => {
-          dispatch(setAppTitle('О проекте'));
-          props.onMenuClick;
+          onMenuClick;
         }}
         sidebarIsOpen={isOpen}
       />

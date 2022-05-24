@@ -29,18 +29,19 @@ router.get('/:id?', [
 			const tasksSnap = await firestore.collection(resource).get();
 			const total = tasksSnap ? tasksSnap.size : 0;
 
+			const {pagination,filter} = params;
 			// Если идет запрос на все документы в коллекции подменяем количество запрашиваемых данных
-			if (params.pagination?.perPage < 0)
-				params.pagination.perPage = tasksSnap.size;
-
-			if (query === 'getList' && Array.isArray(params.filter)) {
+			if (pagination?.perPage < 0)
+				pagination.perPage = tasksSnap.size;
+				console.log(params,'isArray');
+			if (Array.isArray(filter)) {
 				const firestore = app.firestore;
 				const colRef = collection(firestore, resource);
 				const wheres = [];
 				const items = [];
 				let queryAddition = '';
 				let search = null;
-				params.filter.forEach((f) => {
+				filter.forEach((f) => {
 					if (f.field !== 'q') {
 						if (f.field === 'progress') {
 							if (f.operator === '==') {
@@ -89,17 +90,21 @@ router.get('/:id?', [
 						}
 					});
 				}
+				
+				const itemStart=(pagination.page-1)*pagination.perPage>items.length?items.length:(pagination.page-1)*pagination.perPage;
+				const itemEnd=itemStart+pagination.perPage>items.length?items.length:itemStart+pagination.perPage;
+
 				res
 					.status(200)
 					.send({
-						data: items,
-						total: query === 'getList' ? total : items?.length,
+						data: items.slice(itemStart,itemEnd),
+						total: items?.length,
 					});
 			} else {
 				const { data } = await dataProvider[query](resource, params);
 				res
 					.status(200)
-					.send({ data, total: query === 'getList' ? total : data?.length });
+					.send({ data, total: query === 'getList' || query === 'getManyReference' ? total : data?.length });
 			}
 		} catch (e) {
 			console.log(e, 'error to resolve');

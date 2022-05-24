@@ -53,7 +53,7 @@ export default function AlertDialog() {
   return (
     <div style={{display: 'flex', justifyContent: 'center', padding: '10px', paddingTop: '0px'}}>
       <Button variant="contained" onClick={handleClickOpen} style={{width: '100%'}}>
-        Forgot Password?
+        Забыли пароль?
       </Button>
       <Dialog
         open={open}
@@ -61,10 +61,10 @@ export default function AlertDialog() {
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
       >
-        <DialogTitle id="alert-dialog-title">Send Password Reset?</DialogTitle>
+        <DialogTitle id="alert-dialog-title">Сбросить пароль?</DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
-            A password reset will be sent to the following email:
+            Ссылка на подтверждение сброса пароля будет направлена на почтовый ящик:
           </DialogContentText>
           <TextField
             id="outlined-basic"
@@ -78,7 +78,7 @@ export default function AlertDialog() {
         <DialogActions>
           <Button onClick={handleClose}>Cancel</Button>
           <Button onClick={handleSubmit} color="primary" autoFocus>
-            Send Email
+            Направить на почту
           </Button>
         </DialogActions>
       </Dialog>

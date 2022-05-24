@@ -5,9 +5,7 @@ import CustomAppBar from './MuiSampleAppBar';
 import CustomSideBar from './CustomMenu'
 import { getAppTitle } from '../../../store/appcontext';
 
-const CustomLayout = ({ children, ...props }) => {
-
-  const currentPage = useSelector(getAppTitle());
+const CustomLayout = (currentPage) => ({children, ...props})=> {
 
  return (
    <Layout
@@ -17,7 +15,7 @@ const CustomLayout = ({ children, ...props }) => {
          mt: 0,
        },
      }}
-     appBar={CustomAppBar}
+     appBar={CustomAppBar(currentPage)}
      sidebar={CustomSideBar}
    >
      <h1 style={{ marginBottom: '1rem'}}>

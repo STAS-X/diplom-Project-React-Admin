@@ -9,6 +9,7 @@ import {
   SelectInput,
   SelectArrayInput,
   NumberInput,
+  FunctionField,
   ReferenceInput,
   FileInput,
   FileField,
@@ -189,7 +190,7 @@ export const TaskCreate = (props) => {
 
 
   const handleError = ({ error }) => {
-    notify(`Возникла ошибка: ${error.message}`, { type: 'error' }); // default message is 'ra.notification.created'
+    notify(`Возникла ошибка: ${error}`, { type: 'warning' }); // default message is 'ra.notification.created'
     refresh();
   };
 
@@ -209,7 +210,7 @@ export const TaskCreate = (props) => {
             warnWhenUnsavedChanges
             toolbar={<CustomToolbar />}
           >
-            <h2 className="titleDialog">Создание задачи #{taskId} </h2>
+            <FunctionField addLabel={false} render={(record)=> <h3 className="titleDialog">Создание задачи #{record.id} </h3>} />
             <TextInput
               label="Наименование"
               source="title"

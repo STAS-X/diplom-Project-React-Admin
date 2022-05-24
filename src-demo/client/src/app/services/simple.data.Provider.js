@@ -16,24 +16,16 @@ const verifyLoggedStatus = () => {
   return getState().authContext.isLoggedIn;
 };
 
-export default {
-  getList: (resource, params) => {
-    const url = `${apiUrl}/${resource}`;
-    if (!verifyLoggedStatus())
-      return new Promise((resolve) => resolve({ data: [], total: 0 }));
+const convertInputFilters = (filter) => {
 
-    const filter = params.filter;
-    const operators = {
-      _gte: '>=',
-      _lte: '<=',
-      _neq: '!=',
-    };
-    // filters is like [
-    //    { field: "commentable", operator: "=", value: true},
-    //    { field: "released", operator: ">=", value: '2018-01-01'}
-    // ]
-    const filters = [];
-    Object.keys(filter).forEach((key) => {
+  const filters = [];
+  const operators = {
+    _gte: '>=',
+    _lte: '<=',
+    _neq: '!=',
+  };
+
+  Object.keys(filter).forEach((key) => {
       if (typeof filter[key] === 'object') {
         const innerFilter = filter[key];
         Object.keys(innerFilter).forEach((innerKey) => {
@@ -68,6 +60,21 @@ export default {
         );
       }
     });
+    return filters;
+}
+
+export default {
+  getList: (resource, params) => {
+    const url = `${apiUrl}/${resource}`;
+    if (!verifyLoggedStatus())
+      return new Promise((resolve) => resolve({ data: [], total: 0 }));
+
+    const {filter} = params;
+    const filters = convertInputFilters(filter);
+    // filters is like [
+    //    { field: "commentable", operator: "=", value: true},
+    //    { field: "released", operator: ">=", value: '2018-01-01'}
+    // ]
 
     return httpClient
       .get(url, {
@@ -134,12 +141,21 @@ export default {
 
   getManyReference: (resource, params) => {
     const url = `${apiUrl}/${resource}`;
-    console.log(resource, params, 'getManyRefs');
+    if (!verifyLoggedStatus())
+      return new Promise((resolve) => resolve({ data: [], total: 0 }));
+
+    const {filter} = params;
+    const filters = convertInputFilters(filter);
+
+    console.log(filters, resource, params, 'getManyRefs');
     return httpClient
       .get(url, {
         headers: {
           ProviderRequest: 'getManyReference',
-          ProviderParams: JSON.stringify(params),
+          ProviderParams: JSON.stringify({
+            ...params,
+            filter: filters.length > 0 ? filters : filter,
+          }),
         },
       })
       .then(({ status, statusText, data }) => {
@@ -154,9 +170,9 @@ export default {
 
   update: (resource, params) => {
     const url = `${apiUrl}/${resource}/${params.id}`;
+    console.log(params, 'data of item to update');
     return httpClient
       .put(url, {
-        body: JSON.stringify(params.data),
         data: JSON.stringify(params),
         headers: {
           ProviderRequest: 'update',
@@ -177,6 +193,11 @@ export default {
       filter: JSON.stringify({ id: params.ids }),
     };
     const url = `${apiUrl}/${resource}?${stringify(query)}`;
+    if (params.data) {
+      params.ids = {ids:params.ids, data: params.data}
+      delete params.data;
+    }
+    console.log(params, 'updatemany params')
     return httpClient
       .put(url, {
         data: JSON.stringify(params.ids),

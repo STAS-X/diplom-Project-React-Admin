@@ -19,6 +19,7 @@ import {
   useNotify,
   useRedirect,
   useRecordContext,
+  FunctionField,
   ReferenceArrayInput,
   FormDataConsumer,
   Toolbar,
@@ -123,7 +124,7 @@ const CustomToolbar = ({authId, ...props}) => {
     handleSubmitWithRedirect,
   } = props;
 
-  const { data: comments, total, loaded } = useGetList(
+  const { data: comments, loaded } = useGetList(
     'comments',
     { page: 1, perPage: 1 },
     { field: 'id', order: 'ASC' },
@@ -176,7 +177,7 @@ const CustomToolbar = ({authId, ...props}) => {
               handleSubmit();
               //setOnSuccess(handleSuccess);
             }}
-            redirect={loaded && total>1?`comments/${comments[Object.key(comments)[0]].id}`:'/comments/create'}
+            redirect={loaded && Object.keys(comments).length>0?`/comments/${comments[Object.keys(comments)[0]].id}`:'/comments/create'}
             handleSubmitWithRedirect={handleSubmitWithRedirect}
             disabled={!formData.commentable || isInvalid}
           />
@@ -213,10 +214,9 @@ const validateExecDate = (value, allValues) => {
 
 
 export const TaskEdit = (props) => {
-  //const notify = useNotify();
+  const notify = useNotify();
+  const refresh = useRefresh();
   //const rec= useRecordContext();
-  const {id: taskId} = props;
-
   //const fstate = useFormState();
   //console.log(fstate, 'get state of form')
   const { user: authUser } = useSelector(getAuthData());
@@ -231,7 +231,7 @@ export const TaskEdit = (props) => {
   };
 
   const handleFailure = ({ error }) => {
-    notify(`Возникла ошибка: ${error.message}`, { type: 'error' }); // default message is 'ra.notification.created'
+    notify(`Возникла ошибка: ${error}`, { type: 'warning' }); // default message is 'ra.notification.created'
     refresh();
   };
 
@@ -251,7 +251,7 @@ export const TaskEdit = (props) => {
             warnWhenUnsavedChanges
             toolbar={<CustomToolbar authId={authUser.uid} />}
           >
-            <h2 className="titleDialog">Редактирование задачи #{taskId} </h2>
+            <FunctionField addLabel={false} render={(record)=> <h3 className="titleDialog">Редактирование задачи #{record.id} </h3>} />
 
             <TextInput disabled label="Идентификатор" source="id" />
 

@@ -9,6 +9,7 @@ import {
   SimpleForm,
   TextInput,
   SelectInput,
+  FunctionField,
   NumberInput,
   ReferenceInput,
   FileInput,
@@ -90,8 +91,6 @@ const TaskForCommentSelector = ({ id, title, ...data }) => {
 
 const CustomToolbar = ({authId, ...props}) => {
 
-  console.log(props, 'Комментарий через контекст диалога');
-
   const redirect = useRedirect();
 
   const {
@@ -155,6 +154,8 @@ const validateDescription = [
 
 export const CommentEdit = (props) => {
 
+  const refresh = useRefresh();
+  const notify= useNotify();
   const { user: authUser } = useSelector(getAuthData());
 
   const {
@@ -168,9 +169,7 @@ export const CommentEdit = (props) => {
     { userId: authUser.uid, commentable: true }
   );
 
-  const {id: commentId} = props;
-
-  const transform = (data) => {
+   const transform = (data) => {
     console.log(data, 'transform data from edit');
     return {
       ...data,
@@ -180,7 +179,7 @@ export const CommentEdit = (props) => {
   };
 
   const handleFailure = ({ error }) => {
-    notify(`Возникла ошибка: ${error.message}`, { type: 'error' }); // default message is 'ra.notification.created'
+    notify(`Возникла ошибка: ${error}`, { type: 'warning' }); // default message is 'ra.notification.created'
     refresh();
   };
 
@@ -199,9 +198,8 @@ export const CommentEdit = (props) => {
           warnWhenUnsavedChanges
           toolbar={<CustomToolbar authId={authUser.uid} />}
         >
-          <h2 className="titleDialog">
-            Редактирование комментария #{commentId}{' '}
-          </h2>
+
+          <FunctionField addLabel={false} render={(record)=> <h3 className="titleDialog">Редактирование комментария #{record.id} </h3>} />
 
           <TextInput disabled label="Идентификатор" source="id" />
           <DateInput

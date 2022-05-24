@@ -381,7 +381,7 @@ const MyDatagrid = ({
       }
     }
     return () => {};
-  }, [commentList, isAppColorized, loading, loaded]);
+  }, [commentRef.current, isAppColorized, loading, loaded]);
 
   const commentRowStyle = (id) => (record, index) => {
     return {

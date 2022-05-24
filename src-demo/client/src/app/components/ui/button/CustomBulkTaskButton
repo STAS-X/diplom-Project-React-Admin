@@ -1,0 +1,42 @@
+import {
+    useListContext,
+    useUpdateMany,
+    useRefresh,
+    useNotify,
+    useUnselectAll,
+    Button,
+} from 'react-admin';
+import {VisibilityOn,VisibilityOff } from '@material-ui/icons';
+
+const BulkTaskButton = ({label, icon, status}) => {
+
+    const { selectedIds } = useListContext();
+    const refresh = useRefresh();
+    const notify = useNotify();
+    const unselectAll = useUnselectAll('tasks');
+    const [updateMany, { loading }] = useUpdateMany(
+        'tasks',
+        { ids: selectedIds, data: { status } },
+        {
+            onSuccess: () => {
+                refresh();
+                notify(status?'Задачи завершены успешно':'Задачи открыты для исполнения', { undoable: true });
+                unselectAll();
+            },
+            onError: error => notify('Ошибка при обновлении задач!', { type: 'warning' }),
+            mutationMode: 'undoable';
+        }
+    );
+
+    return (
+        <Button
+            label={label}
+            disabled={loading}
+            onClick={() => updateMany}
+        >
+            {status? <VisibilityOn/>:<VisibilityOff/>}
+        </Button>
+    );
+};
+
+export default BulkTaskButton;
