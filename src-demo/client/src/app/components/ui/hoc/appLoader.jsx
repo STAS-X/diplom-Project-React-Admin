@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import {
   toastDarkBounce,
   toastErrorBounce,
@@ -22,63 +22,56 @@ import {
   setAuthUser,
   setAuthToken,
 } from '../../../store/authcontext';
-import { getAppError, setAppError, setAppTitle } from '../../../store/appcontext';
+import {
+  getAppError,
+  setAppError,
+  setAppTitle,
+} from '../../../store/appcontext';
 import authService from '../../../services/auth.service';
 import { getHook } from 'react-hooks-outside';
 import history from '../../../../app/utils/history';
-import { useLogout, useRedirect } from 'react-admin';
+import { useLogout, useRedirect, useAuthProvider } from 'react-admin';
 
-const handleLogout = () => {
-  //const logout = useLogout();
-  //logout();
-  authProvider.logout();
-    setTimeout(()=>history.push('/login'), 500);
-};
+const AppLoader = ({ children, ...props }) => {
+  //const authProvider = useAuthProvider();
+  const dispatch = getHook('dispatch');
 
-const AppLoader = ({ children }) => {
-  //const { getState } = useStore();
-  //const logout = useLogout();
   const { user: authUser, token: authToken } = useSelector(getAuthData());
-  //const authUser = getState().authContext.user;
-  //const authToken = getState().authContext.token;
-  const isLogged = useSelector(getLoggedStatus());
-  const pathname = useSelector((state)=>state.router.location.pathname);
 
-    // if (!isLogged) {
-    //   handleLogout();
-    //   //return;
-    // }
+  const pathname = useSelector((state) => state.router.location.pathname);
+  const isLoggedStatus = useSelector(getLoggedStatus());
+
   const authDBStatus = useSelector(getAuthDBStatus());
   const authError = useSelector(getAuthError());
   const appError = useSelector(getAppError());
   const memoError = authError || appError;
   // const memoLogged = useMemo(() => isLoggedIn, [isLoggedIn]);
 
- //const dispatch = getHook('dispatch');
-  //let logout = useLogout();
+  const handleLogout = () => {
+    authProvider.logout().then(()=>history.push('/login'));
+  };
+
   useEffect(() => {
-      const dispatch = getHook('dispatch');
-      dispatch(
+    dispatch(
       setAppTitle(
         pathname.split('/')[1] === 'users'
           ? 'Пользователи'
           : pathname.split('/')[1] === 'tasks'
           ? 'Задачи'
-          : pathname.split('/')[1] === 'comments' 
+          : pathname.split('/')[1] === 'comments'
           ? 'Комментарии'
           : pathname.split('/')[1] === 'main'
-          ?'Главная страница':'О проекте'
-        ) 
-      );
-      return ()=>{}
+          ? 'Главная страница'
+          : 'О проекте'
+      )
+    );
+    return () => {};
   }, [pathname]);
 
   useEffect(() => {
     const unregisterAuthObserver = firebaseApp
       .auth()
       .onAuthStateChanged((user) => {
-        const dispatch = getHook('dispatch');
-
         if (user) {
           //const dispatch = getHook('dispatch');
           if (!authToken && localStorageService.getToken()) {
@@ -89,7 +82,7 @@ const AppLoader = ({ children }) => {
             } else {
               // Если данные уже были запрошены и они отсутствуют в базе, тогда выходим на авторизацию
               dispatch(setAuthLogout());
-              handleLogout();
+              //handleLogout();
             }
           } else {
             dispatch(setAuthDBStatus(false));
@@ -97,31 +90,29 @@ const AppLoader = ({ children }) => {
         } else {
           // No user is signed in.
           dispatch(setAuthLogout());
-          handleLogout();
+          //handleLogout();
         }
       });
-    return () => unregisterAuthObserver(); 
+    return () => unregisterAuthObserver();
     // Make sure we un-register Firebase observers when the component unmounts.
   }, []);
 
   useEffect(() => {
     //console.log('Произошла ошибка');
-    const dispatch = getHook('dispatch');
-
     if (memoError) {
+      dispatch(setAppError(null));
+      dispatch(setAuthError(null));
       if (memoError.code === 401 || memoError.code === 403) {
-        dispatch(setAppError(null));
-        dispatch(setAuthError(null));
-        dispatch(setAuthLoggedStatus(false));
-        toastErrorBounce(
-          'Ошибка доступа:',
-          `Требуется повторная авторизация: ${memoError.message}`
-        );
+        if (isLoggedStatus) {
+          //dispatch(setAuthLoggedStatus(false));
+          toastErrorBounce(
+            'Ошибка доступа:',
+            `Требуется повторная авторизация: ${memoError.message}`
+          );
           dispatch(setAuthLogout());
-          handleLogout();
+        }
+        //handleLogout();
       } else {
-        dispatch(setAppError(null));
-        dispatch(setAuthError(null));
         toastDarkBounce(
           'При выполнении запроса произошла ошибка:',
           `${memoError.message}`
@@ -131,6 +122,12 @@ const AppLoader = ({ children }) => {
 
     return () => {};
   }, [memoError]);
+
+  useEffect(() => {
+    if (!isLoggedStatus) handleLogout();
+
+    return () => {};
+  }, [isLoggedStatus]);
 
   return children;
 };

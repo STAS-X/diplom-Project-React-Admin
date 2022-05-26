@@ -3,7 +3,6 @@ import { Layout } from 'react-admin';
 import { useSelector } from 'react-redux';
 import CustomAppBar from './MuiSampleAppBar';
 import CustomSideBar from './CustomMenu'
-import { getAppTitle } from '../../../store/appcontext';
 
 const CustomLayout = (currentPage) => ({children, ...props})=> {
 

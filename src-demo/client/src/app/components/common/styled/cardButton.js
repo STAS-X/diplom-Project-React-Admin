@@ -1,14 +1,14 @@
 import IconButton from '@mui/material/IconButton';
-import {FindInPageOutlined as MenuIcon} from '@material-ui/icons';
+import {PeopleAltRounded as MenuIcon} from '@material-ui/icons';
 import Tooltip from '@mui/material/Tooltip';
-import { green, blue, red, grey } from '@material-ui/core/colors';
+import { blue, red, grey } from '@material-ui/core/colors';
 import { emphasize } from '@material-ui/core/styles/colorManipulator';
 import { getHook } from 'react-hooks-outside/lib';
-import { setAppLoading, getAppLoading } from '../../../store/appcontext';
+import { setAppCarding, getAppCarding } from '../../../store/appcontext';
 import { useSelector } from 'react-redux';
 
-const LoadingButton = ({ ...props }) => {
-  const loading = useSelector(getAppLoading());
+const ReviewButton = ({ ...props }) => {
+  const review = useSelector(getAppCarding());
 
   const handleAnimationEnd = ({ target }) => {
     if (target.classList.contains('animate__animated')) {
@@ -31,18 +31,18 @@ const LoadingButton = ({ ...props }) => {
     );
     svg.addEventListener('animationend', handleAnimationEnd, {once:true});
 
-    dispatch(setAppLoading());
+    dispatch(setAppCarding());
   };
 
   return (
-    <Tooltip title="Предзагрузка">
+    <Tooltip title="Показать карточки">
       <IconButton
         size="large"
-        aria-label="loading component inside"
+        aria-label="card view component inside"
         aria-controls="menu-appbar"
         aria-haspopup="true"
         onClick={handleClickLoading}
-        sx={{ bgcolor: loading ? emphasize(blue[900],0.06) : emphasize(grey[800],0.15), mr: 0.5 }}
+        sx={{ bgcolor: !review ? emphasize(blue[900],0.06) : emphasize(red[800],0.15), mr: 0.5 }}
         color="inherit"
       >
         <MenuIcon />
@@ -51,4 +51,4 @@ const LoadingButton = ({ ...props }) => {
   );
 };
 
-export default LoadingButton;
+export default ReviewButton;

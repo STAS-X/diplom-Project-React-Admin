@@ -8,13 +8,13 @@ import {Stack} from '@mui/material';
 import { getAuthData } from '../../../store/authcontext';
 import { getAppColorized } from '../../../store/appcontext';
 import { dateFormatter } from '../../../utils/displayDate';
-import { EmailField, SimpleShowLayout, TextField, Labeled, DateField, useGetList } from 'react-admin';
+import { EmailField, SimpleShowLayout, TextField, Labeled, DateField, useDelete } from 'react-admin';
 
 const useStyles = (isCurrentUser, isColorized) =>
   makeStyles({
     root: {
       width: '350px',
-      height: 'min-content',
+      height: '480px',
       boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
       '&:hover': {
         boxShadow: '0 14px 28px rgba(0,0,0,0.25), 0 10px 10px',
@@ -35,60 +35,19 @@ const useStyles = (isCurrentUser, isColorized) =>
     },
   });
 
-const UserCardExpand = (props) => {
-  console.log(props, 'all data')
+const UserCard = (props) => {
   const user = props.record;
-  const animation = '_rubberBand';
 
-  const [taskNum, setTaskNum] = useState(0);
-  const [taskCompleted, setCompleted] = useState(0);
-  const [taskFailed, setFailed] = useState(0);  
-  const [commentNum, setCommentNum] = useState(0);
+  const animation = '_pulse';
 
   const { user: authUser } = useSelector(getAuthData());
   const colorized = useSelector(getAppColorized());
-
-  const { data: tasks, loaded: tasksLoaded } = useGetList(
-    'tasks',
-    { page: 1, perPage: -1 },
-    { field: 'id', order: 'ASC' }
-  );
-
-  const { data: comments, loaded: commentsLoaded } = useGetList(
-    'comments',
-    { page: 1, perPage: -1 },
-    { field: 'id', order: 'ASC' }
-  );
   //const classes = useCallback((num) => , [taskCompleted]);
-  const classes = useStyles(authUser.uid === user.uid, colorized)();
+  const classes = useStyles(authUser.uid === user.uid,colorized)();
   const cardRef = useRef();
 
   useEffect(() => {
-    if (Object.keys(tasks).length > 0) {
-      const taskFilter = Object.keys(tasks)
-        .map((key) => tasks[key])
-        .filter((task) => task?.userId === authUser.id);
-      setTaskNum(taskFilter.length);
-      const taskCompleted = Object.keys(tasks)
-        .map((key) => tasks[key])
-        .filter(
-          (task) => task?.userId === authUser.id && task?.status
-        );
-       setCompleted(taskCompleted.length); 
-      const taskFailed = Object.keys(tasks)
-        .map((key) => tasks[key])
-        .filter(
-          (task) => task?.userId === authUser.id && !task?.status && new Date(task?.executeAt)>Date.now()
-        );
-       setFailed(taskFailed.length);        
-    }
-    if (Object.keys(comments).length > 0) {
-      const commentFilter = Object.keys(comments)
-        .map((key) => comments[key])
-        .filter((comment) => comment?.userId === authUser.id);
-      setCommentNum(commentFilter.length);
-    }
-
+ 
     if (cardRef.current) {
       const cardAnimate = cardRef.current;
 
@@ -113,7 +72,7 @@ const UserCardExpand = (props) => {
     }
 
     return () => {};
-  }, [tasks, comments, cardRef.current]);
+  }, [cardRef.current]);
 
   return (
     <Card variant="outlined" ref={cardRef} className={classes.root}>
@@ -139,12 +98,12 @@ const UserCardExpand = (props) => {
           sx={{
             justifyContent: 'center',
             alignItems: 'flex-start',
-            flexWrap: 'wrap',
             gap:0.2,
+            flexWrap: 'wrap',
             padding:0,
             margin:0,
             paddingTop:-5,
-            marginLeft:-1,            
+            marginLeft:-1,
             '& label': {fontSize:'110%', mb:-0.5}
           }}
         >
@@ -154,24 +113,10 @@ const UserCardExpand = (props) => {
             <TextField label="Авторизация" source="providerId" color="primary"/>
             <DateField label="Дата предыдущего входа" source="lastLogOut" locales="ru-Ru"
                       showTime={true} options={{ dateStyle: 'long', timeStyle: 'medium' }} color="primary"/>
-        </SimpleShowLayout>
+         </SimpleShowLayout>
         </Stack>
-        <Divider orientation="horizontal" style={{marginTop:10, marginBottom:10}}/>
-        <Typography variant="body2" color="primary" component="div">
-          Всего создано заданий : {tasksLoaded?taskNum:<CircularProgress color="inherit" />}
-        </Typography>
-        <Typography variant="body2" color="secondary" component="div">
-          Из них завершено : {tasksLoaded?taskCompleted:<CircularProgress color="inherit" />}
-        </Typography>
-        <Typography variant="body2" color="error" component="div">
-          Из них просрочено : {tasksLoaded?taskFailed:<CircularProgress color="inherit" />}
-        </Typography>
-        <Typography variant="body2" color="textSecondary" component="div">
-          Всего написано комментариев : {commentsLoaded?commentNum:<CircularProgress color="inherit" />}
-        </Typography>
-        <Divider orientation="horizontal" style={{marginTop:10, marginBottom:-10}}/>
       </CardContent>
     </Card>
   );
 };
-export default UserCardExpand;
+export default UserCard;

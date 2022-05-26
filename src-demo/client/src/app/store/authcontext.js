@@ -1,6 +1,7 @@
 import { createAction, createSlice } from '@reduxjs/toolkit';
 import localStorageService from '../services/localStorage.service';
 import authService from '../services/auth.service';
+import { getHook } from 'react-hooks-outside';
 // import commentService from "../services/comment.service";
 
 const initialState = localStorageService.getToken()
@@ -90,11 +91,10 @@ export const setAuthLogout = () => async (dispatch, state) => {
     if (state().authContext.isLoggedIn) {
       await authService.logout();
     }
-    dispatch(authLogout());
-
   } catch (error) {
-    dispatch(authSetError(error));
+    //dispatch(authSetError(error));
   }
+  dispatch(authLogout());
 };
 
 export const setAuthLoggedStatus = (payload) => (dispatch) => {
@@ -102,7 +102,7 @@ export const setAuthLoggedStatus = (payload) => (dispatch) => {
 };
 
 export const setAuthError = (payload) => (dispatch) => {
-  dispatch(authSetError(payload));
+      dispatch(authSetError(payload));
 };
 
 export const setAuthDBStatus = (payload) => (dispatch) => {

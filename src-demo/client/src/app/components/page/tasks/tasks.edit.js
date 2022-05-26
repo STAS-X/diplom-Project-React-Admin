@@ -97,7 +97,7 @@ const ExecutorChipSelector = ({ id, name, data }) => {
       avatar={
         <Avatar
           alt="Пользователь"
-          src={`https://i.pravatar.cc/150?u=${id}`}
+          src={`https://i.pravatar.cc/300?u=${id}`}
           sx={{ width: 24, height: 24 }}
         />
       }

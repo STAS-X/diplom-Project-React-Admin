@@ -16,12 +16,12 @@ import pink from '@material-ui/core/colors/pink';
 import red from '@material-ui/core/colors/red';
 
 import { CommentList } from './components/page/comments/comments.list';
-import { CommentShow } from './components/page/comments/comments.show';
+import { CommentTabbetShow } from './components/page/comments/comments.tabbet.show';
 import { CommentEdit } from './components/page/comments/comments.edit';
 import { CommentCreate } from './components/page/comments/comments.create';
 
 import { TaskList } from './components/page/tasks/tasks.list';
-import { TaskShow } from './components/page/tasks/tasks.show';
+import { TaskTabbetShow } from './components/page/tasks/tasks.tabbet.show';
 import { TaskEdit } from './components/page/tasks/tasks.edit';
 import { TaskCreate } from './components/page/tasks/tasks.create';
 
@@ -135,7 +135,7 @@ const App = (props) => {
         name="tasks"
         icon={TaskIcon}
         list={TaskList}
-        show={TaskShow}
+        show={TaskTabbetShow}
         create={TaskCreate}
         edit={TaskEdit}
       />
@@ -143,7 +143,7 @@ const App = (props) => {
         name="comments"
         icon={CommentIcon}
         list={CommentList}
-        show={CommentShow}
+        show={CommentTabbetShow}
         create={CommentCreate}
         edit={CommentEdit}
       />

@@ -158,6 +158,9 @@ export const CommentEdit = (props) => {
   const notify= useNotify();
   const { user: authUser } = useSelector(getAuthData());
 
+  const [currentTask] = React.useState(localStorage.getItem('currentTaskId'))
+  if (localStorage.getItem('currentTaskId')) localStorage.removeItem('currentTaskId');
+
   const {
     data: comments,
     total,
@@ -182,6 +185,8 @@ export const CommentEdit = (props) => {
     notify(`Возникла ошибка: ${error}`, { type: 'warning' }); // default message is 'ra.notification.created'
     refresh();
   };
+
+
 
   return (
     <>
@@ -219,7 +224,6 @@ export const CommentEdit = (props) => {
 
           <FormDataConsumer>
             {({ formData, ...rest }) => {
-              console.log(formData, 'data form edit');
               return (
                 <ReferenceInput
                   label="Комментируемая задача"
@@ -234,6 +238,7 @@ export const CommentEdit = (props) => {
                     optionText={(choise) => (
                       <TaskForCommentSelector {...choise} />
                     )}
+                    defaultValue={currentTask?currentTask:''}
                     helperText="Выберите исполнителей"
                   />
                 </ReferenceInput>

@@ -5,6 +5,7 @@ const initialState = localStorageService.getAppData()
   ? {
       theme: 'light',
       appTitle: 'Главная страница',
+      carding: false,
       loading: true,
       colorized: true,
       error: null,
@@ -13,6 +14,7 @@ const initialState = localStorageService.getAppData()
   : {
       theme: 'light',
       appTitle: 'Главная страница',
+      carding: false,
       loading: true,
       colorized: true,
       error: null,
@@ -38,6 +40,10 @@ const appsettingsSlice = createSlice({
       state.colorized = action.payload;
       localStorageService.setAppData({ colorized: action.payload });
     },
+    appSetCarding: (state, action) => {
+      state.carding = action.payload;
+      localStorageService.setAppData({ carding: action.payload });
+    },
     appSetError: (state, action) => {
       state.error = action.payload;
     },
@@ -45,7 +51,7 @@ const appsettingsSlice = createSlice({
 });
 
 const { reducer: appReducer, actions } = appsettingsSlice;
-const { appSetTheme, appSetTitle, appSetColorized, appSetLoading, appSetError } =
+const { appSetTheme, appSetTitle, appSetColorized, appSetCarding, appSetLoading, appSetError } =
   actions;
 
 // const addCommentRequested = createAction("comments/addCommentRequested");
@@ -63,6 +69,10 @@ export const setAppLoading = () => (dispatch, state) => {
   dispatch(appSetLoading(!state().appContext.loading));
 };
 
+export const setAppCarding = () => (dispatch, state) => {
+  dispatch(appSetCarding(!state().appContext.carding));
+};
+
 export const setAppColorized = () => (dispatch, state) => {
   dispatch(appSetColorized(!state().appContext.colorized));
 };
@@ -75,6 +85,7 @@ export const getAppTheme = () => (state) => state.appContext.theme;
 export const getAppTitle = () => (state) => state.appContext.appTitle;
 export const getAppLoading = () => (state) => state.appContext.loading;
 export const getAppColorized = () => (state) => state.appContext.colorized;
+export const getAppCarding = () => (state) => state.appContext.carding;
 export const getAppError = () => (state) => state.appContext.error;
 
 export default appReducer;

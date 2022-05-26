@@ -7,6 +7,7 @@ import firebase from 'firebase/compat/app';
 import ForgotPasswordButton from './CustomForgotPassword';
 import { getHook } from 'react-hooks-outside';
 import authService from '../../services/auth.service';
+import {nanoid} from 'nanoid';
 import {
   setAuthLoggedStatus,
   setAuthDBStatus,
@@ -15,42 +16,7 @@ import {
 } from '../../store/authcontext';
 //import { GoogleAuthProvider } from "firebase/auth";
 
-const handleUserTokenRefresh = async (user) => {
-  const dispatch = getHook('dispatch');
-  //const logout = getHook('logout');
-
-  const {
-    displayName:name,
-    email,
-    photoURL:url,
-    uid,
-    providerData: [{ providerId }],
-  } = user._delegate;
-
-  const authUser = {
-    name: name ? name : email,
-    email,
-    url: url
-      ? url
-      : `https://avatars.dicebear.com/api/avataaars/${(Math.random() + 1)
-          .toString(36)
-          .substring(7)}.svg`,
-    providerId,
-    uid,
-  };
-  const authToken = { ...user._delegate.stsTokenManager };
-console.log(authToken, 'authtoken taked');
-  // Проверяем на существование зарегистрированного пользователя и если он есть в firebase.auth() загружаем его в БД
-  const { data } = await authService.register({
-    user: authUser,
-    token: authToken,
-  });
-
-  dispatch(setAuthToken(data.token));
-  dispatch(setAuthUser(data.user));
-  dispatch(setAuthLoggedStatus(true));
-  dispatch(setAuthDBStatus(false));
-};
+const dispatch = getHook('dispatch');
 
 const SignInScreen = ({ setData, ...props }) => {
   // Configure FirebaseUI.
@@ -151,12 +117,46 @@ const SignInScreen = ({ setData, ...props }) => {
     },
   };
 
+  const handleUserTokenRefresh = async (user) => {
+    //const logout = getHook('logout');
+
+    const {
+      displayName: name,
+      email,
+      photoURL: url,
+      uid,
+      providerData: [{ providerId }],
+    } = user._delegate;
+
+    const authUser = {
+      name: name ? name : email,
+      email,
+      url: url ? url : `https://i.pravatar.cc/300?u=${nanoid(10)}`,
+      providerId,
+      uid,
+    };
+    const authToken = { ...user._delegate.stsTokenManager };
+    console.log(authToken, 'authtoken taked');
+    // Проверяем на существование зарегистрированного пользователя и если он есть в firebase.auth() загружаем его в БД
+    const { data } = await authService.register({
+      user: authUser,
+      token: authToken,
+    });
+
+    dispatch(setAuthLoggedStatus(true));
+    dispatch(setAuthToken(data.token));
+    dispatch(setAuthUser(data.user));
+    dispatch(setAuthDBStatus(false));
+  };
+
   const [isSignedIn, setIsSignedIn] = useState(false); // Local signed-in state.
+  const dispatch = getHook('dispatch');
 
   useEffect(() => {
     const unregisterAuthObserver = firebase
       .auth()
       .onAuthStateChanged((user) => {
+
         console.log('login dialog started');
         if (user) {
           setIsSignedIn(!!user);

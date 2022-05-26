@@ -21,23 +21,29 @@ import EventMonitor from './app/components/common/event/EventMonitor';
 import { getAuthData } from './app/store/authcontext';
 import localStorageService from './app/services/localStorage.service';
 
-setHook('dispatch', useDispatch)
-setHook('store', useStore)
-  .setHook('selector', () => useSelector)
-  .setHook('logout', useLogout)
-  .setHook('redirect', useRedirect);
-
 const store =createAdminStore({
         authProvider,
         dataProvider,
         history,
       })
 
+const MakeHookElement = () => {
+    setHook('dispatch', useDispatch);
+    setHook('store', useStore)
+      .setHook('selector', () => useSelector)
+      .setHook('logout', useLogout)
+      .setHook('redirect', useRedirect);
+
+  return (
+    <ReactHooksWrapper />
+  )
+}
 
 ReactDOM.render(
   <React.StrictMode>
     <Provider store={store}>
       <BrowserRouter>
+        <MakeHookElement />
         <AppLoader history={history}>
           <App
             authProvider={authProvider}
@@ -48,8 +54,6 @@ ReactDOM.render(
             <Redirect exact from="/" to="/main" />
           </Switch>
         </AppLoader>
-
-        <ReactHooksWrapper />
       </BrowserRouter>
       <EventMonitor />
     </Provider>

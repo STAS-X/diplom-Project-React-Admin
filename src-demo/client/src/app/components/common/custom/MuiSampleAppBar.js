@@ -32,15 +32,25 @@ import LogoutIcon from '@material-ui/icons/ExitToAppRounded';
 import { useRedirect, useRefresh } from 'react-admin';
 
 import { useLogout, setSidebarVisibility } from 'react-admin';
+import { getHook } from 'react-hooks-outside/lib';
 import { useDispatch, useSelector } from 'react-redux';
-import { getAppTheme, getAppTitle, setAppTitle  } from '../../../store/appcontext';
-import { getAuthData, setAuthLogout } from '../../../store/authcontext';
-
+import {
+  getAppTheme,
+  getAppTitle,
+  setAppTitle,
+} from '../../../store/appcontext';
+import {
+  getAuthData,
+  getLoggedStatus,
+  setAuthLoggedStatus,
+  setAuthLogout,
+} from '../../../store/authcontext';
 import CustomTitle from './customTitle';
 
 import ThemeButton from '../styled/themButton';
 import ColorizedButton from '../styled/colorButton';
 import LoadingButton from '../styled/loadingButton';
+import ReviewButton from '../styled/cardButton';
 
 const pages = [
   { title: 'Главная', icon: DefaultIcon, resource: '/main' },
@@ -88,7 +98,10 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
 const CustomAppBar = (currentPage) => (props) => {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
-  const dispatch = useDispatch();
+
+  const logout = useLogout();//getHook('logout');
+  const dispatch = getHook('dispatch');
+  //const dispatch = useDispatch();
   //const { getState } = useStore()
   const redirect = useRedirect();
   const theme = useSelector(getAppTheme());
@@ -123,11 +136,16 @@ const CustomAppBar = (currentPage) => (props) => {
     setAnchorElUser(null);
   };
 
-  const logout = useLogout();
+  // const logout = useLogout();
+  // const handleLogout = () => {
+  //   //dispatch(setAuthLogout());
+  //   logout();
+  // };
   const handleLogout = () => {
-    //dispatch(setAuthLogout());
+    dispatch(setAuthLogout());
     logout();
   };
+
   const refresh = useRefresh();
   const handleRefresh = () => {
     //dispatch(setAuthLogout());
@@ -137,7 +155,7 @@ const CustomAppBar = (currentPage) => (props) => {
   const handleProject = () => {
     dispatch(setAppTitle('О проекте'));
     redirect('/project');
-  }
+  };
 
   return (
     <AppBar
@@ -241,8 +259,9 @@ const CustomAppBar = (currentPage) => (props) => {
         </Box> */}
 
         <Box sx={{ flexGrow: 0, display: 'flex', mr: 3 }}>
+          <ReviewButton/>
           <LoadingButton />
-          <ColorizedButton/>
+          <ColorizedButton />
           <ThemeButton />
           <Tooltip title={authUser ? authUser.name : '-XXX-'}>
             <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
@@ -259,9 +278,7 @@ const CustomAppBar = (currentPage) => (props) => {
                   alt="Remy Sharp"
                   /*title={`${authUser?.email ? authUser?.email : 'email empty'}`}*/
                   sx={{ width: 48, height: 48 }}
-                  src={
-                    authUser?.url ? authUser.url : '/broken-image.jpg'
-                  }
+                  src={authUser?.url ? authUser.url : '/broken-image.jpg'}
                 >
                   TR
                 </Avatar>

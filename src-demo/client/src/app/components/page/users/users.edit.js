@@ -1,163 +1,242 @@
-// in src/User.js
 import * as React from 'react';
-// tslint:disable-next-line:no-var-requires
+import { useSelector } from 'react-redux';
 import {
-  Datagrid,
-  List,
-  Show,
-  Filter,
-  SimpleShowLayout,
-  SimpleForm,
-  TextField,
-  TextInput,
-  ListButton,
-  ShowButton,
-  EditButton,
-  DeleteButton,
-  FormGroupContextProvider,
+  Edit,
+  DateInput,
   SaveButton,
-  Toolbar,
-  useEditController,
-  EditContextProvider,
-  useFormGroup,
-  minLength,
+  EditButton,
+  SimpleForm,
+  TextInput,
+  EmailField,
+  ImageField,
+  DateField,
+  FunctionField,
+  TextField,
+  NumberInput,
   useNotify,
+  Toolbar,
   useRefresh,
-  useRedirect,
+  useEditContext,
+  required,
+  minLength,
+  maxLength,
+  minValue,
+  maxValue,
+  number,
 } from 'react-admin';
-import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
-  Typography,
-} from '@material-ui/core';
-import ExpandMore from '@material-ui/icons/ExpandMore';
+import { Stack, Button } from '@mui/material';
+import { ReorderRounded, PortraitRounded } from '@material-ui/icons';
+import { getAuthData } from '../../../store/authcontext';
+import { nanoid } from 'nanoid';
+import { dateFormatter } from '../../../utils/displayDate';
 
-
-const AccordionSectionTitle = ({ children, name }) => {
-  const formGroupState = useFormGroup(name);
+const CustomToolbar = ({ authId, ...props }) => {
+  //const notify = useNotify();
+  //const redirect = useRedirect();
+  //const refresh = useRefresh();
+  const {
+    invalid: isInvalid,
+    pristine,
+    record,
+    handleSubmit,
+    handleSubmitWithRedirect,
+  } = props;
 
   return (
-    <Typography
-      color={
-        formGroupState.invalid && formGroupState.dirty ? 'error' : 'inherit'
-      }
+    <Toolbar
+      {...props}
+      style={{
+        display: 'inline-flex',
+        justifyContent: 'space-between',
+        minWidth: 500,
+      }}
     >
-      {children}
-    </Typography>
+      <SaveButton
+        label="Сохранить"
+        onClick={() => {
+          handleSubmit();
+          //setOnSuccess(handleSuccess);
+        }}
+        redirect={'show'}
+        disabled={(isInvalid || pristine) && record.id !== authId}
+      />
+    </Toolbar>
   );
 };
 
-const PostCreateToolbar = (props) => (
-  <Toolbar {...props}>
-    <SaveButton
-      label="post.action.save_and_show"
-      redirect="show"
-      submitOnEnter={true}
-    />
-    <SaveButton
-      label="post.action.save_and_add"
-      redirect={false}
-      submitOnEnter={false}
-      variant="text"
-    />
-  </Toolbar>
-);
+const validateFio = [
+  required('Необходимо ввести ФИО'),
+  minLength(3, 'ФИО должно быть более 3-х символов'),
+];
+const validateAge = [
+  required('Необходимо указать возраст'),
+  minValue(10, 'Не может быть меньше 10 лет'),
+  maxValue(100, 'Не может быть больше 100 лет'),
+];
 
-const PostEditActions = () => (
-  <TopToolbar>
-    <ListButton />
-    <ShowButton />
-  </TopToolbar>
-);
+const MyProfileImage = ({ transform, authURL, profileURL, setProfileURL }) => {
+  const { record, setTransform } = useEditContext();
+  console.log(record, 'from context');
 
-const MyEdit = (props) => {
-  const controllerProps = useEditController(props);
-  const {
-    basePath, // deduced from the location, useful for action buttons
-    defaultTitle, // the translated title based on the resource, e.g. 'Post #123'
-    error, // error returned by dataProvider when it failed to fetch the record. Useful if you want to adapt the view instead of just showing a notification using the `onFailure` side effect.
-    loaded, // boolean that is false until the record is available
-    loading, // boolean that is true on mount, and false once the record was fetched
-    record, // record fetched via dataProvider.getOne() based on the id from the location
-    redirect, // the default redirection route. Defaults to 'list'
-    resource, // the resource name, deduced from the location. e.g. 'posts'
-    save, // the update callback, to be passed to the underlying form as submit handler
-    saving, // boolean that becomes true when the dataProvider is called to update the record
-    version, // integer used by the refresh feature
-  } = controllerProps;
-  console.log(record);
+  if (!profileURL) {
+    const newURL = {
+      picture: [{ url: record.url, desc: 'Фото' }],
+    };
+    setProfileURL(newURL);
+  }
+
+  const handleClick = (isProfile) => {
+    if (isProfile) {
+      const newURL = {
+        picture: [
+          {
+            url: authURL,
+            desc: 'Фото',
+          },
+        ],
+      };
+      setProfileURL(newURL);
+      setTransform(transform(authURL));      
+    } else {
+      const newURL = {
+        picture: [
+          {
+            url: `https://i.pravatar.cc/300?u=${nanoid(10)}`,
+            desc: 'Фото',
+          },
+        ],
+      };
+      setProfileURL(newURL);
+      setTransform(transform(newURL.picture[0].url));
+    }
+  };
+
   return (
-    <EditContextProvider value={controllerProps}>
-      <div>
-        <h2>Новый титл для формы редактирования</h2>
-        {React.cloneElement(props.children, {
-          basePath,
-          record: { ...record, name: 'Test XXX', age: 40 },
-          redirect,
-          resource,
-          save,
-          saving,
-          version,
-        })}
-      </div>
-    </EditContextProvider>
+    <Stack
+      direction="row"
+      display="inline-flex"
+      sx={{
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',
+        '& img': { width: 350, height: 350, maxHeight: 350 },
+      }}
+    >
+      <ImageField record={profileURL} source="picture" src="url" title="desc" />
+      <Button
+        variant="text"
+        color="primary"
+        startIcon={<ReorderRounded />}
+        onClick={() => handleClick(false)}
+      >
+        Случайно
+      </Button>
+      <Button
+        variant="text"
+        color="primary"
+        startIcon={<PortraitRounded />}
+        onClick={() => handleClick(true)}
+      >
+        Из профиля
+      </Button>
+    </Stack>
   );
 };
 
 export const UserEdit = (props) => {
   const notify = useNotify();
   const refresh = useRefresh();
-  const redirect = useRedirect();
 
-  const onSuccess = () => {
-    notify(`Изменения были применены успешно`);
-    redirect('/posts');
+  //const rec= useRecordContext();
+  //const fstate = useFormState();
+  //console.log(fstate, 'get state of form')
+  const { user: authUser } = useSelector(getAuthData());
+
+  const [profileURL, setProfileURL] = React.useState(null);
+
+  const handleFailure = (error) => {
+    notify(`Возникла ошибка: ${error}`, { type: 'warning' }); // default message is 'ra.notification.created'
     refresh();
   };
 
+  const transform = (newUrl) => (data) => {
+    console.log(data, newUrl, 'transform data from edit');
+    return {
+      ...data,
+      url: newUrl ? newUrl : data.url,
+    };
+  };
+
   return (
-    <MyEdit onSuccess={onSuccess} {...props}>
-      <SimpleForm
-        toolbar={<PostCreateToolbar />}
-        actions={<PostEditActions />}
-        submitOnEnter={true}
-        variant="standard"
-        margin="normal"
-      >
-          <TextInput source="name" />
-          <TextInput source="age" />
-          <TextInput source="email" />
-          <TextInput source="id" />
-          <TextInput source="providerId" />
-          <TextInput source="lastLogOut" />
-        <FormGroupContextProvider name="options">
-          <Accordion>
-            <AccordionSummary
-              expandIcon={<ExpandMore />}
-              aria-controls="options-content"
-              id="options-header"
-            >
-              <AccordionSectionTitle name="options">
-                Options
-              </AccordionSectionTitle>
-            </AccordionSummary>
-            <AccordionDetails
-              id="options-content"
-              aria-labelledby="options-header"
-              variant="outlined"
-            >
-              <TextInput source="teaser" validate={minLength(20)} />
-              <TextInput
-                source="sample"
-                validate={minLength(10)}
-                style={{ marginLeft: '10px', marginRight: '10px' }}
-              />
-              <TextInput source="tester" validate={minLength(15)} />
-            </AccordionDetails>
-          </Accordion>
-        </FormGroupContextProvider>
-      </SimpleForm>
-    </MyEdit>
+    <>
+      {authUser && (
+        <Edit
+          {...props}
+          mutationMode="undoable"
+          onFailure={handleFailure}
+          hasShow={false}
+          redirect={false}
+        >
+          <SimpleForm
+            mode="onBlur"
+            warnWhenUnsavedChanges
+            toolbar={<CustomToolbar authId={authUser.uid} />}
+          >
+            <FunctionField
+              addLabel={false}
+              render={(record) => (
+                <h3 className="titleDialog">
+                  Редактирование профиля пользователя #{record.name}{' '}
+                </h3>
+              )}
+            />
+
+            <TextField disabled label="Идентификатор" source="id" />
+
+            <MyProfileImage
+              label="Фото профиля"
+              record={props}
+              profileURL={profileURL}
+              authURL={authUser.url}
+              transform={transform}
+              setProfileURL={setProfileURL}
+            />
+
+            <TextInput
+              label="ФИО"
+              source="name"
+              validate={validateFio}
+              defaultValue={'John Dow'}
+            />
+
+            <NumberInput
+              label="Возраст"
+              source="age"
+              step={5}
+              validate={validateAge}
+              defaultValue={20}
+            />
+            <TextField disabled label="Авторизация" source="providerId" />
+            <DateInput
+              disabled
+              label="Создан"
+              source="createdAt"
+              parse={dateFormatter}
+              //defaultValue={dateFormatter(new Date())}
+            />
+            <EmailField label="Логин" source="email" />
+
+            <DateField
+              locales="ru-Ru"
+              showTime={true}
+              options={{ dateStyle: 'long', timeStyle: 'medium' }}
+              label="Ранее входил"
+              source="lastLogOut"
+              //parse={dateFormatter}
+              //defaultValue={dateFormatter(new Date())}
+            />
+          </SimpleForm>
+        </Edit>
+      )}
+    </>
   );
 };

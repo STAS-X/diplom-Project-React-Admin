@@ -23,13 +23,15 @@ import {
   useGetOne,
   useListContext,
   useTranslate,
+  RecordContextProvider,
   Pagination as RaPagination,
   PaginationActions as RaPaginationActions,
 } from 'react-admin';
-import { Stack, Chip } from '@mui/material';
+import { Stack, Card, Chip } from '@mui/material';
 import UserCardExpand from '../../common/cards/user.card.expand';
+import UserCard from '../../common/cards/user.card.list';
 import { getAuthData } from '../../../store/authcontext';
-import { getAppColorized, getAppLoading } from '../../../store/appcontext';
+import { getAppColorized, getAppCarding, getAppLoading } from '../../../store/appcontext';
 
 const QuickFilter = ({ label }) => {
   const translate = useTranslate();
@@ -90,7 +92,7 @@ const UserToolbar = ({ userId }) => {
     <Stack direction="row" justifyContent="space-between">
       <FilterForm filters={filters} />
       <div>
-        <SortButton fields={['name', 'email', 'loggedOut']} />
+        <SortButton fields={['name', 'age', 'loggedOut']} />
         <FilterButton filters={filters} />
         {/*<CreateButton />*/}
       </div>
@@ -100,13 +102,17 @@ const UserToolbar = ({ userId }) => {
 
 export const UserList = (props) => {
 
-   const { loadedOnce: isLoading } = useSelector(
+   const { loadedOnce: isLoading, ids } = useSelector(
     (state) => state.admin.resources.users.list
+  );
+   const users = useSelector(
+    (state) => state.admin.resources.users.data
   );
 
   const { user: authUser } = useSelector(getAuthData());
   const isAppColorized = useSelector(getAppColorized());
   const isAppLoading = useSelector(getAppLoading());
+  const isCarding = useSelector(getAppCarding());
 
  
   return (
@@ -122,11 +128,26 @@ export const UserList = (props) => {
           {!(!isLoading && isAppLoading) && (
             <UserToolbar userId={authUser.uid} />
           )}
-          {!(!isLoading && isAppLoading) && (
+          { !isCarding && !(!isLoading && isAppLoading) && (
             <MyDatagrid
               isAppColorized={isAppColorized}
+              isCarding={isCarding}
               authId={authUser.uid}
             />
+          )}
+          { isCarding && !(!isLoading && isAppLoading) && (
+            <Stack direction="row" 
+                   display="inline-flex"
+                   sx={{
+                      justifyContent: 'space-around',
+                      alignItems: 'flex-start',
+                      gap:10,
+                      flexWrap: 'wrap',
+                      py: 5
+                    }}
+            >
+              {ids.map(id => <UserCard key={id} record={users[id]} />)}
+            </Stack>
           )}
           {!(!isLoading && isAppLoading) && <UserPagination />}
         </ListBase>
@@ -139,12 +160,12 @@ export const UserList = (props) => {
 
 const MyDatagrid = ({
   isAppColorized,
+  isCarding,
   authId,
   ...props
 }) => {
 
   const userRef = React.useRef();
-  const userList = userRef.current;
   const { loaded, loading } = useListContext();
 
   const userRowStyle = (id) => (record, index) => {
@@ -154,6 +175,7 @@ const MyDatagrid = ({
   };
 
   React.useEffect(() => {
+    const userList = userRef.current;
     if (userList) {
       const ths = userList.querySelectorAll('thead>tr>th');
       for (const userTh of ths)
@@ -194,7 +216,6 @@ const MyDatagrid = ({
       <TextField label="Имя" source="name" />
       <TextField
         label="Возраст"
-        sortable={false}
         source="age"
         defaultValue={'не указан'}
       />
@@ -209,7 +230,7 @@ const MyDatagrid = ({
       <FunctionField
         label=""
         render={(record) => {
-          if (record.id === authId) return <EditButton label="" />;
+          if (record.id === authId) return <EditButton basePath="/users" label="" record={record} />;
         }}
       />
     </Datagrid>

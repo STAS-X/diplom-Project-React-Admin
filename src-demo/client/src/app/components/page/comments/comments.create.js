@@ -165,6 +165,9 @@ const validateDescription = [
 export const CommentCreate = (props) => {
   const { user: authUser } = useSelector(getAuthData());
 
+  const [currentTask] = React.useState(localStorage.getItem('currentTaskId'))
+  if (localStorage.getItem('currentTaskId')) localStorage.removeItem('currentTaskId');
+
   const {
     data: comments,
     total,
@@ -216,7 +219,6 @@ export const CommentCreate = (props) => {
 
             <FormDataConsumer>
               {({ formData, ...rest }) => {
-                console.log(formData, 'data form edit');
                 return (
                   <>
                     {loaded && (
@@ -238,6 +240,7 @@ export const CommentCreate = (props) => {
                           optionText={(choise) => (
                             <TaskForCommentSelector {...choise}/>
                           )}
+                          defaultValue={currentTask?currentTask:''}
                           helperText={
                             'Выберите задачу для комментирования'
                           }

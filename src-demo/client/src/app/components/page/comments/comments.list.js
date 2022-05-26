@@ -224,7 +224,7 @@ const CommentAuthorField = ({ userId }) => {
             <Avatar
               alt="Пользователь"
               src={
-                user.url ? user.url : `https://i.pravatar.cc/150?u=${user.id}`
+                user.url ? user.url : `https://i.pravatar.cc/300?u=${user.id}`
               }
               sx={{ width: 24, height: 24 }}
             />

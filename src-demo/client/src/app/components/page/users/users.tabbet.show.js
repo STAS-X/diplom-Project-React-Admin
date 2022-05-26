@@ -241,7 +241,11 @@ export const UserTabbetShow = (props) => {
   const { data: user, loaded} = useGetOne('users', props.id);
   //const { user: authUser } = useSelector(getAuthData());
   const { pathname } = props.history.location;
-  if (pathname.slice(-4)==="show") props.history.location.pathname = props.history.location.pathname+'/users';
+  if (pathname.slice(-4)==="show") {
+    const newTab = localStorage.getItem('currentTab')
+    if (newTab) localStorage.removeItem('currentTab');
+    props.history.location.pathname = props.history.location.pathname+(newTab?newTab:'/user');
+  }
 
   //if (newPath.slice(-4)==="show")
 
@@ -252,7 +256,7 @@ return (
       variant="scrollable"
       spacing={2}
     >
-      <Tab label="Общая информация" icon={<ViewList style={{marginRight : 5}}/>} path="users">
+      <Tab label="Общая информация" icon={<ViewList style={{marginRight : 5}}/>} path="user">
         <TextField label="Имя пользователя" source="name" />
         <TextField label="Возраст" source="age" />
         <EmailField label="Почта" source="email" />
@@ -263,7 +267,7 @@ return (
                    defaultValue={dateFormatter(Date.now())}  />
       </Tab>
       <Tab label="Профиль" icon={<UserIcon style={{marginRight : 5}}/>} path="card">
-        <UserCardExpand style={{ margin:20}}/>
+        <UserCardExpand style={{ margin:20}} userId={props.id}/>
       </Tab>
       <Tab label="Задачи" icon={<TaskIcon style={{marginRight : 5}}/>} path="tasks">
         <ReferenceManyField
