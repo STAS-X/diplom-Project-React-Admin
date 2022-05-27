@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useRef} from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import { green, blue, red } from '@material-ui/core/colors';
 import { emphasize } from '@material-ui/core/styles/colorManipulator';
@@ -21,28 +21,26 @@ import {
   useGetOne,
   useGetList,
 } from 'react-admin';
-import TaskProgressBar from '../../common/progressbar/task.progress';
+import TaskProgressBar from '../progressbar/task.progress';
 import { getAuthData } from '../../../store/authcontext';
 import { getAppColorized } from '../../../store/appcontext';
 import { dateFormatter } from '../../../utils/displayDate';
 import { getRandomInt } from '../../../utils/getRandomInt';
 
-const useStyles = (isCurrentUser, isColorized, loaded) =>
+const useStyles = (isCurrentUser, isColorized) =>
   makeStyles({
     root: {
-      right: 0,
+      width: '380px',
+      height: '240px',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
+      '&:hover': {
+        boxShadow: '0 14px 28px rgba(0,0,0,0.25), 0 10px 10px',
+      },
+      backgroundColor: isColorized?emphasize(
+        isCurrentUser ? green[100] : red[100],
+        0.05
+      ):'whitesmoke',
       transition: '300ms ease-out',
-      width: loaded ? 380 : 0,
-      height: 'min-content',
-      zIndex: 1,
-      //maxWidth: '200px',
-      opacity: loaded ? 1 : 0,
-      marginRight: '2em',
-      marginTop: '3em',
-      position: 'absolute',
-      backgroundColor: isColorized
-        ? emphasize(isCurrentUser ? green[100] : red[100], 0.05)
-        : 'whitesmoke',
     },
     media: {
       justifyContent: 'center',
@@ -54,41 +52,51 @@ const useStyles = (isCurrentUser, isColorized, loaded) =>
     },
   });
 
-const TaskAsideCard = ({ id }) => {
-  if (!id) return null;
-  const { data: task, loaded: taskLoaded } = useGetOne('tasks', id);
 
-  if (!taskLoaded) return null;
+const TaskCard = ({ record: task }) => {
 
-  return <TaskCard task={task} />;
-};
+  const animation = '_pulse';
 
-function TaskCardCreator({ task }) {
   const { user: authUser } = useSelector(getAuthData());
   const colorized = useSelector(getAppColorized());
+  const cardRef = useRef();
 
-  const { data: user, loading: userLoading, loaded: userLoaded } = useGetOne('users', task.userId);
-  const { total, loaded: commentsLoaded } = useGetList(
-    'comments',
-    { page: 1, perPage: -1 },
-    { field: 'id', order: 'ASC' },
-    { taskId: task.id }
-  );
+ useEffect(() => {
+ 
+    if (cardRef.current) {
+      const cardAnimate = cardRef.current;
+
+      const handleAnimationEnd = (e) => {
+        e.stopPropagation();
+        e.target.classList.remove(
+          'animate__animated',
+          `animate_${animation}`,
+          'animate__fast'
+        );
+      };
+      const handleMouseEnter = ({ target }) => {
+        target.classList.add(
+          'animate__animated',
+          `animate_${animation}`,
+          'animate__fast'
+        );
+      };
+
+      cardAnimate.addEventListener('animationend', handleAnimationEnd);
+      cardAnimate.addEventListener('mouseenter', handleMouseEnter);
+    }
+
+    return () => {};
+  }, [cardRef.current]);
+
 
   const classes = useStyles(
-    user ? authUser.uid === user.id : false,
+    authUser.uid === task.userId,
     colorized,
-    !userLoading
   )();
 
   return (
-    <Card variant="outlined" className={classes.root}>
-      <CardMedia
-        className={classes.media}
-        image={user ? user.url : authUser.url}
-        component="img"
-        title="Avatar"
-      ></CardMedia>
+    <Card variant="outlined" ref={cardRef} className={classes.root}>
       <CardContent>
         <Typography
           gutterBottom
@@ -103,7 +111,22 @@ function TaskCardCreator({ task }) {
             marginLeft: 10,
           }}
         >
-          {user ? user.name : ''}
+          {task.title}
+        </Typography>
+        <Typography
+          gutterBottom
+          color="secondary"
+          variant="h6"
+          component="h3"
+          style={{
+            textAlign: 'center',
+            padding: 0,
+            margin: 0,
+            marginBottom: -10,
+            marginLeft: 10,
+          }}
+        >
+          {task.description}
         </Typography>
         <Grid
           container
@@ -115,12 +138,6 @@ function TaskCardCreator({ task }) {
         >
           <Grid item xs={6}>
             <SimpleShowLayout record={task}>
-              <TextField label="Название" source="title" />
-              <TextField
-                label="Описание"
-                sortable={false}
-                source="description"
-              />
               <DateField
                 label="Дата исполнения"
                 source="executeAt"
@@ -128,10 +145,6 @@ function TaskCardCreator({ task }) {
                 options={{ dateStyle: 'long' }}
                 color="primary"
               />
-            </SimpleShowLayout>
-          </Grid>
-          <Grid item xs={6}>
-            <SimpleShowLayout record={task}>
               <FunctionField
                 label="Ход исполнения"
                 source="progress"
@@ -142,7 +155,10 @@ function TaskCardCreator({ task }) {
                   />
                 )}
               />
-
+            </SimpleShowLayout>
+          </Grid>
+          <Grid item xs={6}>
+            <SimpleShowLayout record={task}>            
               <FunctionField
                 label="Статус"
                 source="status"
@@ -223,23 +239,9 @@ function TaskCardCreator({ task }) {
             </SimpleShowLayout>
           </Grid>
         </Grid>
-        <Divider
-          orientation="horizontal"
-          style={{ marginBottom: 10 }}
-        />
-        <Typography variant="body2" color="primary" component="div">
-          Всего комментариев :{' '}
-          {commentsLoaded ? total? total: 0 : <CircularProgress color="inherit" />}
-        </Typography>
-        <Divider
-          orientation="horizontal"
-          style={{ marginTop: 10}}
-        />
       </CardContent>
     </Card>
   );
 }
 
-const TaskCard = React.memo(TaskCardCreator);
-
-export default TaskAsideCard;
+export default TaskCard;

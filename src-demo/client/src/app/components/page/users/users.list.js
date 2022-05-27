@@ -100,6 +100,21 @@ const UserToolbar = ({ userId }) => {
   );
 };
 
+const updateListColorizedStyle = (userList, isAppColorized) => {
+  const ths = userList.querySelectorAll('thead>tr>th');
+  for (const userTh of ths)
+    userTh.style.backgroundColor = isAppColorized ? blue[100] : 'whitesmoke';
+  const paging = userList.nextSibling?.querySelector('div.MuiToolbar-root');
+  if (paging) {
+    paging.style.backgroundColor = isAppColorized ? blue[200] : 'whitesmoke';
+    paging.querySelector('p').textContent = 'Строк на странице';
+    if (paging.querySelector('.previous-page'))
+      paging.querySelector('.previous-page').textContent = '< Предыдущая';
+    if (paging.querySelector('.next-page'))
+      paging.querySelector('.next-page').textContent = 'Следующая > ';
+  }
+};
+
 export const UserList = (props) => {
 
    const { loadedOnce: isLoading, ids } = useSelector(
@@ -113,6 +128,19 @@ export const UserList = (props) => {
   const isAppColorized = useSelector(getAppColorized());
   const isAppLoading = useSelector(getAppLoading());
   const isCarding = useSelector(getAppCarding());
+
+  React.useEffect(() => {
+    const paging = document.querySelector('div.MuiTablePagination-toolbar');
+    if (paging) {
+      paging.style.backgroundColor = isAppColorized ? blue[200] : 'whitesmoke';
+      paging.querySelector('p').textContent = 'Строк на странице';
+      if (paging.querySelector('.previous-page'))
+        paging.querySelector('.previous-page').textContent = '< Предыдущая';
+      if (paging.querySelector('.next-page'))
+        paging.querySelector('.next-page').textContent = 'Следующая > ';
+    }
+    return () => {};
+  }, [isAppColorized, isLoading, isCarding]);
 
  
   return (
@@ -128,25 +156,28 @@ export const UserList = (props) => {
           {!(!isLoading && isAppLoading) && (
             <UserToolbar userId={authUser.uid} />
           )}
-          { !isCarding && !(!isLoading && isAppLoading) && (
+          {!isCarding && !(!isLoading && isAppLoading) && (
             <MyDatagrid
               isAppColorized={isAppColorized}
               isCarding={isCarding}
               authId={authUser.uid}
             />
           )}
-          { isCarding && !(!isLoading && isAppLoading) && (
-            <Stack direction="row" 
-                   display="inline-flex"
-                   sx={{
-                      justifyContent: 'space-around',
-                      alignItems: 'flex-start',
-                      gap:10,
-                      flexWrap: 'wrap',
-                      py: 5
-                    }}
+          {isCarding && !(!isLoading && isAppLoading) && (
+            <Stack
+              direction="row"
+              display="inline-flex"
+              sx={{
+                justifyContent: 'space-around',
+                alignItems: 'flex-start',
+                gap: 10,
+                flexWrap: 'wrap',
+                py: 5,
+              }}
             >
-              {ids.map(id => <UserCard key={id} record={users[id]} />)}
+              {ids.map((id) => (
+                <UserCard key={id} record={users[id]} />
+              ))}
             </Stack>
           )}
           {!(!isLoading && isAppLoading) && <UserPagination />}
@@ -177,24 +208,7 @@ const MyDatagrid = ({
   React.useEffect(() => {
     const userList = userRef.current;
     if (userList) {
-      const ths = userList.querySelectorAll('thead>tr>th');
-      for (const userTh of ths)
-        userTh.style.backgroundColor = isAppColorized
-          ? blue[100]
-          : 'whitesmoke';
-      const paging = userList.nextSibling?.querySelector(
-        'div.MuiToolbar-root'
-      );
-      if (paging) {
-        paging.style.backgroundColor = isAppColorized
-          ? blue[200]
-          : 'whitesmoke';
-        paging.querySelector('p').textContent = 'Строк на странице';
-        if (paging.querySelector('.previous-page'))
-          paging.querySelector('.previous-page').textContent = '< Предыдущая';
-        if (paging.querySelector('.next-page'))
-          paging.querySelector('.next-page').textContent = 'Следующая > ';
-      }
+      updateListColorizedStyle(userList, isAppColorized);
     }
     return () => {};
   }, [userRef.current, isAppColorized, loaded, loading]);

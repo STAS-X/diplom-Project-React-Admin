@@ -27,8 +27,8 @@ const useStyles = (isCurrentUser, isColorized) =>
     },
     media: {
       justifyContent: 'center',
-      width: '180px',
-      height: '160px',
+      width: '200px',
+      height: '150px',
       marginTop: '1rem',
       objectFit: 'unset',
       margin: 'auto',
@@ -119,17 +119,19 @@ const UserCardExpand = (props) => {
     <Card variant="outlined" ref={cardRef} className={classes.root}>
       <CardMedia
         className={classes.media}
-        image={authUser.url}
+        image={user.url}
         component="img"
         title="Avatar"
-      ></CardMedia>
+      >
+      </CardMedia>
+
       <CardContent>
         <Typography
           gutterBottom
           color="textPrimary"
           variant="h6"
           component="h2"
-          style={{padding:0, margin:0, marginBottom:-10, marginLeft:10}}
+          style={{textAlign:'center', padding:0, margin:0, marginBottom:-10, marginLeft:10}}
         >
           {user.name}
         </Typography>

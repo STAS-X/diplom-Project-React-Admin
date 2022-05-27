@@ -68,9 +68,14 @@ import { makeStyles } from '@material-ui/core/styles';
 import { dateFormatter } from '../../../utils/displayDate';
 import Loading from '../../ui/loading/loading';
 import TaskAsideCard from '../../common/cards/task.card.aside';
+import TaskCard from '../../common/cards/task.card.list';
 import { getAuthData } from '../../../store/authcontext';
 import TaskProgressBar from '../../common/progressbar/task.progress';
-import { getAppColorized, getAppLoading } from '../../../store/appcontext';
+import {
+  getAppColorized,
+  getAppLoading,
+  getAppCarding,
+} from '../../../store/appcontext';
 
 const QuickFilter = ({ label }) => {
   const translate = useTranslate();
@@ -416,13 +421,28 @@ export const TaskList = (props) => {
   const [tasksIds, setTasksIds] = React.useState([]);
   const [hoverId, setHoverId] = React.useState();
 
-  const { loadedOnce: isLoading } = useSelector(
+  const { loadedOnce: isLoading, ids } = useSelector(
     (state) => state.admin.resources.tasks.list
   );
+  const tasks = useSelector((state) => state.admin.resources.tasks.data);
 
   const { user: authUser } = useSelector(getAuthData());
   const isAppColorized = useSelector(getAppColorized());
   const isAppLoading = useSelector(getAppLoading());
+  const isCarding = useSelector(getAppCarding());
+
+  React.useEffect(() => {
+    const paging = document.querySelector('div.MuiTablePagination-toolbar');
+    if (paging) {
+      paging.style.backgroundColor = isAppColorized ? blue[200] : 'whitesmoke';
+      paging.querySelector('p').textContent = 'Строк на странице';
+      if (paging.querySelector('.previous-page'))
+        paging.querySelector('.previous-page').textContent = '< Предыдущая';
+      if (paging.querySelector('.next-page'))
+        paging.querySelector('.next-page').textContent = 'Следующая > ';
+    }
+    return () => {};
+  }, [isAppColorized, isLoading, isCarding]);
 
   return (
     <>
@@ -442,7 +462,7 @@ export const TaskList = (props) => {
               userId={authUser.uid}
             />
           )}
-          {!(!isLoading && isAppLoading) && (
+          {!isCarding && !(!isLoading && isAppLoading) && (
             <MyDatagrid
               isAppColorized={isAppColorized}
               authId={authUser.uid}
@@ -452,7 +472,27 @@ export const TaskList = (props) => {
               setHoverId={setHoverId}
             />
           )}
-          {!(!isLoading && isAppLoading) && <TaskPagination />}
+          {isCarding && !(!isLoading && isAppLoading) && (
+            <Stack
+              direction="row"
+              display="inline-flex"
+              sx={{
+                justifyContent: 'space-around',
+                alignItems: 'flex-start',
+                gap: 10,
+                flexWrap: 'wrap',
+                py: 5,
+              }}
+            >
+              {ids.map((id) => (
+                <TaskCard key={id} record={tasks[id]} />
+              ))}
+            </Stack>
+          )}
+
+          {!(!isLoading && isAppLoading) && (
+            <TaskPagination />
+          )}
         </ListBase>
       )}
       {!isLoading && isAppLoading && <Loading />}
@@ -524,6 +564,23 @@ const ControlButtons = ({ record, authId }) => {
   );
 };
 
+const updateListColorizedStyle = (taskList, isAppColorized) => {
+  const ths = taskList.querySelectorAll('thead>tr>th');
+  for (const taskTh of ths)
+    taskTh.style.backgroundColor = isAppColorized ? blue[100] : 'whitesmoke';
+  const paging = taskList.parentNode.nextSibling?.querySelector(
+    'div.MuiToolbar-root'
+  );
+  if (paging) {
+    paging.style.backgroundColor = isAppColorized ? blue[200] : 'whitesmoke';
+    paging.querySelector('p').textContent = 'Строк на странице';
+    if (paging.querySelector('.previous-page'))
+      paging.querySelector('.previous-page').textContent = '< Предыдущая';
+    if (paging.querySelector('.next-page'))
+      paging.querySelector('.next-page').textContent = 'Следующая > ';
+  }
+};
+
 const MyDatagrid = ({
   isAppColorized,
   authId,
@@ -533,29 +590,14 @@ const MyDatagrid = ({
   setHoverId,
   ...props
 }) => {
-  const taskRef = React.useRef();
-  const taskList = taskRef.current;
 
+  const taskRef = React.useRef();
   const { loaded, loading } = useListContext();
 
   React.useEffect(() => {
+    const taskList = taskRef.current;
     if (taskList) {
-      const ths = taskList.querySelectorAll('thead>tr>th');
-      for (const taskTh of ths)
-        taskTh.style.backgroundColor = isAppColorized
-          ? blue[100]
-          : 'whitesmoke';
-      const paging = taskList.parentNode.nextSibling?.querySelector('div.MuiToolbar-root');
-      if (paging) {
-        paging.style.backgroundColor = isAppColorized
-          ? blue[200]
-          : 'whitesmoke';
-        paging.querySelector('p').textContent = 'Строк на странице';
-        if (paging.querySelector('.previous-page'))
-          paging.querySelector('.previous-page').textContent = '< Предыдущая';
-        if (paging.querySelector('.next-page'))
-          paging.querySelector('.next-page').textContent = 'Следующая > ';
-      }
+      updateListColorizedStyle(taskList, isAppColorized);
     }
     return () => {};
   }, [taskRef.current, isAppColorized, loading, loaded]);
@@ -580,9 +622,10 @@ const MyDatagrid = ({
         hoverId !==
         target.closest('tr').querySelector('td.column-id').textContent
       ) {
-        handleUpdateId(
-          target.closest('tr').querySelector('td.column-id').textContent
-        );
+        const newHoverId = target
+          .closest('tr')
+          .querySelector('td.column-id').textContent;
+        if (newHoverId) handleUpdateId(newHoverId);
         //setTransition(true);
       }
     }

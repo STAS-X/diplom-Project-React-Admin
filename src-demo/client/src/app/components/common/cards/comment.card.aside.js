@@ -1,94 +1,151 @@
 import React from 'react';
-import { useGetOne } from 'react-admin';
 import { makeStyles } from '@material-ui/core/styles';
 import { green, blue, red } from '@material-ui/core/colors';
+import { emphasize } from '@material-ui/core/styles/colorManipulator';
 import {
   Card,
   CardMedia,
+  Grid,
+  Box,
+  Divider,
   CardContent,
   Typography,
   CircularProgress,
 } from '@material-ui/core';
+import { useSelector } from 'react-redux';
+import {
+  SimpleShowLayout,
+  TextField,
+  DateField,
+  FunctionField,
+  RichTextField,
+  useGetOne,
+  useGetList,
+} from 'react-admin';
+import TaskProgressBar from '../../common/progressbar/task.progress';
+import { getAuthData } from '../../../store/authcontext';
+import { getAppColorized } from '../../../store/appcontext';
 import { dateFormatter } from '../../../utils/displayDate';
-import {getRandomInt} from '../../../utils/getRandomInt';
-import waveImg from '../../../resources/icons/sun.png';
+import { getRandomInt } from '../../../utils/getRandomInt';
+
+const useStyles = (isCurrentUser, isColorized, loaded) =>
+  makeStyles({
+    root: {
+      right: 0,
+      width: loaded===true ? 340 : 0,
+      height: 'min-content',
+      transition: '300ms ease-out',
+      zIndex:1,
+      //maxWidth: '200px',
+      opacity: loaded===true ? 1 : 0,
+      marginRight: '2em',
+      marginTop: '3em',
+      position: 'absolute',
+      backgroundColor: isColorized
+        ? emphasize(isCurrentUser ? green[100] : red[100], 0.05)
+        : 'whitesmoke',
+    },
+    media: {
+      justifyContent: 'center',
+      width: '200px',
+      height: '150px',
+      marginTop: '1rem',
+      objectFit: 'unset',
+      margin: 'auto',
+    },
+  });
 
 const CommentAsideCard = ({ id }) => {
-  const [loaded, setLoaded] = React.useState(false);
-  let task;
-  let loadedTask=false;
+  if (!id) return null;
+  const { data: comment, loaded: commentLoaded } = useGetOne('comments', id);
 
-  const { data: comment, loaded: loadedComment } = useGetOne('comments', id);
-  if (loadedComment) {
-   const { data, loaded } = useGetOne('tasks', comment.taskId);
-    task=data; loadedTask=loaded;
-  }
+  if (!commentLoaded) return null;
 
-  console.info(loaded,' loaded comment');
+  return <CommentCard comment={comment} />;
+};
 
-  React.useEffect(()=>{
-   setLoaded(loadedComment && loadedTask && id);
-  },[loadedTask, loadedComment, id]);
+function CommentCardCreator({ comment }) {
 
-  const rnd = (Math.random() * 10).toFixed();
+  const { user: authUser } = useSelector(getAuthData());
+  const colorized = useSelector(getAppColorized());
 
-    const useStyles = (item, bgcolor) =>
-    makeStyles({
-      root: {
-        right: 0,
-        width:loaded ?250:0,
-        height: 300,
-        zIndex: 1,
-        //maxWidth: '200px',
-        transition: '200ms ease-out',
-        opacity: loaded ?1:0,
-        marginRight: '2em',
-        marginTop: '3em',
-        position: 'absolute',
-        backgroundColor:
-          bgcolor > 5 ? green[100] : bgcolor > 2 ? blue[100] : red[100],
-        
-      },
-      media: {
-        justifyContent: 'center',
-        width: '80%',
-        height: '100px',
-        marginTop: '1rem',
-        objectFit: 'unset',
-        margin: 'auto',
-      },
-    });
-  const classes = useStyles(id, rnd)();
+  const { data: user, loading: userLoading } = useGetOne('users', comment.userId);
+  const { data: task, loading: taskLoading, loaded: taskLoaded } = useGetOne('tasks', comment.taskId);
+
+  const classes = useStyles(
+    user ? authUser.uid === user.id : false,
+    colorized,
+    !userLoading
+  )();
 
   return (
-    <Card className={classes.root}>
+    <Card variant="outlined" className={classes.root}>
       <CardMedia
         className={classes.media}
-        image={waveImg}
+        image={user ? user.url : authUser.url}
         component="img"
-        title="Солнечная сторона"
+        title="Avatar"
       ></CardMedia>
       <CardContent>
-        {loaded && (
-          <>
-            <Typography gutterBottom variant="h5" component="h2">
-              {`Комментарий к задаче ${task.title}`}
-            </Typography>
-            <Typography variant="body1" color="textSecondary" component="h3">
-              {comment.description} <br />
-              {`Id: ${id}`}
-            </Typography>
-            <Typography variant="body2" color="textSecondary" component="h4">
-              {'Задача создана:'}
-              {comment.createdAt
-                ? dateFormatter(comment.createdAt)
-                : dateFormatter(Date.now())}
-            </Typography>
-          </>
+        <Typography
+          gutterBottom
+          color="primary"
+          variant="h6"
+          component="h2"
+          style={{
+            textAlign: 'center',
+            padding: 0,
+            margin: 0,
+            marginBottom: -10,
+            marginLeft: 10,
+          }}
+        >
+          {user ? user.name : ''}
+        </Typography>
+        {taskLoaded && (
+          <Grid
+            container
+            direction="row"
+            justifyContent="space-between"
+            alignItems="flex-start"
+            columns={12}
+            spacing={1}
+          >
+            <Grid item xs={6}>
+              <SimpleShowLayout record={{ ...comment, task }}>
+                <TextField label="Название" source="title" />
+                <TextField
+                  label="Описание"
+                  sortable={false}
+                  source="description"
+                />
+                <DateField
+                  label="Дата создания"
+                  source="createdAt"
+                  locales="ru-Ru"
+                  options={{ dateStyle: 'long' }}
+                  color="primary"
+                />
+              </SimpleShowLayout>
+            </Grid>
+            <Grid item xs={6}>
+              <SimpleShowLayout record={{ ...comment, task }}>
+                <TextField label="Название задачи" source="task.title" />
+                <TextField label="Описание задачи" source="task.description" />
+              </SimpleShowLayout>
+            </Grid>
+            <Grid item xs={12} style={{marginTop:-20}}>
+              <SimpleShowLayout record={comment}>
+                <RichTextField label="Тело комментария" source="body" color="primary" />
+              </SimpleShowLayout>
+            </Grid>            
+          </Grid>
         )}
-        {!(loaded) && <CircularProgress color="inherit" />}
       </CardContent>
     </Card>
   );
-};
+}
+
+const CommentCard = React.memo(CommentCardCreator);
+
 export default CommentAsideCard;

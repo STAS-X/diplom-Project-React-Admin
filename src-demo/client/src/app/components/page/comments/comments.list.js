@@ -49,9 +49,14 @@ import CreateCommentIcon from '@material-ui/icons/AddCommentRounded';
 import EditCommentIcon from '@material-ui/icons/EditAttributesRounded';
 import MailIcon from '@material-ui/icons/MailOutline';
 import CommentAsideCard from '../../common/cards/comment.card.aside';
+import CommentCard from '../../common/cards/comment.card.list';
 import { dateFormatter } from '../../../utils/displayDate';
 import { getAuthData } from '../../../store/authcontext';
-import { getAppColorized, getAppLoading } from '../../../store/appcontext';
+import {
+  getAppColorized,
+  getAppLoading,
+  getAppCarding,
+} from '../../../store/appcontext';
 import ContentFilter from '@material-ui/icons/FilterList';
 
 // const PostFilterButton = (props) => {
@@ -266,6 +271,24 @@ const CommentTaskField = ({ taskId }) => {
   );
 };
 
+
+const updateListColorizedStyle = (commentList, isAppColorized) => {
+ const ths = commentList.querySelectorAll('thead>tr>th');
+ for (const commentTh of ths)
+   commentTh.style.backgroundColor = isAppColorized ? blue[100] : 'whitesmoke';
+ const paging = commentList.parentNode.nextSibling?.querySelector(
+   'div.MuiToolbar-root'
+ );
+ if (paging) {
+   paging.style.backgroundColor = isAppColorized ? blue[200] : 'whitesmoke';
+   paging.querySelector('p').textContent = 'Строк на странице';
+   if (paging.querySelector('.previous-page'))
+     paging.querySelector('.previous-page').textContent = '< Предыдущая';
+   if (paging.querySelector('.next-page'))
+     paging.querySelector('.next-page').textContent = 'Следующая > ';
+ }
+};
+
 export const CommentList = (props) => {
   const [commentsIds, setCommentsIds] = React.useState([]);
   const [hoverId, setHoverId] = React.useState();
@@ -273,10 +296,25 @@ export const CommentList = (props) => {
   const { user: authUser } = useSelector(getAuthData());
   const isAppColorized = useSelector(getAppColorized());
   const isAppLoading = useSelector(getAppLoading());
+  const isCarding = useSelector(getAppCarding());
 
-  const { loadedOnce: isLoading } = useSelector(
+  const { loadedOnce: isLoading, ids } = useSelector(
     (state) => state.admin.resources.comments.list
   );
+  const comments = useSelector((state) => state.admin.resources.comments.data);
+
+  React.useEffect(() => {
+    const paging = document.querySelector('div.MuiTablePagination-toolbar');
+    if (paging) {
+      paging.style.backgroundColor = isAppColorized ? blue[200] : 'whitesmoke';
+      paging.querySelector('p').textContent = 'Строк на странице';
+      if (paging.querySelector('.previous-page'))
+        paging.querySelector('.previous-page').textContent = '< Предыдущая';
+      if (paging.querySelector('.next-page'))
+        paging.querySelector('.next-page').textContent = 'Следующая > ';
+    }
+    return () => {};
+  }, [isAppColorized, isLoading, isCarding]);
 
   //const [isTransition, setTransition]=React.useState(false);
 
@@ -298,7 +336,7 @@ export const CommentList = (props) => {
               userId={authUser.uid}
             />
           )}
-          {!(!isLoading && isAppLoading) && (
+          {!isCarding && !(!isLoading && isAppLoading) && (
             <MyDatagrid
               isAppColorized={isAppColorized}
               authId={authUser.uid}
@@ -307,6 +345,23 @@ export const CommentList = (props) => {
               hoverId={hoverId}
               setHoverId={setHoverId}
             />
+          )}
+          {isCarding && !(!isLoading && isAppLoading) && (
+            <Stack
+              direction="row"
+              display="inline-flex"
+              sx={{
+                justifyContent: 'space-around',
+                alignItems: 'flex-start',
+                gap: 10,
+                flexWrap: 'wrap',
+                py: 5,
+              }}
+            >
+              {ids.map((id) => (
+                <CommentCard key={id} record={comments[id]} />
+              ))}
+            </Stack>
           )}
           {!(!isLoading && isAppLoading) && <CommentPagination />}
         </ListBase>
@@ -360,25 +415,9 @@ const MyDatagrid = ({
   const { loaded, loading } = useListContext();
 
   React.useEffect(() => {
+    const commentList = commentRef.current;
     if (commentList) {
-      const ths = commentList.querySelectorAll('thead>tr>th');
-      for (const commentTh of ths)
-        commentTh.style.backgroundColor = isAppColorized
-          ? blue[100]
-          : 'whitesmoke';
-      const paging = commentList.parentNode.nextSibling?.querySelector(
-        'div.MuiToolbar-root'
-      );
-      if (paging) {
-        paging.style.backgroundColor = isAppColorized
-          ? blue[200]
-          : 'whitesmoke';
-        paging.querySelector('p').textContent = 'Строк на странице';
-        if (paging.querySelector('.previous-page'))
-          paging.querySelector('.previous-page').textContent = '< Предыдущая';
-        if (paging.querySelector('.next-page'))
-          paging.querySelector('.next-page').textContent = 'Следующая > ';
-      }
+       updateListColorizedStyle(commentList, isAppColorized);
     }
     return () => {};
   }, [commentRef.current, isAppColorized, loading, loaded]);
@@ -403,9 +442,10 @@ const MyDatagrid = ({
         hoverId !==
         target.closest('tr').querySelector('td.column-id').textContent
       ) {
-        handleUpdateId(
-          target.closest('tr').querySelector('td.column-id').textContent
-        );
+        const newHoverId = target
+          .closest('tr')
+          .querySelector('td.column-id').textContent;
+        if (newHoverId) handleUpdateId(newHoverId);
         //setTransition(true);
       }
     }

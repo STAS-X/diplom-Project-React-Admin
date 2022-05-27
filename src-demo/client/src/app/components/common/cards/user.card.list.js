@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
 import { green, blue, red } from '@material-ui/core/colors';
 import { emphasize } from '@material-ui/core/styles/colorManipulator';
-import {Card, CardMedia, Divider, CardContent, Typography, CircularProgress} from '@material-ui/core';
+import {Card, CardMedia, Divider, Grid, Box, CardContent, Typography, CircularProgress} from '@material-ui/core';
 import {Stack} from '@mui/material';
 import { getAuthData } from '../../../store/authcontext';
 import { getAppColorized } from '../../../store/appcontext';
@@ -14,7 +14,7 @@ const useStyles = (isCurrentUser, isColorized) =>
   makeStyles({
     root: {
       width: '350px',
-      height: '480px',
+      height: '380px',
       boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
       '&:hover': {
         boxShadow: '0 14px 28px rgba(0,0,0,0.25), 0 10px 10px',
@@ -27,8 +27,8 @@ const useStyles = (isCurrentUser, isColorized) =>
     },
     media: {
       justifyContent: 'center',
-      width: '180px',
-      height: '160px',
+      width: '200px',
+      height: '150px',
       marginTop: '1rem',
       objectFit: 'unset',
       margin: 'auto',
@@ -78,43 +78,42 @@ const UserCard = (props) => {
     <Card variant="outlined" ref={cardRef} className={classes.root}>
       <CardMedia
         className={classes.media}
-        image={authUser.url}
+        image={user.url}
         component="img"
         title="Avatar"
-      ></CardMedia>
+      >
+      </CardMedia>
       <CardContent>
-        <Typography
-          gutterBottom
-          color="textPrimary"
-          variant="h6"
-          component="h2"
-          style={{padding:0, margin:0, marginBottom:-10, marginLeft:10}}
-        >
-          {user.name}
-        </Typography>
-        <Stack
-          direction="column"
-          display="inline-flex"
-          sx={{
-            justifyContent: 'center',
-            alignItems: 'flex-start',
-            gap:0.2,
-            flexWrap: 'wrap',
-            padding:0,
-            margin:0,
-            paddingTop:-5,
-            marginLeft:-1,
-            '& label': {fontSize:'110%', mb:-0.5}
-          }}
-        >
-        <SimpleShowLayout record={user} >
-            <EmailField label="Логин" source="email" color="primary"/>
-            <TextField label="Возраст" source="age" color="primary"/>
-            <TextField label="Авторизация" source="providerId" color="primary"/>
-            <DateField label="Дата предыдущего входа" source="lastLogOut" locales="ru-Ru"
-                      showTime={true} options={{ dateStyle: 'long', timeStyle: 'medium' }} color="primary"/>
-         </SimpleShowLayout>
-        </Stack>
+          <Typography
+            gutterBottom
+            color="primary"
+            variant="h6"
+            component="h2"
+            style={{textAlign:'center', padding:0, margin:0, marginBottom:-10, marginLeft:10}}
+          >
+            {user.name}
+          </Typography>
+          <Grid container
+                direction="row"
+                justifyContent="space-between"
+                alignItems="flex-start"
+                columns={12}
+                spacing={6}>
+
+            <Grid item xs={4} style={{marginLeft:-15}} >
+              <SimpleShowLayout record={user} >
+                  <EmailField label="Логин" source="email" color="primary"/>
+                  <TextField label="Возраст" source="age" color="primary"/>
+              </SimpleShowLayout>
+            </Grid>
+            <Grid item xs={8} style={{marginRight:-35}}>
+              <SimpleShowLayout record={user} >
+                  <TextField label="Авторизация" source="providerId" color="primary"/>
+                  <DateField label="Дата входа" source="lastLogOut" locales="ru-Ru"
+                            showTime={true} options={{ dateStyle: 'long', timeStyle: 'medium' }} color="primary"/>
+              </SimpleShowLayout>
+            </Grid>
+          </Grid>            
       </CardContent>
     </Card>
   );
