@@ -32,12 +32,12 @@ const useStyles = (isCurrentUser, isColorized, loaded) =>
   makeStyles({
     root: {
       right: 0,
-      width: loaded===true ? 340 : 0,
+      width: loaded === true ? 340 : 0,
       height: 'min-content',
       transition: '300ms ease-out',
-      zIndex:1,
+      zIndex: 1,
       //maxWidth: '200px',
-      opacity: loaded===true ? 1 : 0,
+      opacity: loaded === true ? 1 : 0,
       marginRight: '2em',
       marginTop: '3em',
       position: 'absolute',
@@ -65,12 +65,18 @@ const CommentAsideCard = ({ id }) => {
 };
 
 function CommentCardCreator({ comment }) {
-
   const { user: authUser } = useSelector(getAuthData());
   const colorized = useSelector(getAppColorized());
 
-  const { data: user, loading: userLoading } = useGetOne('users', comment.userId);
-  const { data: task, loading: taskLoading, loaded: taskLoaded } = useGetOne('tasks', comment.taskId);
+  const { data: user, loading: userLoading } = useGetOne(
+    'users',
+    comment.userId
+  );
+  const {
+    data: task,
+    loading: taskLoading,
+    loaded: taskLoaded,
+  } = useGetOne('tasks', comment.taskId);
 
   const classes = useStyles(
     user ? authUser.uid === user.id : false,
@@ -102,45 +108,49 @@ function CommentCardCreator({ comment }) {
         >
           {user ? user.name : ''}
         </Typography>
-        {taskLoaded && (
-          <Grid
-            container
-            direction="row"
-            justifyContent="space-between"
-            alignItems="flex-start"
-            columns={12}
-            spacing={1}
-          >
+        <Grid
+          container
+          direction="row"
+          justifyContent="space-between"
+          alignItems="flex-start"
+          columns={12}
+          spacing={1}
+        >
+          {task && (
             <Grid item xs={6}>
-              <SimpleShowLayout record={{ ...comment, task }}>
-                <TextField label="Название" source="title" />
-                <TextField
-                  label="Описание"
-                  sortable={false}
-                  source="description"
-                />
-                <DateField
-                  label="Дата создания"
-                  source="createdAt"
-                  locales="ru-Ru"
-                  options={{ dateStyle: 'long' }}
-                  color="primary"
-                />
+              <SimpleShowLayout record={task}>
+                <TextField label="Название задачи" source="title" />
+                <TextField label="Описание задачи" source="description" />
               </SimpleShowLayout>
             </Grid>
-            <Grid item xs={6}>
-              <SimpleShowLayout record={{ ...comment, task }}>
-                <TextField label="Название задачи" source="task.title" />
-                <TextField label="Описание задачи" source="task.description" />
-              </SimpleShowLayout>
-            </Grid>
-            <Grid item xs={12} style={{marginTop:-20}}>
-              <SimpleShowLayout record={comment}>
-                <RichTextField label="Тело комментария" source="body" color="primary" />
-              </SimpleShowLayout>
-            </Grid>            
+          )}
+          <Grid item xs={6}>
+            <SimpleShowLayout record={comment}>
+              <TextField label="Название" source="title" />
+              <TextField
+                label="Описание"
+                sortable={false}
+                source="description"
+              />
+              <DateField
+                label="Дата создания"
+                source="createdAt"
+                locales="ru-Ru"
+                options={{ dateStyle: 'long' }}
+                color="primary"
+              />
+            </SimpleShowLayout>
           </Grid>
-        )}
+          <Grid item xs={12} style={{ marginTop: -20 }}>
+            <SimpleShowLayout record={comment}>
+              <RichTextField
+                label="Тело комментария"
+                source="body"
+                color="primary"
+              />
+            </SimpleShowLayout>
+          </Grid>
+        </Grid>
       </CardContent>
     </Card>
   );

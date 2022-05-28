@@ -5,6 +5,7 @@ import { emphasize } from '@material-ui/core/styles/colorManipulator';
 import {
   Card,
   CardMedia,
+  Button,
   Grid,
   Box,
   Divider,
@@ -12,13 +13,20 @@ import {
   Typography,
   CircularProgress,
 } from '@material-ui/core';
+import { Stack } from '@mui/material';
 import { useSelector } from 'react-redux';
 import {
   SimpleShowLayout,
   TextField,
   DateField,
   FunctionField,
+  RichTextField,
+  ShowButton,
+  EditButton,
+  useRefresh,
+  useNotify,
   useGetOne,
+  useDelete,
   useGetList,
 } from 'react-admin';
 import TaskProgressBar from '../progressbar/task.progress';
@@ -26,20 +34,21 @@ import { getAuthData } from '../../../store/authcontext';
 import { getAppColorized } from '../../../store/appcontext';
 import { dateFormatter } from '../../../utils/displayDate';
 import { getRandomInt } from '../../../utils/getRandomInt';
+import DeleteIcon from '@material-ui/icons/DeleteRounded';
 
 const useStyles = (isCurrentUser, isColorized) =>
   makeStyles({
     root: {
       width: '380px',
       height: '240px',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
+      position: 'relative',
+      boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
       '&:hover': {
         boxShadow: '0 14px 28px rgba(0,0,0,0.25), 0 10px 10px',
       },
-      backgroundColor: isColorized?emphasize(
-        isCurrentUser ? green[100] : red[100],
-        0.05
-      ):'whitesmoke',
+      backgroundColor: isColorized
+        ? emphasize(isCurrentUser ? green[100] : red[100], 0.05)
+        : 'whitesmoke',
       transition: '300ms ease-out',
     },
     media: {
@@ -51,6 +60,101 @@ const useStyles = (isCurrentUser, isColorized) =>
       margin: 'auto',
     },
   });
+
+  const DeleteTaskButton = ({ record: task, cardRef }) => {
+    const animation = '_zoomOut';
+    const refresh = useRefresh();
+    const notify = useNotify();
+    const [deleteOne, { loading, loaded, error }] = useDelete(
+      'tasks',
+      task.id,
+      task,
+      {
+        mutationMode: 'undoable',
+        onSuccess: () => {
+          notify(`Pflfxf ${task.id} удаляется`, { undoable: true });
+          refresh();
+        },
+        onError: (error) =>
+          notify('Ошибка при удалении комментария!', { type: 'warning' }),
+      }
+    );
+    const handleAnimationEnd = ({ target }) => {
+      //e.stopPropagation();
+      target.classList.remove(
+        'animate__animated',
+        `animate_${animation}`,
+        'animate__fast'
+      );
+      target.remove();
+      //refresh();
+    };
+    const handleClick = () => {
+      const cardAnimate = cardRef.current;
+      cardAnimate.addEventListener('animationend', handleAnimationEnd, {
+        once: true,
+      });
+      cardAnimate.classList.add(
+        'animate__animated',
+        `animate_${animation}`,
+        'animate__fast'
+      );
+      setTimeout(() => deleteOne(), 0);
+    };
+
+    return (
+      <Button
+        variant="text"
+        className="RaButtn-button"
+        style={{
+          fontFamily:
+            '-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif',
+          fontSize: '0.8125rem',
+          color: '#f44336',
+        }}
+        disabled={loading}
+        label=""
+        startIcon={<DeleteIcon />}
+        onClick={handleClick}
+      ></Button>
+    );
+  };
+
+  const TaskToolbar = ({ authId, record: task, cardRef }) => {
+    return (
+      <Stack
+        alignItems="flex-start"
+        direction="row"
+        justifyContent="flex-end"
+        sx={{
+          position: 'absolute',
+          '& .MuiCardContent-root': {
+            display: 'inline-flex',
+            margin: 0,
+            padding: 0,
+          },
+          '& .MuiButton-root': {
+            minWidth: '32px !important',
+            margin: 0,
+            padding: 0,
+          },
+          width: 64,
+          height: 'min-content',
+          right: 5,
+          top: 5,
+          zIndex: 1,
+        }}
+      >
+        <SimpleShowLayout record={task}>
+          {authId !== task.userId && <ShowButton label="" />}
+          {authId === task.userId && <EditButton label="" />}
+          {authId === task.userId && (
+            <DeleteTaskButton cardRef={cardRef} />
+          )}
+        </SimpleShowLayout>
+      </Stack>
+    );
+  };
 
 
 const TaskCard = ({ record: task }) => {
@@ -67,7 +171,7 @@ const TaskCard = ({ record: task }) => {
       const cardAnimate = cardRef.current;
 
       const handleAnimationEnd = (e) => {
-        e.stopPropagation();
+        //e.stopPropagation();
         e.target.classList.remove(
           'animate__animated',
           `animate_${animation}`,
@@ -98,6 +202,11 @@ const TaskCard = ({ record: task }) => {
   return (
     <Card variant="outlined" ref={cardRef} className={classes.root}>
       <CardContent>
+        <TaskToolbar
+          record={task}
+          authId={authUser.uid}
+          cardRef={cardRef}
+        />
         <Typography
           gutterBottom
           color="primary"
@@ -158,7 +267,7 @@ const TaskCard = ({ record: task }) => {
             </SimpleShowLayout>
           </Grid>
           <Grid item xs={6}>
-            <SimpleShowLayout record={task}>            
+            <SimpleShowLayout record={task}>
               <FunctionField
                 label="Статус"
                 source="status"
