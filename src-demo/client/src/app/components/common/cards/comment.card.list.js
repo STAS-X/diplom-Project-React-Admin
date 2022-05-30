@@ -35,20 +35,25 @@ import { dateFormatter } from '../../../utils/displayDate';
 import { getRandomInt } from '../../../utils/getRandomInt';
 import DeleteIcon from '@material-ui/icons/DeleteRounded';
 
-const useStyles = (isCurrentUser, isColorized) =>
+const useStyles = (isCurrentUser, isColorized, isDragging) =>
   makeStyles({
     root: {
-      width: '300px',
-      height: '300px',
+      width: '350px',
+      height: '380px',
       position: 'relative',
+      backgroundColor: isColorized
+        ? emphasize(isCurrentUser ? green[100] : red[100], 0.05)
+        : 'whitesmoke',
+      ...(isDragging?{
+      border: 'blue 5px dashed',
+      background: isColorized?'linear-gradient(90deg, #cbf2ff 0%, #98cbe4 55%, #0b9dc3 100%)':'',
+      }:{}),
       boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
       '&:hover': {
         boxShadow: '0 14px 28px rgba(0,0,0,0.25), 0 10px 10px',
       },
-      backgroundColor: isColorized
-        ? emphasize(isCurrentUser ? green[100] : red[100], 0.05)
-        : 'whitesmoke',
-      transition: '300ms ease-out',
+      transition: '300ms ease-out'
+      
     },
     media: {
       justifyContent: 'center',
@@ -154,13 +159,15 @@ const CommentToolbar = ({ authId, record: comment, cardRef }) => {
   );
 };
 
-const CommentAsideCard = ({ record: comment }) => {
+const CommentAsideCard = ({ record: comment, isDragging }) => {
   const animation = '_pulse';
 
   const { user: authUser } = useSelector(getAuthData());
   const colorized = useSelector(getAppColorized());
 
   const { loaded: taskLoaded, data: task } = useGetOne('tasks', comment.taskId);
+  //const taskLoaded=true;
+  //const task = {title:'123', description:'456'};
 
   const cardRef = useRef();
 
@@ -176,12 +183,15 @@ const CommentAsideCard = ({ record: comment }) => {
           'animate__fast'
         );
       };
-      const handleMouseEnter = ({ target }) => {
+      const handleMouseEnter = (e) => {
+        const {target} = e;
+        if (localStorage.getItem('dragCommentId')) {
+        } else {
         target.classList.add(
           'animate__animated',
           `animate_${animation}`,
           'animate__fast'
-        );
+        )};
       };
 
       cardAnimate.addEventListener('animationend', handleAnimationEnd, {once:true});
@@ -191,8 +201,9 @@ const CommentAsideCard = ({ record: comment }) => {
     return () => {};
   }, [cardRef.current]);
 
-  const classes = useStyles(authUser.uid === comment.userId, colorized)();
+  const classes = useStyles(authUser.uid === comment.userId, colorized, isDragging)();
 
+  
   return (
     <Card variant="outlined" ref={cardRef} className={classes.root}>
       <CardContent>
@@ -201,8 +212,6 @@ const CommentAsideCard = ({ record: comment }) => {
           authId={authUser.uid}
           cardRef={cardRef}
         />
-        {task && (
-          <>
             <Typography
               gutterBottom
               color="primary"
@@ -216,7 +225,7 @@ const CommentAsideCard = ({ record: comment }) => {
                 marginLeft: 10,
               }}
             >
-              Задача {task.title}
+              Задача {task?.title}
             </Typography>
             <Typography
               gutterBottom
@@ -231,10 +240,8 @@ const CommentAsideCard = ({ record: comment }) => {
                 marginLeft: 10,
               }}
             >
-              {task.description}
+              {task?.description}
             </Typography>
-          </>
-        )}
         <Grid container direction="row" alignItems="flex-start" spacing={1}>
           <Grid item>
             <SimpleShowLayout record={comment}>

@@ -19,6 +19,7 @@
     "react": "^17.x",
     "react-admin": "^3.19.10",
     "react-admin-firebase": "3",
+    "react-beautiful-dnd": "^13.1.0",
     "react-dom": "^17.x",
     "react-firebaseui": "^6.0.0",
     "react-hook-form": "^7.31.1",

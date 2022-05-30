@@ -30,6 +30,7 @@ import {
 import { Stack, Card, Chip } from '@mui/material';
 import UserCardExpand from '../../common/cards/user.card.expand';
 import UserCard from '../../common/cards/user.card.list';
+import UserDraggableComponent from '../../common/drag_drop/user.card.draggable';
 import { getAuthData } from '../../../store/authcontext';
 import { getAppColorized, getAppCarding, getAppLoading } from '../../../store/appcontext';
 
@@ -49,7 +50,22 @@ const PaginationActions = (props) => {
   );
 };
 
-const UserPagination = (props) => {
+const UserPagination = ({isAppColorized, ...props}) => {
+
+   React.useEffect(()=>{
+    const paging = document.querySelector('div.MuiTablePagination-toolbar');
+    if (paging) {
+      paging.style.backgroundColor = isAppColorized ? blue[200] : 'whitesmoke';
+      paging.querySelector('p').textContent = 'Строк на странице';
+      if (paging.querySelector('.previous-page'))
+        paging.querySelector('.previous-page').textContent = '< Предыдущая';
+      if (paging.querySelector('.next-page'))
+        paging.querySelector('.next-page').textContent = 'Следующая > ';
+    }
+    return ()=>{}
+   },[isAppColorized, props]);
+
+
   return (
     <RaPagination
       {...props}
@@ -100,21 +116,6 @@ const UserToolbar = ({ userId }) => {
   );
 };
 
-const updateListColorizedStyle = (userList, isAppColorized) => {
-  const ths = userList.querySelectorAll('thead>tr>th');
-  for (const userTh of ths)
-    userTh.style.backgroundColor = isAppColorized ? blue[100] : 'whitesmoke';
-  const paging = userList.nextSibling?.querySelector('div.MuiToolbar-root');
-  if (paging) {
-    paging.style.backgroundColor = isAppColorized ? blue[200] : 'whitesmoke';
-    paging.querySelector('p').textContent = 'Строк на странице';
-    if (paging.querySelector('.previous-page'))
-      paging.querySelector('.previous-page').textContent = '< Предыдущая';
-    if (paging.querySelector('.next-page'))
-      paging.querySelector('.next-page').textContent = 'Следующая > ';
-  }
-};
-
 export const UserList = (props) => {
 
    const { loadedOnce: isLoading, ids } = useSelector(
@@ -129,20 +130,7 @@ export const UserList = (props) => {
   const isAppLoading = useSelector(getAppLoading());
   const isCarding = useSelector(getAppCarding());
 
-  React.useEffect(() => {
-    const paging = document.querySelector('div.MuiTablePagination-toolbar');
-    if (paging) {
-      paging.style.backgroundColor = isAppColorized ? blue[200] : 'whitesmoke';
-      paging.querySelector('p').textContent = 'Строк на странице';
-      if (paging.querySelector('.previous-page'))
-        paging.querySelector('.previous-page').textContent = '< Предыдущая';
-      if (paging.querySelector('.next-page'))
-        paging.querySelector('.next-page').textContent = 'Следующая > ';
-    }
-    return () => {};
-  }, [isAppColorized, isLoading, isCarding]);
 
- 
   return (
     <>
       {authUser && (
@@ -164,23 +152,9 @@ export const UserList = (props) => {
             />
           )}
           {isCarding && !(!isLoading && isAppLoading) && (
-            <Stack
-              direction="row"
-              display="inline-flex"
-              sx={{
-                justifyContent: 'space-around',
-                alignItems: 'flex-start',
-                gap: 10,
-                flexWrap: 'wrap',
-                py: 5,
-              }}
-            >
-              {ids.map((id) => (
-                <UserCard key={id} record={users[id]} />
-              ))}
-            </Stack>
+            <UserDraggableComponent list={ids.map(id => users[id])} ids={ids}/>
           )}
-          {!(!isLoading && isAppLoading) && <UserPagination />}
+          {!(!isLoading && isAppLoading) && <UserPagination isAppColorized={isAppColorized} />}
         </ListBase>
       )}
       {!isLoading && isAppLoading && <Loading />}
@@ -204,15 +178,6 @@ const MyDatagrid = ({
       backgroundColor: record.id === id ? green[200] : red[100],
     };
   };
-
-  React.useEffect(() => {
-    const userList = userRef.current;
-    if (userList) {
-      updateListColorizedStyle(userList, isAppColorized);
-    }
-    return () => {};
-  }, [userRef.current, isAppColorized, loaded, loading]);
-
 
   return (
     <Datagrid

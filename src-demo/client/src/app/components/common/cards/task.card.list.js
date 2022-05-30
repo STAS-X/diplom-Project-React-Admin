@@ -36,20 +36,25 @@ import { dateFormatter } from '../../../utils/displayDate';
 import { getRandomInt } from '../../../utils/getRandomInt';
 import DeleteIcon from '@material-ui/icons/DeleteRounded';
 
-const useStyles = (isCurrentUser, isColorized) =>
+const useStyles =  (isCurrentUser, isColorized, isDragging) =>
   makeStyles({
     root: {
-      width: '380px',
-      height: '240px',
+      width: '350px',
+      height: '380px',
       position: 'relative',
+      backgroundColor: isColorized
+        ? emphasize(isCurrentUser ? green[100] : red[100], 0.05)
+        : 'whitesmoke',
+      ...(isDragging?{
+      border: 'blue 5px dashed',
+      background: isColorized?'linear-gradient(90deg, #cbf2ff 0%, #98cbe4 55%, #0b9dc3 100%)':'',
+      }:{}),
       boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
       '&:hover': {
         boxShadow: '0 14px 28px rgba(0,0,0,0.25), 0 10px 10px',
       },
-      backgroundColor: isColorized
-        ? emphasize(isCurrentUser ? green[100] : red[100], 0.05)
-        : 'whitesmoke',
-      transition: '300ms ease-out',
+      transition: '300ms ease-out'
+      
     },
     media: {
       justifyContent: 'center',
@@ -157,7 +162,7 @@ const useStyles = (isCurrentUser, isColorized) =>
   };
 
 
-const TaskCard = ({ record: task }) => {
+const TaskCard = ({ record: task, isDragging }) => {
 
   const animation = '_pulse';
 
@@ -178,12 +183,15 @@ const TaskCard = ({ record: task }) => {
           'animate__fast'
         );
       };
-      const handleMouseEnter = ({ target }) => {
+      const handleMouseEnter = (e) => {
+        const {target} = e;
+        if (localStorage.getItem('dragTaskId')) {
+        } else {
         target.classList.add(
           'animate__animated',
           `animate_${animation}`,
           'animate__fast'
-        );
+        )};
       };
 
       cardAnimate.addEventListener('animationend', handleAnimationEnd);
@@ -197,6 +205,7 @@ const TaskCard = ({ record: task }) => {
   const classes = useStyles(
     authUser.uid === task.userId,
     colorized,
+    isDragging
   )();
 
   return (

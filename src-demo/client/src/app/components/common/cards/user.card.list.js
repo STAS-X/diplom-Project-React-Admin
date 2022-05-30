@@ -29,20 +29,30 @@ import {
   useDelete,
 } from 'react-admin';
 
-const useStyles = (isCurrentUser, isColorized) =>
+const useStyles = (isCurrentUser, isColorized, isDragging) =>
   makeStyles({
     root: {
       width: '350px',
       height: '380px',
       position: 'relative',
+      backgroundColor: isColorized
+        ? emphasize(isCurrentUser ? green[100] : red[100], 0.05)
+        : 'whitesmoke',
+      ...(isDragging?{
+      border: 'blue 5px dashed',
+      background: isColorized?'linear-gradient(90deg, #cbf2ff 0%, #98cbe4 55%, #0b9dc3 100%)':'',
+      }:{}),
       boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
       '&:hover': {
         boxShadow: '0 14px 28px rgba(0,0,0,0.25), 0 10px 10px',
       },
-      backgroundColor: isColorized
-        ? emphasize(isCurrentUser ? green[100] : red[100], 0.05)
-        : 'whitesmoke',
-      transition: '300ms ease-out',
+      transition: '300ms ease-out'
+      
+    },
+    age: {
+      '& span.MuiTypography-root:after' : {
+        content: '" лет"'
+      }
     },
     media: {
       justifyContent: 'center',
@@ -54,7 +64,7 @@ const useStyles = (isCurrentUser, isColorized) =>
     },
   });
 
-const UserToolbar = ({ authId, record: user, cardRef }) => {
+const UserToolbar = ({ authId, record: user }) => {
   return (
     <Stack
       alignItems="flex-start"
@@ -87,14 +97,15 @@ const UserToolbar = ({ authId, record: user, cardRef }) => {
   );
 };
 
-const UserCard = ({record:user}) => {
+const UserCard = ({record:user, isDragging}) => {
 
   const animation = '_pulse';
 
   const { user: authUser } = useSelector(getAuthData());
   const colorized = useSelector(getAppColorized());
   //const classes = useCallback((num) => , [taskCompleted]);
-  const classes = useStyles(authUser.uid === user.id, colorized)();
+  console.log(isDragging,'is dragging');
+  const classes = useStyles(authUser.uid === user.id, colorized, isDragging)();
   const cardRef = useRef();
 
   useEffect(() => {
@@ -109,12 +120,16 @@ const UserCard = ({record:user}) => {
           'animate__fast'
         );
       };
-      const handleMouseEnter = ({ target }) => {
+      const handleMouseEnter = (e) => {
+        const {target} = e;
+        if (localStorage.getItem('dragUserId')) {
+        } else {
         target.classList.add(
           'animate__animated',
           `animate_${animation}`,
           'animate__fast'
         );
+        }
       };
 
       cardAnimate.addEventListener('animationend', handleAnimationEnd);
@@ -125,7 +140,11 @@ const UserCard = ({record:user}) => {
   }, [cardRef.current]);
 
   return (
-    <Card variant="outlined" ref={cardRef} className={classes.root}>
+    <Card
+      variant="outlined"
+      ref={cardRef}
+      className={classes.root}
+    >
       <CardContent>
         <UserToolbar record={user} authId={authUser.uid} cardRef={cardRef} />
         <CardMedia
@@ -160,7 +179,7 @@ const UserCard = ({record:user}) => {
           <Grid item xs={4} style={{ marginLeft: -15 }}>
             <SimpleShowLayout record={user}>
               <EmailField label="Логин" source="email" color="primary" />
-              <TextField label="Возраст" source="age" color="primary" />
+              <TextField label="Возраст" source="age" color="primary" className={classes.age} />
             </SimpleShowLayout>
           </Grid>
           <Grid item xs={8} style={{ marginRight: -35 }}>
