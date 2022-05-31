@@ -41,19 +41,23 @@ const useStyles = (isCurrentUser, isColorized, isDragging) =>
       width: '350px',
       height: '380px',
       position: 'relative',
+      margin: 10,
       backgroundColor: isColorized
         ? emphasize(isCurrentUser ? green[100] : red[100], 0.05)
         : 'whitesmoke',
-      ...(isDragging?{
-      border: 'blue 5px dashed',
-      background: isColorized?'linear-gradient(90deg, #cbf2ff 0%, #98cbe4 55%, #0b9dc3 100%)':'',
-      }:{}),
+      ...(isDragging
+        ? {
+            border: 'blue 5px dashed',
+            background: isColorized
+              ? 'linear-gradient(90deg, #cbf2ff 0%, #98cbe4 55%, #0b9dc3 100%)'
+              : '',
+          }
+        : {}),
       boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
       '&:hover': {
         boxShadow: '0 14px 28px rgba(0,0,0,0.25), 0 10px 10px',
       },
-      transition: '300ms ease-out'
-      
+      transition: '300ms ease-out',
     },
     media: {
       justifyContent: 'center',
@@ -159,7 +163,7 @@ const CommentToolbar = ({ authId, record: comment, cardRef }) => {
   );
 };
 
-const CommentAsideCard = ({ record: comment, isDragging }) => {
+const CommentCard = ({ record: comment, isDragging }) => {
   const animation = '_pulse';
 
   const { user: authUser } = useSelector(getAuthData());
@@ -265,4 +269,4 @@ const CommentAsideCard = ({ record: comment, isDragging }) => {
     </Card>
   );
 };
-export default CommentAsideCard;
+export default CommentCard;

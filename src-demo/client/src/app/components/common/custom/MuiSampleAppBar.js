@@ -157,6 +157,10 @@ const CustomAppBar = (currentPage) => (props) => {
     redirect('/project');
   };
 
+  const handleRedirectToProfile = () => {
+    redirect('edit', '/users', authUser.uid);
+  };
+
   return (
     <AppBar
       position="static"
@@ -306,6 +310,7 @@ const CustomAppBar = (currentPage) => (props) => {
                 key={ind}
                 onClick={() => {
                   handleCloseUserMenu();
+                  if (setting.title === 'Профиль') handleRedirectToProfile();
                   if (setting.title === 'О проекте') handleProject();
                   if (setting.title === 'Обновить') handleRefresh();
                   if (setting.title === 'Выйти') handleLogout();

@@ -39,7 +39,7 @@ const move = (source, destination, droppableSource, droppableDestination) => {
 
 function CommentDragCard({ data, index }) {
   return (
-    <Draggable onDragOver={(e)=>console.log(e,'drag over')} draggableId={data.id} index={index}>
+    <Draggable draggableId={data.id} index={index}>
       {(provided, snapshot) => {
         return (
         <div
@@ -68,8 +68,11 @@ const CommentDraggableComponent = ({ list: comments, ids }) => {
 
   React.useEffect(()=>{
   //if (!state) {
-    for (let num=0; num*rowCards<=comments.length; num++ ) {
-      commentsByRows[`draglist${num+1}`]=comments.slice(num*rowCards, (num+1)*rowCards)
+    for (let num = 0; (num + 1) * rowCards <= comments.length; num++) {
+      commentsByRows[`draglist${num + 1}`] = comments.slice(
+        num * rowCards,
+        (num + 1) * rowCards
+      );
     }
     setState(commentsByRows);
   //}
@@ -91,51 +94,55 @@ const CommentDraggableComponent = ({ list: comments, ids }) => {
       );
 
       setState(prev => {return {...prev, [source.droppableId]:items}});
-    } else {
-       const result = move(
+    } else if (destination.index < rowCards) {
+      const result = move(
         state[source.droppableId],
         state[destination.droppableId],
         source,
         destination
       );
-      setState(prev => {return {...prev, ...result}});
+      setState((prev) => {
+        return { ...prev, ...result };
+      });
     }
 
     localStorage.setItem('dragCommentId', result.draggableId);
     setTimeout(()=>localStorage.removeItem('dragCommentId'),0);
-
   }
 
   return (
     <>
-  {state &&  (
-  <DragDropContext onDragEnd={onDragEnd}>
-    {Object.keys(state).map((key, index) => (
-      <Droppable key={index} droppableId={`${key}`} direction="horizontal">
-        {(provided, snapshot) => (
-          <div 
-            {...provided.droppableProps}
-            ref={provided.innerRef}>
-
-            <Stack
-              sx={{
-                flexDirection:'row',
-                display:'flex',
-                justifyContent: 'space-around',
-                alignItems: 'flex-start',
-                flexWrap: 'wrap',
-                gap: '3rem',
-                py: 5,
-              }}
+      {state && (
+        <DragDropContext onDragEnd={onDragEnd}>
+          {Object.keys(state).map((key, index) => (
+            <Droppable
+              key={index}
+              droppableId={`${key}`}
+              direction="horizontal"
             >
-            <CommentDragStack comments={state[key]} />
-            {provided.placeholder}
-            </Stack>
-            </div>
-          )}
-      </Droppable>
-    ))}
-    </DragDropContext>)}
+              {(provided, snapshot) => (
+                <div {...provided.droppableProps} ref={provided.innerRef}>
+                  <Stack
+                    sx={{
+                      flexDirection: 'row',
+                      display: 'flex',
+                      justifyContent: 'space-around',
+                      alignItems: 'flex-start',
+                      overflow: 'hidden',
+                      flexWrap: 'wrap',
+                      gap: '3rem',
+                      py: 5,
+                    }}
+                  >
+                    <CommentDragStack comments={state[key]} />
+                    {provided.placeholder}
+                  </Stack>
+                </div>
+              )}
+            </Droppable>
+          ))}
+        </DragDropContext>
+      )}
     </>
   );
 };

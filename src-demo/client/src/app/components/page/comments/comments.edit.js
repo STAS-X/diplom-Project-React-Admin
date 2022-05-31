@@ -18,13 +18,14 @@ import {
   SimpleFormIterator,
   useNotify,
   useRedirect,
+  useRefresh,
   useRecordContext,
   FormDataConsumer,
   Toolbar,
   useEditContext,
   useEditController,
   Title,
-  useRefresh,
+  useGetOne,
   useGetList,
   required,
   minLength,
@@ -37,7 +38,14 @@ import RichTextInput from 'ra-input-rich-text';
 import { makeStyles } from '@material-ui/core/styles';
 //import { useFormState } from 'react-hook-form';
 import { green, blue, red } from '@mui/material/colors';
-import { Stack, Box, Typography, Avatar, Chip, CircularProgress } from '@mui/material';
+import {
+  Stack,
+  Box,
+  Typography,
+  Avatar,
+  Chip,
+  CircularProgress,
+} from '@mui/material';
 import TaskEditIcon from '@material-ui/icons/EditRounded';
 import DeleteIcon from '@material-ui/icons/DeleteRounded';
 import TaskProgressBar from '../../common/progressbar/task.progress';
@@ -51,24 +59,24 @@ import {
 import { dateFormatter } from '../../../utils/displayDate';
 
 const getTaskResult = (data) => {
-      if (data.status) {
-        if (new Date(data.finishedAt) <= new Date(data.executeAt)) {
-          return 1;
-        } else {
-          return 0;
-        }
+  if (data.status) {
+    if (new Date(data.finishedAt) <= new Date(data.executeAt)) {
+      return 1;
+    } else {
+      return 0;
+    }
+  } else {
+    if (new Date(data.executeAt) < new Date()) {
+      if (data.progress < 100) {
+        return -1;
       } else {
-        if (new Date(data.executeAt) < new Date()) {
-          if (data.progress < 100) {
-            return -1;
-          } else {
-            return 0;
-          }
-        } else {
-          return 0;
-        }
+        return 0;
       }
-}
+    } else {
+      return 0;
+    }
+  }
+};
 
 const TaskForCommentSelector = ({ id, title, ...data }) => {
   const result = getTaskResult(data);
@@ -76,21 +84,24 @@ const TaskForCommentSelector = ({ id, title, ...data }) => {
     <Chip
       label={`${title} - id#${id}`}
       sx={{
-        '&':{
-            minWidth:150,
-            backgroundColor: result === 1? blue[200]: green[200],
-            color: result === 1? green[600]: result === 0 ? blue[600]:red[600],
-            fontWeight: 'bold',
-            fontSize: 14,
-            'span:after': {content: result===1? '" ✔️"': '" 😐"', color: result>=0?'green':'inherit' },
-        }
+        '&': {
+          minWidth: 150,
+          backgroundColor: result === 1 ? blue[200] : green[200],
+          color:
+            result === 1 ? green[600] : result === 0 ? blue[600] : red[600],
+          fontWeight: 'bold',
+          fontSize: 14,
+          'span:after': {
+            content: result === 1 ? '" ✔️"' : '" 😐"',
+            color: result >= 0 ? 'green' : 'inherit',
+          },
+        },
       }}
     />
   );
 };
 
-const CustomToolbar = ({authId, ...props}) => {
-
+const CustomToolbar = ({ authId, ...props }) => {
   const redirect = useRedirect();
 
   const {
@@ -100,7 +111,6 @@ const CustomToolbar = ({authId, ...props}) => {
     handleSubmit,
     handleSubmitWithRedirect,
   } = props;
-
 
   const handleSuccess = () => {
     console.info(`Данные задачи ${record.id} сохранены успешно`);
@@ -151,15 +161,21 @@ const validateDescription = [
   minLength(3, 'Описание должно быть более 3-х символов'),
 ];
 
-
 export const CommentEdit = (props) => {
-
   const refresh = useRefresh();
-  const notify= useNotify();
+  const notify = useNotify();
+  const redirect = useRedirect();
+
+  const {
+    data: { userId: editUserId },
+    loaded: isLoaded,
+  } = useGetOne('comments', props.id);
+
   const { user: authUser } = useSelector(getAuthData());
 
-  const [currentTask] = React.useState(localStorage.getItem('currentTaskId'))
-  if (localStorage.getItem('currentTaskId')) localStorage.removeItem('currentTaskId');
+  const [currentTask] = React.useState(localStorage.getItem('currentTaskId'));
+  if (localStorage.getItem('currentTaskId'))
+    localStorage.removeItem('currentTaskId');
 
   const {
     data: comments,
@@ -172,7 +188,7 @@ export const CommentEdit = (props) => {
     { userId: authUser.uid, commentable: true }
   );
 
-   const transform = (data) => {
+  const transform = (data) => {
     console.log(data, 'transform data from edit');
     return {
       ...data,
@@ -186,7 +202,12 @@ export const CommentEdit = (props) => {
     refresh();
   };
 
+  React.useEffect(() => {
+    if (isLoaded && authUser.uid !== editUserId)
+      setTimeout(() => redirect('show', '/comments', props.id), 0);
 
+    return () => {};
+  }, [isLoaded]);
 
   return (
     <>
@@ -203,8 +224,14 @@ export const CommentEdit = (props) => {
           warnWhenUnsavedChanges
           toolbar={<CustomToolbar authId={authUser.uid} />}
         >
-
-          <FunctionField addLabel={false} render={(record)=> <h3 className="titleDialog">Редактирование комментария #{record.id} </h3>} />
+          <FunctionField
+            addLabel={false}
+            render={(record) => (
+              <h3 className="titleDialog">
+                Редактирование комментария #{record.id}{' '}
+              </h3>
+            )}
+          />
 
           <TextInput disabled label="Идентификатор" source="id" />
           <DateInput
@@ -229,8 +256,10 @@ export const CommentEdit = (props) => {
                   label="Комментируемая задача"
                   source="taskId"
                   reference="tasks"
-                  filter={total>0?{id_nar: Object.keys(comments)}:{}}
-                  validate={required('Необходимо выбрать задачу для комментария')}
+                  filter={total > 0 ? { id_nar: Object.keys(comments) } : {}}
+                  validate={required(
+                    'Необходимо выбрать задачу для комментария'
+                  )}
                   sort={{ field: 'title', order: 'ASC' }}
                 >
                   <SelectInput
@@ -238,7 +267,7 @@ export const CommentEdit = (props) => {
                     optionText={(choise) => (
                       <TaskForCommentSelector {...choise} />
                     )}
-                    defaultValue={currentTask?currentTask:''}
+                    defaultValue={currentTask ? currentTask : ''}
                     helperText="Выберите исполнителей"
                   />
                 </ReferenceInput>

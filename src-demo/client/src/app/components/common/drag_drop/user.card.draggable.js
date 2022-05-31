@@ -85,7 +85,7 @@ const UserDraggableComponent = ({ list: users, ids }) => {
 
    React.useEffect(()=>{
   //if (!state) {
-    for (let num=0; num*rowCards<=users.length; num++ ) {
+    for (let num=0; (num+1)*rowCards<=users.length; num++ ) {
       usersByRows[`draglist${num+1}`]=users.slice(num*rowCards, (num+1)*rowCards)
     }
     setState(usersByRows);
@@ -108,14 +108,16 @@ const UserDraggableComponent = ({ list: users, ids }) => {
       );
 
       setState(prev => {return {...prev, [source.droppableId]:items}});
-    } else {
-       const result = move(
+    } else if (destination.index < rowCards) {
+      const result = move(
         state[source.droppableId],
         state[destination.droppableId],
         source,
         destination
       );
-      setState(prev => {return {...prev, ...result}});
+      setState((prev) => {
+        return { ...prev, ...result };
+      });
     }
 
     localStorage.setItem('dragUserId', result.draggableId);
@@ -125,34 +127,37 @@ const UserDraggableComponent = ({ list: users, ids }) => {
 
   return (
     <>
-  {state &&  (
-  <DragDropContext onDragEnd={onDragEnd}>
-    {Object.keys(state).map((key, index) => (
-      <Droppable key={index} droppableId={`${key}`} direction="horizontal">
-        {(provided, snapshot) => (
-          <div 
-            {...provided.droppableProps}
-            ref={provided.innerRef}>
-
-            <Stack
-              sx={{
-                flexDirection:'row',
-                display:'flex',
-                justifyContent: 'space-around',
-                alignItems: 'flex-start',
-                flexWrap: 'wrap',
-                gap: '3rem',
-                py: 5,
-              }}
+      {state && (
+        <DragDropContext onDragEnd={onDragEnd}>
+          {Object.keys(state).map((key, index) => (
+            <Droppable
+              key={index}
+              droppableId={`${key}`}
+              direction="horizontal"
             >
-            <UserDragStack users={state[key]} />
-            {provided.placeholder}
-            </Stack>
-            </div>
-          )}
-      </Droppable>
-    ))}
-    </DragDropContext>)}
+              {(provided, snapshot) => (
+                <div {...provided.droppableProps} ref={provided.innerRef}>
+                  <Stack
+                    sx={{
+                      flexDirection: 'row',
+                      display: 'flex',
+                      justifyContent: 'space-around',
+                      alignItems: 'flex-start',
+                      overflow: 'hidden',
+                      flexWrap: 'wrap',
+                      gap: '3rem',
+                      py: 5,
+                    }}
+                  >
+                    <UserDragStack users={state[key]} />
+                    {provided.placeholder}
+                  </Stack>
+                </div>
+              )}
+            </Droppable>
+          ))}
+        </DragDropContext>
+      )}
     </>
   );
 };

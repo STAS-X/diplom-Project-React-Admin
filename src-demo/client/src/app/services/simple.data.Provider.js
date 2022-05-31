@@ -200,9 +200,10 @@ export default {
     console.log(params, 'updatemany params')
     return httpClient
       .put(url, {
-        data: JSON.stringify(params.ids),
+        data: JSON.stringify(params),
         headers: {
           ProviderRequest: 'updateMany',
+          ProviderParams: JSON.stringify(params.ids),
         },
       })
       .then(({ status, statusText, data }) => {
@@ -239,7 +240,7 @@ export default {
       .delete(url, {
         headers: {
           ProviderRequest: 'delete',
-          ProviderParams: JSON.stringify(params),
+          ProviderParams: params.id,
         },
       })
       .then(({ status, statusText, data }) => {

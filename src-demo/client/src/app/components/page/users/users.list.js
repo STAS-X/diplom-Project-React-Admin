@@ -32,7 +32,11 @@ import UserCardExpand from '../../common/cards/user.card.expand';
 import UserCard from '../../common/cards/user.card.list';
 import UserDraggableComponent from '../../common/drag_drop/user.card.draggable';
 import { getAuthData } from '../../../store/authcontext';
-import { getAppColorized, getAppCarding, getAppLoading } from '../../../store/appcontext';
+import {
+  getAppColorized,
+  getAppCarding,
+  getAppLoading,
+} from '../../../store/appcontext';
 
 const QuickFilter = ({ label }) => {
   const translate = useTranslate();
@@ -50,9 +54,18 @@ const PaginationActions = (props) => {
   );
 };
 
-const UserPagination = ({isAppColorized, ...props}) => {
-
-   React.useEffect(()=>{
+const UserPagination = ({ isAppColorized, ...props }) => {
+  React.useEffect(() => {
+    const rowHead = document.querySelectorAll(
+      'thead.MuiTableHead-root tr.MuiTableRow-root th'
+    );
+    if (rowHead) {
+      const ths = Array.from(rowHead);
+      ths.forEach(
+        (th) =>
+          (th.style.backgroundColor = isAppColorized ? blue[100] : 'whitesmoke')
+      );
+    }
     const paging = document.querySelector('div.MuiTablePagination-toolbar');
     if (paging) {
       paging.style.backgroundColor = isAppColorized ? blue[200] : 'whitesmoke';
@@ -62,9 +75,8 @@ const UserPagination = ({isAppColorized, ...props}) => {
       if (paging.querySelector('.next-page'))
         paging.querySelector('.next-page').textContent = 'Следующая > ';
     }
-    return ()=>{}
-   },[isAppColorized, props]);
-
+    return () => {};
+  }, [isAppColorized, props]);
 
   return (
     <RaPagination
@@ -117,19 +129,15 @@ const UserToolbar = ({ userId }) => {
 };
 
 export const UserList = (props) => {
-
-   const { loadedOnce: isLoading, ids } = useSelector(
+  const { loadedOnce: isLoading, ids } = useSelector(
     (state) => state.admin.resources.users.list
   );
-   const users = useSelector(
-    (state) => state.admin.resources.users.data
-  );
+  const users = useSelector((state) => state.admin.resources.users.data);
 
   const { user: authUser } = useSelector(getAuthData());
   const isAppColorized = useSelector(getAppColorized());
   const isAppLoading = useSelector(getAppLoading());
   const isCarding = useSelector(getAppCarding());
-
 
   return (
     <>
@@ -152,9 +160,14 @@ export const UserList = (props) => {
             />
           )}
           {isCarding && !(!isLoading && isAppLoading) && (
-            <UserDraggableComponent list={ids.map(id => users[id])} ids={ids}/>
+            <UserDraggableComponent
+              list={ids.map((id) => users[id])}
+              ids={ids}
+            />
           )}
-          {!(!isLoading && isAppLoading) && <UserPagination isAppColorized={isAppColorized} />}
+          {!(!isLoading && isAppLoading) && (
+            <UserPagination isAppColorized={isAppColorized} />
+          )}
         </ListBase>
       )}
       {!isLoading && isAppLoading && <Loading />}
@@ -162,14 +175,7 @@ export const UserList = (props) => {
   );
 };
 
-
-const MyDatagrid = ({
-  isAppColorized,
-  isCarding,
-  authId,
-  ...props
-}) => {
-
+const MyDatagrid = ({ isAppColorized, isCarding, authId, ...props }) => {
   const userRef = React.useRef();
   const { loaded, loading } = useListContext();
 
@@ -193,11 +199,7 @@ const MyDatagrid = ({
         style={{ display: 'none' }}
       />
       <TextField label="Имя" source="name" />
-      <TextField
-        label="Возраст"
-        source="age"
-        defaultValue={'не указан'}
-      />
+      <TextField label="Возраст" source="age" defaultValue={'не указан'} />
       <EmailField label="Почта" sortable={false} source="email" />
       <TextField label="Провайдер входа" sortable={false} source="providerId" />
       <DateField
@@ -209,8 +211,10 @@ const MyDatagrid = ({
       <FunctionField
         label=""
         render={(record) => {
-          if (record.id === authId) return <EditButton basePath="/users" label="" record={record} />;
+          if (record.id === authId)
+            return <EditButton basePath="/users" label="" record={record} />;
         }}
       />
     </Datagrid>
-  );};
+  );
+};

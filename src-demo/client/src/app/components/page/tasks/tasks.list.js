@@ -94,9 +94,15 @@ const PaginationActions = (props) => {
   );
 };
 
-const TaskPagination = ({isAppColorized, ...props}) => {
-
-   React.useEffect(()=>{
+const TaskPagination = ({ isAppColorized, ...props }) => {
+  React.useEffect(() => {
+    const rowHead = document.querySelectorAll(
+      'thead.MuiTableHead-root tr.MuiTableRow-root th'
+    );
+    if (rowHead) {
+        const ths=Array.from(rowHead);
+        ths.forEach(th => th.style.backgroundColor = isAppColorized ? blue[100] : 'whitesmoke');
+    }
     const paging = document.querySelector('div.MuiTablePagination-toolbar');
     if (paging) {
       paging.style.backgroundColor = isAppColorized ? blue[200] : 'whitesmoke';
@@ -106,8 +112,8 @@ const TaskPagination = ({isAppColorized, ...props}) => {
       if (paging.querySelector('.next-page'))
         paging.querySelector('.next-page').textContent = 'Следующая > ';
     }
-    return ()=>{}
-   },[isAppColorized, props]);
+    return () => {};
+  }, [isAppColorized, props]);
 
   return (
     <RaPagination
@@ -475,11 +481,14 @@ export const TaskList = (props) => {
             />
           )}
           {isCarding && !(!isLoading && isAppLoading) && (
-            <TaskDraggableComponent list={ids.map(id => tasks[id])} ids={ids}/>
+            <TaskDraggableComponent
+              list={ids.map((id) => tasks[id])}
+              ids={ids}
+            />
           )}
 
           {!(!isLoading && isAppLoading) && (
-            <TaskPagination isAppColorized={isAppColorized}/>
+            <TaskPagination isAppColorized={isAppColorized} />
           )}
         </ListBase>
       )}
@@ -561,7 +570,6 @@ const MyDatagrid = ({
   setHoverId,
   ...props
 }) => {
-
   const taskRef = React.useRef();
   const { loaded, loading } = useListContext();
 

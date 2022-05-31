@@ -37,7 +37,7 @@ import {
   TopToolbar
   
 } from '@mui/material';
-import TaskAsideCard from '../../common/cards/task.card.aside';
+import TaskCard from '../../common/cards/task.card.list';
 import {useSelector} from 'react-redux';
 import { getAuthData } from '../../../store/authcontext';
 import {Visibility,VisibilityOff, ViewList, People as UserIcon, Pages as TaskIcon, Comment as CommentIcon  } from '@material-ui/icons';
@@ -191,21 +191,21 @@ return (
         <FunctionField
           label="Создатель"
           source="userId"
-          render={(record) => <CreatorField userId={record.userId}/>}
+          render={(record) => <CreatorField userId={record.userId} />}
         />
         <DateField label="Дата создания" source="createdAt" lacales="ru" />
         <DateField label="Дата исполнения" source="executeAt" locales="ru" />
         <FunctionField
           label="Ход исполнения"
           source="progress"
-          render={(record) =>
-            <span>{record.progress}%</span>
-          }
+          render={(record) => <span>{record.progress}%</span>}
         />
         <FunctionField
           label="Исполнители"
           source="executors"
-          render={(record) => <ExecutorsListField executors={record.executors} />}
+          render={(record) => (
+            <ExecutorsListField executors={record.executors} />
+          )}
         />
 
         <FunctionField
@@ -216,12 +216,12 @@ return (
         <FunctionField
           label="Завершена"
           source="status"
-          render={(record) => <span>{record.status?'Да':'Нет'}</span>}
+          render={(record) => <span>{record.status ? 'Да' : 'Нет'}</span>}
         />
         <FunctionField
           label="Комментируема"
           source="commentable"
-          render={(record) => <span>{record.commentable?'Да':'Нет'}</span>}
+          render={(record) => <span>{record.commentable ? 'Да' : 'Нет'}</span>}
         />
       </Tab>
       <Tab
@@ -229,7 +229,11 @@ return (
         icon={<TaskIcon style={{ marginRight: 5 }} />}
         path="card"
       >
-        <TaskAsideCard style={{ margin: 20 }} id={props.id} />
+        <TaskCard
+          style={{ margin: 20 }}
+          record={props.record}
+          isDragging={false}
+        />
       </Tab>
       <Tab
         label="Комментарии"
@@ -242,9 +246,7 @@ return (
           filter={{ taskId: props.id }}
           reference="comments"
           target="taskId"
-          label={`Комментарии задачи ${
-            task ? task.title : props.id
-          }`}
+          label={`Комментарии задачи ${task ? task.title : props.id}`}
         >
           <List
             {...props}

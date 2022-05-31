@@ -70,8 +70,11 @@ const TaskDraggableComponent = ({ list: tasks, ids }) => {
 
    React.useEffect(()=>{
   //if (!state) {
-    for (let num=0; num*rowCards<=tasks.length; num++ ) {
-      tasksByRows[`draglist${num+1}`]=tasks.slice(num*rowCards, (num+1)*rowCards)
+    for (let num = 0; (num + 1) * rowCards <= tasks.length; num++) {
+      tasksByRows[`draglist${num + 1}`] = tasks.slice(
+        num * rowCards,
+        (num + 1) * rowCards
+      );
     }
     setState(tasksByRows);
   //}
@@ -93,14 +96,16 @@ const TaskDraggableComponent = ({ list: tasks, ids }) => {
       );
 
       setState(prev => {return {...prev, [source.droppableId]:items}});
-    } else  {
-       const result = move(
+    } else if (destination.index<rowCards) {
+      const result = move(
         state[source.droppableId],
         state[destination.droppableId],
         source,
         destination
       );
-      setState(prev => {return {...prev, ...result}});
+      setState((prev) => {
+        return { ...prev, ...result };
+      });
     }
 
     localStorage.setItem('dragTaskId', result.draggableId);
@@ -125,6 +130,7 @@ const TaskDraggableComponent = ({ list: tasks, ids }) => {
                 display:'flex',
                 justifyContent: 'space-around',
                 alignItems: 'flex-start',
+                overflow:'hidden',
                 flexWrap: 'wrap',
                 gap: '3rem',
                 py: 5,

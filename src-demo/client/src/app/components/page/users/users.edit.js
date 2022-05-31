@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import {
   Edit,
   DateInput,
@@ -16,7 +16,9 @@ import {
   useNotify,
   Toolbar,
   useRefresh,
+  useRedirect,
   useEditContext,
+  FormDataConsumer,
   required,
   minLength,
   maxLength,
@@ -25,14 +27,16 @@ import {
   number,
 } from 'react-admin';
 import { Stack, Button } from '@mui/material';
-import { ReorderRounded, PortraitRounded } from '@material-ui/icons';
-import { getAuthData } from '../../../store/authcontext';
+import { Repeat as PlayRounded, PortraitRounded } from '@material-ui/icons';
+import { getAuthData, setAuthUser } from '../../../store/authcontext';
 import { nanoid } from 'nanoid';
 import { dateFormatter } from '../../../utils/displayDate';
+import { getRandomInt } from '../../../utils/getRandomInt';
 
-const CustomToolbar = ({ authId, ...props }) => {
+const CustomToolbar = ({ authUser, profileURL, ...props }) => {
   //const notify = useNotify();
   //const redirect = useRedirect();
+  const dispatch = useDispatch();
   //const refresh = useRefresh();
   const {
     invalid: isInvalid,
@@ -51,15 +55,34 @@ const CustomToolbar = ({ authId, ...props }) => {
         minWidth: 500,
       }}
     >
-      <SaveButton
-        label="Сохранить"
-        onClick={() => {
-          handleSubmit();
-          //setOnSuccess(handleSuccess);
-        }}
-        redirect={'show'}
-        disabled={(isInvalid || pristine) && record.id !== authId}
-      />
+      <FormDataConsumer>
+        {({ formData }) => (
+          <SaveButton
+            label="Сохранить"
+            onClick={() => {
+              console.log(formData, 'data from edit context');
+              handleSubmit();
+              dispatch(
+                setAuthUser({
+                  ...authUser,
+                  age: formData.age,
+                  name: formData.name,
+                  url: profileURL.picture[0].url,
+                })
+              );
+              //setOnSuccess(handleSuccess);
+            }}
+            redirect={'show'}
+            handleSubmitWithRedirect={() => {}}
+            disabled={
+              record.id === authUser.uid
+                ? isInvalid ||
+                  (pristine && profileURL?.picture[0].url === formData.url)
+                : true
+            }
+          />
+        )}
+      </FormDataConsumer>
     </Toolbar>
   );
 };
@@ -76,14 +99,20 @@ const validateAge = [
 
 const MyProfileImage = ({ transform, authURL, profileURL, setProfileURL }) => {
   const { record, setTransform } = useEditContext();
-  console.log(record, 'from context');
+  const avatarsUrl = [
+    'https://avatars.dicebear.com/api/avataaars/',
+    'https://i.pravatar.cc/300?u=',
+  ];
 
-  if (!profileURL) {
-    const newURL = {
-      picture: [{ url: record.url, desc: 'Фото' }],
-    };
-    setProfileURL(newURL);
-  }
+  React.useEffect(() => {
+    if (!profileURL) {
+      const newURL = {
+        picture: [{ url: record.url, desc: 'Фото' }],
+      };
+      setProfileURL(newURL);
+    }
+    return () => {};
+  }, [profileURL]);
 
   const handleClick = (isProfile) => {
     if (isProfile) {
@@ -96,12 +125,12 @@ const MyProfileImage = ({ transform, authURL, profileURL, setProfileURL }) => {
         ],
       };
       setProfileURL(newURL);
-      setTransform(transform(authURL));      
+      setTransform(transform(authURL));
     } else {
       const newURL = {
         picture: [
           {
-            url: `https://i.pravatar.cc/300?u=${nanoid(10)}`,
+            url: `${avatarsUrl[getRandomInt(0, 1)]}${nanoid(21)}.svg`,
             desc: 'Фото',
           },
         ],
@@ -125,7 +154,7 @@ const MyProfileImage = ({ transform, authURL, profileURL, setProfileURL }) => {
       <Button
         variant="text"
         color="primary"
-        startIcon={<ReorderRounded />}
+        startIcon={<PlayRounded />}
         onClick={() => handleClick(false)}
       >
         Случайно
@@ -145,7 +174,9 @@ const MyProfileImage = ({ transform, authURL, profileURL, setProfileURL }) => {
 export const UserEdit = (props) => {
   const notify = useNotify();
   const refresh = useRefresh();
+  const redirect = useRedirect();
 
+  const { id: editUserId } = props;
   //const rec= useRecordContext();
   //const fstate = useFormState();
   //console.log(fstate, 'get state of form')
@@ -159,12 +190,18 @@ export const UserEdit = (props) => {
   };
 
   const transform = (newUrl) => (data) => {
-    console.log(data, newUrl, 'transform data from edit');
     return {
       ...data,
       url: newUrl ? newUrl : data.url,
     };
   };
+
+  React.useEffect(() => {
+    if (authUser.uid !== editUserId)
+      setTimeout(() => redirect('show', '/users', editUserId), 0);
+
+    return () => {};
+  }, []);
 
   return (
     <>
@@ -179,7 +216,9 @@ export const UserEdit = (props) => {
           <SimpleForm
             mode="onBlur"
             warnWhenUnsavedChanges
-            toolbar={<CustomToolbar authId={authUser.uid} />}
+            toolbar={
+              <CustomToolbar authUser={authUser} profileURL={profileURL} />
+            }
           >
             <FunctionField
               addLabel={false}
@@ -195,6 +234,7 @@ export const UserEdit = (props) => {
             <MyProfileImage
               label="Фото профиля"
               record={props}
+              source="url"
               profileURL={profileURL}
               authURL={authUser.url}
               transform={transform}

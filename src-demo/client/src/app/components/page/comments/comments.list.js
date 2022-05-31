@@ -80,7 +80,6 @@ const QuickFilter = ({ label }) => {
 };
 
 const PaginationActions = (props) => {
-
   return (
     <RaPaginationActions
       {...props}
@@ -90,9 +89,18 @@ const PaginationActions = (props) => {
   );
 };
 
-const CommentPagination = ({isAppColorized, ...props}) => {
-
-   React.useEffect(()=>{
+const CommentPagination = ({ isAppColorized, ...props }) => {
+  React.useEffect(() => {
+    const rowHead = document.querySelectorAll(
+      'thead.MuiTableHead-root tr.MuiTableRow-root th'
+    );
+    if (rowHead) {
+      const ths = Array.from(rowHead);
+      ths.forEach(
+        (th) =>
+          (th.style.backgroundColor = isAppColorized ? blue[100] : 'whitesmoke')
+      );
+    }
     const paging = document.querySelector('div.MuiTablePagination-toolbar');
     if (paging) {
       paging.style.backgroundColor = isAppColorized ? blue[200] : 'whitesmoke';
@@ -102,8 +110,8 @@ const CommentPagination = ({isAppColorized, ...props}) => {
       if (paging.querySelector('.next-page'))
         paging.querySelector('.next-page').textContent = 'Следующая > ';
     }
-    return ()=>{}
-   },[isAppColorized, props]);
+    return () => {};
+  }, [isAppColorized, props]);
 
   return (
     <RaPagination
@@ -300,7 +308,6 @@ export const CommentList = (props) => {
   );
   const comments = useSelector((state) => state.admin.resources.comments.data);
 
-
   //const [isTransition, setTransition]=React.useState(false);
 
   return (
@@ -332,9 +339,14 @@ export const CommentList = (props) => {
             />
           )}
           {isCarding && !(!isLoading && isAppLoading) && (
-            <CommentDraggableComponent list={ids.map(id => comments[id])} ids={ids} />
+            <CommentDraggableComponent
+              list={ids.map((id) => comments[id])}
+              ids={ids}
+            />
           )}
-          {!(!isLoading && isAppLoading) && <CommentPagination isAppColorized={isAppColorized}/>}
+          {!(!isLoading && isAppLoading) && (
+            <CommentPagination isAppColorized={isAppColorized} />
+          )}
         </ListBase>
       )}
       {!isLoading && isAppLoading && <Loading />}

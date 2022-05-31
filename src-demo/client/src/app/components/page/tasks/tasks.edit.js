@@ -18,13 +18,14 @@ import {
   SimpleFormIterator,
   useNotify,
   useRedirect,
+  useGetOne,
   useRecordContext,
   FunctionField,
   ReferenceArrayInput,
   FormDataConsumer,
   Toolbar,
   useEditContext,
-  useGetList ,
+  useGetList,
   Title,
   useRefresh,
   required,
@@ -69,27 +70,27 @@ const ProgressBarField = (id, progress) => (
 );
 
 const getTaskResult = (data) => {
-      if (data.status) {
-        if (new Date(data.finishedAt) <= new Date(data.executeAt)) {
-          return 1;
-        } else {
-          return 0;
-        }
+  if (data.status) {
+    if (new Date(data.finishedAt) <= new Date(data.executeAt)) {
+      return 1;
+    } else {
+      return 0;
+    }
+  } else {
+    if (new Date(data.executeAt) < new Date()) {
+      if (data.progress < 100) {
+        return -1;
       } else {
-        if (new Date(data.executeAt) < new Date()) {
-          if (data.progress < 100) {
-            return -1;
-          } else {
-            return 0;
-          }
-        } else {
-          return 0;
-        }
+        return 0;
       }
-}
+    } else {
+      return 0;
+    }
+  }
+};
 
 const ExecutorChipSelector = ({ id, name, data }) => {
-  const result = getTaskResult(data)
+  const result = getTaskResult(data);
 
   return (
     <Chip
@@ -104,14 +105,16 @@ const ExecutorChipSelector = ({ id, name, data }) => {
       sx={{
         fontWeight: 'bold',
         fontSize: 14,
-        'span:after': {content: result===1? '" ✔️"': '" 😐"', color: result>=0?'green':'inherit' },
-
+        'span:after': {
+          content: result === 1 ? '" ✔️"' : '" 😐"',
+          color: result >= 0 ? 'green' : 'inherit',
+        },
       }}
     />
   );
 };
 
-const CustomToolbar = ({authId, ...props}) => {
+const CustomToolbar = ({ authId, ...props }) => {
   //const notify = useNotify();
   //const redirect = useRedirect();
   //const refresh = useRefresh();
@@ -128,13 +131,12 @@ const CustomToolbar = ({authId, ...props}) => {
     'comments',
     { page: 1, perPage: 1 },
     { field: 'id', order: 'ASC' },
-    { userId: authId, taskId: record.id}
+    { userId: authId, taskId: record.id }
   );
 
   //const { record, saving, setOnSuccess } = useEditContext();
 
   const handleSuccess = () => {
-
     console.info(`Данные задачи ${record.id} сохранены успешно`);
     // if (saving)
     //   if (localStorage.getItem('redirectTo')) {
@@ -177,7 +179,11 @@ const CustomToolbar = ({authId, ...props}) => {
               handleSubmit();
               //setOnSuccess(handleSuccess);
             }}
-            redirect={loaded && Object.keys(comments).length>0?`/comments/${comments[Object.keys(comments)[0]].id}`:'/comments/create'}
+            redirect={
+              loaded && Object.keys(comments).length > 0
+                ? `/comments/${comments[Object.keys(comments)[0]].id}`
+                : '/comments/create'
+            }
             handleSubmitWithRedirect={handleSubmitWithRedirect}
             disabled={!formData.commentable || isInvalid}
           />
@@ -212,11 +218,15 @@ const validateExecDate = (value, allValues) => {
   return undefined;
 };
 
-
 export const TaskEdit = (props) => {
   const notify = useNotify();
   const refresh = useRefresh();
-  //const rec= useRecordContext();
+  const redirect = useRedirect();
+
+  const {
+    data: { userId: editUserId },
+    loaded: isLoaded,
+  } = useGetOne('tasks', props.id);
   //const fstate = useFormState();
   //console.log(fstate, 'get state of form')
   const { user: authUser } = useSelector(getAuthData());
@@ -235,6 +245,13 @@ export const TaskEdit = (props) => {
     refresh();
   };
 
+  React.useEffect(() => {
+    if (isLoaded && authUser.uid !== editUserId)
+      setTimeout(() => redirect('show', '/tasks', props.id), 0);
+
+    return () => {};
+  }, [isLoaded]);
+
   return (
     <>
       {authUser && (
@@ -251,7 +268,14 @@ export const TaskEdit = (props) => {
             warnWhenUnsavedChanges
             toolbar={<CustomToolbar authId={authUser.uid} />}
           >
-            <FunctionField addLabel={false} render={(record)=> <h3 className="titleDialog">Редактирование задачи #{record.id} </h3>} />
+            <FunctionField
+              addLabel={false}
+              render={(record) => (
+                <h3 className="titleDialog">
+                  Редактирование задачи #{record.id}{' '}
+                </h3>
+              )}
+            />
 
             <TextInput disabled label="Идентификатор" source="id" />
 

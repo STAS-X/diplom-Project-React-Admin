@@ -37,7 +37,7 @@ import {
   TopToolbar
   
 } from '@mui/material';
-import CommentAsideCard from '../../common/cards/comment.card.aside';
+import CommentCard from '../../common/cards/comment.card.list';
 import {useSelector} from 'react-redux';
 import { getAuthData } from '../../../store/authcontext';
 import {Visibility,VisibilityOff, ViewList, People as UserIcon, Pages as TaskIcon, Comment as CommentIcon  } from '@material-ui/icons';
@@ -97,26 +97,22 @@ return (
         <FunctionField
           label="Создатель"
           source="userId"
-          render={(record) => <CreatorField userId={record.userId}/>}
+          render={(record) => <CreatorField userId={record.userId} />}
         />
         <FunctionField
           label="Комментируемая задача"
           source="taskId"
-          render={(record) => <CommentTaskField taskId={record.taskId}/>}
+          render={(record) => <CommentTaskField taskId={record.taskId} />}
         />
         <DateField label="Дата создания" source="createdAt" lacales="ru" />
-         <RichTextField
-            label="Комментарий"
-            source="body"
-        />
-
+        <RichTextField label="Комментарий" source="body" />
       </Tab>
       <Tab
         label="Комментарий"
         icon={<CommentIcon style={{ marginRight: 5 }} />}
         path="card"
       >
-        <CommentAsideCard style={{ margin: 20 }} id={props.id} />
+        <CommentCard style={{ margin: 20 }} record={props.record} isDragging={false} />
       </Tab>
     </TabbedShowLayout>
   </Show>

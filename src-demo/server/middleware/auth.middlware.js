@@ -38,16 +38,19 @@ module.exports = async (req, res, next) => {
     }
     const firestore = app.firestore;
 
+    console.log(req.body, 'get data from PUT DELETE query');
+ 
+
     const userSnap = await getDoc(doc(firestore, 'auth', 'user'));
     if (userSnap.exists() > 0) {
       const user = userSnap.data();
       //req.userId = user.uid;
+
       if (req.method === 'PUT' || req.method === 'DELETE') {
         const { data }  = req.body.data?JSON.parse(req.body.data):{data:null};
 
         if (data || userUid) {
-          console.log(data,user.uid,userUid,'get permissions')
-          const dataUid = data?.uid?data.uid:data?.id?data.id:null;
+          const dataUid = data?.uid ? data.uid : data?.id ? data.id : userUid;
           if (!(dataUid && dataUid === user.uid || userUid && userUid === user.uid)) {
             return res.status(403).send({
               code: 403,
