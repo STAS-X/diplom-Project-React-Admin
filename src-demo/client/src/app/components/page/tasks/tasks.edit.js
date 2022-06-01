@@ -248,7 +248,6 @@ export const TaskEdit = (props) => {
   React.useEffect(() => {
     if (isLoaded && authUser.uid !== editUserId)
       setTimeout(() => redirect('show', '/tasks', props.id), 0);
-
     return () => {};
   }, [isLoaded]);
 

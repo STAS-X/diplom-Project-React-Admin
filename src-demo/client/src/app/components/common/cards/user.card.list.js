@@ -150,7 +150,7 @@ const UserCard = ({record:user, isDragging}) => {
       className={classes.root}
     >
       <CardContent>
-        <UserToolbar record={user} authId={authUser.uid} cardRef={cardRef} />
+        <UserToolbar record={user} authId={authUser.uid} />
         <CardMedia
           className={classes.media}
           image={user.url}

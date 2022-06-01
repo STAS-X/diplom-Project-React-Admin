@@ -166,6 +166,7 @@ const CustomAppBar = (currentPage) => (props) => {
       position="static"
       sx={{
         m: 0,
+        zIndex:10,
         backgroundColor: theme === 'light' ? '#0f80f0' : '#0f4080',
       }}
     >

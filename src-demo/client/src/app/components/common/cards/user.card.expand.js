@@ -29,7 +29,7 @@ const useStyles = (isCurrentUser, isColorized) =>
     root: {
       width: '350px',
       height: 'min-content',
-      margin:10,
+      margin: 10,
       boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
       '&:hover': {
         boxShadow: '0 14px 28px rgba(0,0,0,0.25), 0 10px 10px',
@@ -54,8 +54,40 @@ const useStyles = (isCurrentUser, isColorized) =>
     },
   });
 
+const UserToolbar = ({ authId, record: user }) => {
+  return (
+    <Stack
+      alignItems="flex-start"
+      direction="row"
+      justifyContent="flex-end"
+      sx={{
+        position: 'absolute',
+        '& .MuiCardContent-root': {
+          display: 'inline-flex',
+          margin: 0,
+          padding: 0,
+        },
+        '& .MuiButton-root': {
+          minWidth: '32px !important',
+          margin: 0,
+          padding: 0,
+        },
+        width: 32,
+        height: 'min-content',
+        right: 5,
+        top: 5,
+        zIndex: 1,
+      }}
+    >
+      <SimpleShowLayout record={user}>
+        {authId !== user.id && <ShowButton label="" />}
+        {authId === user.id && <EditButton label="" />}
+      </SimpleShowLayout>
+    </Stack>
+  );
+};
+
 const UserCardExpand = (props) => {
-  console.log(props, 'all data');
   const user = props.record;
   const animation = '_rubberBand';
 
@@ -137,14 +169,14 @@ const UserCardExpand = (props) => {
 
   return (
     <Card variant="outlined" ref={cardRef} className={classes.root}>
-      <CardMedia
-        className={classes.media}
-        image={user.url}
-        component="img"
-        title="Avatar"
-      ></CardMedia>
-
       <CardContent>
+        <UserToolbar record={user} authId={authUser.uid} />
+        <CardMedia
+          className={classes.media}
+          image={user.url}
+          component="img"
+          title="Avatar"
+        ></CardMedia>
         <Typography
           gutterBottom
           color="textPrimary"

@@ -35,7 +35,7 @@ import { dateFormatter } from '../../../utils/displayDate';
 import { getRandomInt } from '../../../utils/getRandomInt';
 import DeleteIcon from '@material-ui/icons/DeleteRounded';
 
-const useStyles = (isCurrentUser, isColorized, isDragging) =>
+const useStyles = (isCurrentUser, isColorized, isTaskLoaded, isDragging) =>
   makeStyles({
     root: {
       width: '350px',
@@ -45,6 +45,10 @@ const useStyles = (isCurrentUser, isColorized, isDragging) =>
       backgroundColor: isColorized
         ? emphasize(isCurrentUser ? green[100] : red[100], 0.05)
         : 'whitesmoke',
+      ...(isTaskLoaded
+        ? {
+            border: 'blue 5px dashed',
+          }:{}),
       ...(isDragging
         ? {
             border: 'blue 5px dashed',
@@ -205,7 +209,7 @@ const CommentCard = ({ record: comment, isDragging }) => {
     return () => {};
   }, [cardRef.current]);
 
-  const classes = useStyles(authUser.uid === comment.userId, colorized, isDragging)();
+  const classes = useStyles(authUser.uid === comment.userId, colorized,taskLoaded && task, isDragging)();
 
   
   return (
@@ -216,6 +220,8 @@ const CommentCard = ({ record: comment, isDragging }) => {
           authId={authUser.uid}
           cardRef={cardRef}
         />
+        {task && (
+          <>
             <Typography
               gutterBottom
               color="primary"
@@ -229,7 +235,7 @@ const CommentCard = ({ record: comment, isDragging }) => {
                 marginLeft: 10,
               }}
             >
-              Задача {task?.title}
+              Задача {task.title}
             </Typography>
             <Typography
               gutterBottom
@@ -244,8 +250,27 @@ const CommentCard = ({ record: comment, isDragging }) => {
                 marginLeft: 10,
               }}
             >
-              {task?.description}
+              {task.description}
             </Typography>
+          </>
+        )}
+        {!task && taskLoaded && (
+          <Typography
+            gutterBottom
+            color="error"
+            variant="h6"
+            component="h2"
+            style={{
+              textAlign: 'center',
+              padding: 0,
+              margin: 0,
+              marginBottom: -10,
+              marginLeft: 10,
+            }}
+          >
+            Задача удалена!
+          </Typography>
+        )}
         <Grid container direction="row" alignItems="flex-start" spacing={1}>
           <Grid item>
             <SimpleShowLayout record={comment}>
