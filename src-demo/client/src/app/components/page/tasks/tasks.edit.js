@@ -98,7 +98,7 @@ const ExecutorChipSelector = ({ id, name, data }) => {
       avatar={
         <Avatar
           alt="Пользователь"
-          src={`https://i.pravatar.cc/300?u=${id}`}
+          src={data.url?data.url:`https://i.pravatar.cc/300?u=${id}`}
           sx={{ width: 24, height: 24 }}
         />
       }
@@ -127,25 +127,13 @@ const CustomToolbar = ({ authId, ...props }) => {
     handleSubmitWithRedirect,
   } = props;
 
-  const { data: comments, loaded } = useGetList(
+  const { data: comments, loaded, total } = useGetList(
     'comments',
     { page: 1, perPage: 1 },
     { field: 'id', order: 'ASC' },
     { userId: authId, taskId: record.id }
   );
-
-  //const { record, saving, setOnSuccess } = useEditContext();
-
-  const handleSuccess = () => {
-    console.info(`Данные задачи ${record.id} сохранены успешно`);
-    // if (saving)
-    //   if (localStorage.getItem('redirectTo')) {
-    //     const redirectTo = localStorage.getItem('redirectTo');
-    //     console.log(redirectTo);
-    //     localStorage.removeItem('redirectTo');
-    //     redirect('/comments/create');
-    //   } else redirect(`/tasks/${record.id}/show`);
-  };
+  console.log(comments, authId, record.id, 'get list of comments');
 
   return (
     <Toolbar
@@ -180,7 +168,7 @@ const CustomToolbar = ({ authId, ...props }) => {
               //setOnSuccess(handleSuccess);
             }}
             redirect={
-              loaded && Object.keys(comments).length > 0
+              (loaded && total === 1)
                 ? `/comments/${comments[Object.keys(comments)[0]].id}`
                 : '/comments/create'
             }

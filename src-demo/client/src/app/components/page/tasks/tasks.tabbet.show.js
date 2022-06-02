@@ -76,7 +76,7 @@ const ExecutorsListField = ({ executors: ids }) => {
   if (loading || !loaded) return <CircularProgress color="inherit" />;
 
   if (error) {
-    return <p>ERROR</p>;
+    return <p style={{ color: 'red' }}>Ошибка при загрузке</p>;
   }
  
   return (

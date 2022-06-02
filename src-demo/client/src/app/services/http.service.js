@@ -31,7 +31,7 @@ http.interceptors.request.use(
       //console.log(useStore.getState);
       //const token  = useStore((state) => state.authContext.token);
       const token = getState().authContext.token;
-      const {uid} =getState().authContext.auth;
+      const { uid } = getState().authContext.auth;
 
       const {
         expirationTime = null,
@@ -42,8 +42,9 @@ http.interceptors.request.use(
       //const authToken =
       //  firebaseApp.auth().currentUser._delegate.stsTokenManager;
       if (refreshToken && expirationTime && expirationTime < Date.now()) {
-        const { stsTokenManager: authToken, uid } = (await authProvider.checkAuth())
-          ._delegate;
+        const { stsTokenManager: authToken, uid } = (
+          await authProvider.checkAuth()
+        )._delegate;
         const data = await dispatch(setAuthRefreshToken(authToken));
 
         if (data) {
@@ -56,14 +57,14 @@ http.interceptors.request.use(
           config.headers = {
             ...config.headers,
             Authorization: '',
-            UserUid: ''
+            UserUid: '',
           };
         }
       } else {
         config.headers = {
           ...config.headers,
           Authorization: accessToken ? `Bearer ${accessToken}` : '',
-          UserUid: accessToken ?`${uid}`:''
+          UserUid: accessToken ? `${uid}` : '',
           // DataUserId: `${user.uid}`
         };
       }
@@ -71,22 +72,25 @@ http.interceptors.request.use(
     return config;
   },
   function (error) {
-    let expectedErrors = false;
-    let errorData = {};
-    const dispatch = getHook('dispatch');
+    const expectedErrors = error.response
+      ? error.response.status >= 300 &&
+        error.response.status <= 500 &&
+        error.response.data?.code !== 200
+      : error.status >= 300 && error.status <= 500;
 
-    if (error.request) {
-      expectedErrors =
-        error.request.status >= 300 && error.request.status < 500;
-      errorData = error.request.data;
-      dispatch(setAppError(errorData));
-    } else if (error.message) {
-      errorData = {
-        code: error.status,
-        name: 'NetworkError',
-        message: error.message,
-      };
-      dispatch(setAppError(errorData));
+    if (expectedErrors) {
+      const dispatch = getHook('dispatch');
+      if (error.response) {
+        const errorData = error.response.data;
+        dispatch(setAppError(errorData));
+      } else if (error.message) {
+        const errorData = {
+          code: error.status,
+          name: 'NetworkError',
+          message: error.message,
+        };
+        dispatch(setAppError(errorData));
+      }
     }
 
     return Promise.reject(error);
@@ -99,22 +103,26 @@ http.interceptors.response.use(
     return res;
   },
   function (error) {
-    let expectedErrors = false;
-    let errorData = {};
-    const dispatch = getHook('dispatch');
+    console.info(error.response, 'get error response');
+    const expectedErrors = error.response
+      ? error.response.status >= 300 &&
+        error.response.status <= 500 &&
+        error.response.data?.code !== 200
+      : error.status >= 300 && error.status <= 500;
 
-    if (error.response) {
-      expectedErrors =
-        error.response.status >= 300 && error.response.status < 500;
-      errorData = error.response.data;
-      dispatch(setAppError(errorData));
-    } else if (error.message) {
-      errorData = {
-        code: error.status,
-        name: 'NetworkError',
-        message: error.message,
-      };
-      dispatch(setAppError(errorData));
+    if (expectedErrors) {
+      const dispatch = getHook('dispatch');
+      if (error.response) {
+        const errorData = error.response.data;
+        dispatch(setAppError(errorData));
+      } else if (error.message) {
+        const errorData = {
+          code: error.status,
+          name: 'NetworkError',
+          message: error.message,
+        };
+        dispatch(setAppError(errorData));
+      }
     }
 
     return Promise.reject(error);

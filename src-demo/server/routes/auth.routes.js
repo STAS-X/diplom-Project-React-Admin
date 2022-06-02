@@ -113,8 +113,8 @@ router.delete('/signOut', [
             .update({ lastLogOut: Date.now() });
         });
 
-        await firestore.collection('auth').doc('user').delete();
         await firestore.collection('auth').doc('token').delete();
+        await firestore.collection('auth').doc('user').delete();
         //console.log('user and token delete');
       }
       return res.status(200).send({ signOut: true });

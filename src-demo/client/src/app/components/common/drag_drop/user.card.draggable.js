@@ -85,8 +85,11 @@ const UserDraggableComponent = ({ list: users, ids }) => {
 
    React.useEffect(()=>{
   //if (!state) {
-    for (let num=0; (num+1)*rowCards<=users.length; num++ ) {
-      usersByRows[`draglist${num+1}`]=users.slice(num*rowCards, (num+1)*rowCards)
+    for (let num = 0; num + 1 <= Math.ceil(users.length / rowCards); num++) {
+      usersByRows[`draglist${num + 1}`] = users.slice(
+        num * rowCards,
+        (num + 1) * rowCards
+      );
     }
     setState(usersByRows);
   //}

@@ -37,7 +37,6 @@ router.get('/:id?', [
 			// Если идет запрос на все документы в коллекции подменяем количество запрашиваемых данных
 			if (pagination?.perPage < 0)
 				pagination.perPage = tasksSnap.size;
-				console.log(params,'isArray');
 			if (Array.isArray(filter)) {
 				const firestore = app.firestore;
 				const colRef = collection(firestore, resource);
@@ -111,9 +110,9 @@ router.get('/:id?', [
 					.send({ data, total: query === 'getList' || query === 'getManyReference' ? total : data?.length });
 			}
 		} catch (e) {
-			console.log(e, 'error to resolve');
+
 			res.status(500).send({
-				code: 500,
+				code: e.status === 200? 200: 500,
 				name: 'ServerError',
 				message: `На сервере произошла ошибка ${e.message}. Попробуйте позже`,
 			});
@@ -168,12 +167,12 @@ router.delete('/:id?', [
 	auth,
 	async (req, res) => {
 		try {
-			console.log('route tasks');
 			const dataProvider = app.provider;
 			const query = req.headers['providerrequest'];
 			const params = JSON.parse(req.headers['providerparams']);
+			console.log(params, 'route tasks delete method');
 
-			const { data } = await dataProvider[query](resource, { ids: params });
+			const { data } = await dataProvider[query](resource, params);
 			res.status(200).send(data);
 		} catch (e) {
 			res.status(500).send({

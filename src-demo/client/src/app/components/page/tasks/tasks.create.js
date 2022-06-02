@@ -18,6 +18,7 @@ import {
   useCreate,
   useCreateContext,
   CreateButton,
+  SaveButton,
   Toolbar,
   useNotify,
   useRedirect,
@@ -68,27 +69,28 @@ const ProgressBarField = (id, progress) => (
 );
 
 const getTaskResult = (data) => {
-      if (data.status) {
-        if (new Date(data.finishedAt) <= new Date(data.executeAt)) {
-          return 1;
-        } else {
-          return 0;
-        }
+  if (data.status) {
+    if (new Date(data.finishedAt) <= new Date(data.executeAt)) {
+      return 1;
+    } else {
+      return 0;
+    }
+  } else {
+    if (new Date(data.executeAt) < new Date()) {
+      if (data.progress < 100) {
+        return -1;
       } else {
-        if (new Date(data.executeAt) < new Date()) {
-          if (data.progress < 100) {
-            return -1;
-          } else {
-            return 1;
-          }
-        } else {
-          return 0;
-        }
+        return 1;
       }
-}
+    } else {
+      return 0;
+    }
+  }
+};
 
 const ExecutorChipSelector = ({ id, name, data }) => {
   //const record = useRecordContext();
+  const result = getTaskResult(data);
 
   return (
     <Chip
@@ -96,7 +98,7 @@ const ExecutorChipSelector = ({ id, name, data }) => {
       avatar={
         <Avatar
           alt="Пользователь"
-          src={`https://i.pravatar.cc/300?u=${id}`}
+          src={data.url ? data.url : `https://i.pravatar.cc/300?u=${id}`}
           sx={{ width: 24, height: 24 }}
         />
       }
@@ -104,8 +106,10 @@ const ExecutorChipSelector = ({ id, name, data }) => {
         id: { id },
         fontWeight: 'bold',
         fontSize: 14,
-        'span:after': {content: result===1? '" ✔️"': '" 😐"', color: result>=0?'green':'inherit' },
-
+        'span:after': {
+          content: result === 1 ? '" ✔️"' : '" 😐"',
+          color: result >= 0 ? 'green' : 'inherit',
+        },
       }}
     />
   );
@@ -115,15 +119,23 @@ const CustomToolbar = (props) => {
   const notify = useNotify();
   const redirect = useRedirect();
   //const refresh = useRefresh();
-  console.log(props, 'пропсы');
-  const { invalid: isInvalid, handleSubmit, handleSubmitWithRedirect } = props;
+  const {
+    invalid: isInvalid,
+    record,
+    handleSubmit,
+    handleSubmitWithRedirect,
+  } = props;
 
   return (
     <Toolbar
       {...props}
-      style={{ display: 'inline-flex', justifyContent: 'space-between', minWidth: 500 }}
+      style={{
+        display: 'inline-flex',
+        justifyContent: 'space-between',
+        minWidth: 500,
+      }}
     >
-      <CreateButton
+      <SaveButton
         label="Создать"
         onClick={() => {
           handleSubmit();
@@ -132,12 +144,15 @@ const CustomToolbar = (props) => {
       />
       <FormDataConsumer>
         {({ formData, ...rest }) => (
-          <CreateButton
+          <SaveButton
             icon={<AddCommentIcon />}
             label={'Создать и комментировать'}
             onClick={() => {
-              handleSubmitWithRedirect('/comments/create');
+              localStorage.setItem('currentTaskId', record.id);
+              handleSubmit('/comments/create');
             }}
+            redirect={'/comments/create'}
+            handleSubmitWithRedirect={handleSubmitWithRedirect}
             disabled={!formData.commentable || isInvalid}
           />
         )}
@@ -174,12 +189,11 @@ const validateExecDate = (value, allValues) => {
 export const TaskCreate = (props) => {
   //const notify = useNotify();
   //const refresh = useRefresh();
-  const {id: taskId} = props;
+  const { id: taskId } = props;
 
   const { user: authUser } = useSelector(getAuthData());
 
   const transform = (data) => {
-
     return {
       ...data,
       userId: authUser.uid,
@@ -187,7 +201,6 @@ export const TaskCreate = (props) => {
       finishedAt: data.status ? dateFormatter(Date.now()) : '',
     };
   };
-
 
   const handleError = ({ error }) => {
     notify(`Возникла ошибка: ${error}`, { type: 'warning' }); // default message is 'ra.notification.created'
@@ -210,7 +223,12 @@ export const TaskCreate = (props) => {
             warnWhenUnsavedChanges
             toolbar={<CustomToolbar />}
           >
-            <FunctionField addLabel={false} render={(record)=> <h3 className="titleDialog">Создание задачи #{record.id} </h3>} />
+            <FunctionField
+              addLabel={false}
+              render={(record) => (
+                <h3 className="titleDialog">Создание задачи </h3>
+              )}
+            />
             <TextInput
               label="Наименование"
               source="title"
@@ -256,7 +274,6 @@ export const TaskCreate = (props) => {
                       filter={{ id_neq: authUser.uid }}
                       validate={required('Необходимо выбрать исполнителей')}
                       sort={{ field: 'name', order: 'ASC' }}
-                      formData={formData.status}
                     >
                       <SelectArrayInput
                         name="executors"

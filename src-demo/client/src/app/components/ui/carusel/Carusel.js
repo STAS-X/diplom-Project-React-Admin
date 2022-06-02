@@ -1,46 +1,44 @@
 import React from 'react';
 import Carousel from 'react-material-ui-carousel';
-import {Home} from '@mui/icons-material';
-import { Paper, Stack, Button } from '@mui/material';
+import { ImageTwoTone as ImageHome } from '@mui/icons-material';
+import { Paper, Stack, CardMedia, Button } from '@mui/material';
+import { green, blueGrey, blue, cyan, pink } from '@material-ui/core/colors';
 
-const CaruselTest = (props) => {
-  var items = [
-    {
-      name: 'Random Name #1',
-      description: 'Probably the most random thing you have ever seen!',
-    },
-    {
-      name: 'Random Name #2',
-      description: 'Hello World!',
-    },
-  ];
+const CaruselImages = (props) => {
+  const { index } = props;
+
+  var items = Array.from(
+    { length: 8 },
+    (_, i) => `%PUBLIC_URL%/../images/image${i+1}.jpg`
+  );
 
   const handleChangeSlide = (current, previous) => {
-      console.log(current, previous, 'slider changed');
-      const currentItem=document.getElementById(`carusel-item-${current}`);
-      const previousItem=document.getElementById(`carusel-item-${previous}`);
-        //itemCarusel.addEventListener(ontransitionend, ({target})=>{target.style.opacity=1}, {once:true});
-      currentItem.style.opacity=1;
-      previousItem.style.opacity=0.15;      
-  }
+    console.log(current, previous, 'slider changed');
+    const currentItem = document.getElementById(`carusel-item-${current}`);
+    const previousItem = document.getElementById(`carusel-item-${previous}`);
+    //itemCarusel.addEventListener(ontransitionend, ({target})=>{target.style.opacity=1}, {once:true});
+    currentItem.style.opacity = 1;
+    previousItem.style.opacity = 0.15;
+  };
 
   const initProps = {
-    interval: 5000,
-    duration: 2000,
+    interval: 4500,
+    duration: 1500,
+    index,
     animation: 'slide',
-    changeOnFirstRender:true, 
+    changeOnFirstRender: true,
     cycleNavigation: true,
     navButtonsAlwaysInvisible: true,
-    onChange:handleChangeSlide,
+    onChange: handleChangeSlide,
     indicatorIconButtonProps: {
       style: {
         padding: '10px', // 1
-        color: 'blue', // 3
+        color: blue[400], // 3
       },
     },
     activeIndicatorIconButtonProps: {
       style: {
-        backgroundColor: 'red', // 2
+        backgroundColor: blueGrey[100], // 2
       },
     },
     indicatorContainerProps: {
@@ -54,30 +52,19 @@ const CaruselTest = (props) => {
   };
 
   return (
-    <Carousel {...initProps} height="100vh" IndicatorIcon={<Home/>}>
-
-      {items.map((item, i) => (
-        <Item key={i} item={item} id={i}/>
+    <Carousel {...initProps} height="60vh" sx={{mt:2}} IndicatorIcon={<ImageHome />}>
+      {items.map((image, i) => (
+        <CardMedia
+          key={i}
+          id={`carusel-item-${i}`}
+          title={`Картинка ${i + 1}`}
+          image={image}
+          component='img'
+          sx={{ width: '100%', height: '100%', mt:10, transition:'opacity 1.5s' }}
+        />
       ))}
-
     </Carousel>
   );
 };
 
-function Item(props) {
-  return (
-    <Paper id={`carusel-item-${props.id}`} sx={{position: 'absolute', left: 10,  right: 10,  top: 80,  bottom: 10,   overflow: 'auto', transition:'opacity  2s'}}>
-     <div style={{position:'absolute', textAlign:'center', bottom:'calc(10%-30px)'}}>
-      <h3>{props.item.name}</h3>
-      <p>{props.item.description}</p>
-        <figure>
-            <img src="https://i.pravatar.cc/300" alt="Elephant at sunset"/>
-            <figcaption style={{textAlign:'center', margin:0, marginTop:-30}}>An elephant at sunset</figcaption>
-        </figure>
-      <Button className="CheckButton">Check it out!</Button>
-     </div>
-    </Paper>
-  );
-}
-
-export default CaruselTest;
+export default CaruselImages;

@@ -68,7 +68,7 @@ const CommentDraggableComponent = ({ list: comments, ids }) => {
 
   React.useEffect(()=>{
   //if (!state) {
-    for (let num = 0; (num + 1) * rowCards <= comments.length; num++) {
+    for (let num = 0; (num + 1) <= Math.ceil(comments.length/rowCards); num++) {
       commentsByRows[`draglist${num + 1}`] = comments.slice(
         num * rowCards,
         (num + 1) * rowCards

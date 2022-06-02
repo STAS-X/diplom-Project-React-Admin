@@ -19,6 +19,8 @@ import {
   EmailField,
   SimpleShowLayout,
   TextField,
+  EditButton,
+  ShowButton,  
   Labeled,
   DateField,
   useGetList,
@@ -30,6 +32,7 @@ const useStyles = (isCurrentUser, isColorized) =>
       width: '350px',
       height: 'min-content',
       margin: 10,
+      position:'relative',
       boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
       '&:hover': {
         boxShadow: '0 14px 28px rgba(0,0,0,0.25), 0 10px 10px',
@@ -76,7 +79,7 @@ const UserToolbar = ({ authId, record: user }) => {
         height: 'min-content',
         right: 5,
         top: 5,
-        zIndex: 1,
+        zIndex: 10,
       }}
     >
       <SimpleShowLayout record={user}>
@@ -88,7 +91,7 @@ const UserToolbar = ({ authId, record: user }) => {
 };
 
 const UserCardExpand = (props) => {
-  const user = props.record;
+  const {record:user} = props;
   const animation = '_rubberBand';
 
   const [taskNum, setTaskNum] = useState(0);

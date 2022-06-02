@@ -273,12 +273,12 @@ const CommentAuthorField = ({ userId }) => {
 const CommentTaskField = ({ taskId }) => {
   if (!taskId) return <h5>Задача не найдена</h5>;
 
-  const { data: task, loaded, error } = useGetOne('tasks', taskId);
+  const { data: task, loading, loaded, error } = useGetOne('tasks', taskId);
 
-  if (!loaded) return <CircularProgress color="inherit" />;
+  if (!loaded && loading) return <CircularProgress color="inherit" />;
 
   if (error) {
-    return <p>ERROR</p>;
+    return <p style={{color:"red"}}>Задача удалена</p>;
   }
   return (
     task && (

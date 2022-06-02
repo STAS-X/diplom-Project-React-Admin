@@ -45,9 +45,9 @@ const useStyles = (isCurrentUser, isColorized, isTaskLoaded, isDragging) =>
       backgroundColor: isColorized
         ? emphasize(isCurrentUser ? green[100] : red[100], 0.05)
         : 'whitesmoke',
-      ...(isTaskLoaded
+      ...(!isTaskLoaded
         ? {
-            border: 'blue 5px dashed',
+            border: 'red 6px dashed',
           }:{}),
       ...(isDragging
         ? {

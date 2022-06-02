@@ -70,7 +70,7 @@ const TaskDraggableComponent = ({ list: tasks, ids }) => {
 
    React.useEffect(()=>{
   //if (!state) {
-    for (let num = 0; (num + 1) * rowCards <= tasks.length; num++) {
+    for (let num = 0; num + 1 <= Math.ceil(tasks.length / rowCards); num++) {
       tasksByRows[`draglist${num + 1}`] = tasks.slice(
         num * rowCards,
         (num + 1) * rowCards

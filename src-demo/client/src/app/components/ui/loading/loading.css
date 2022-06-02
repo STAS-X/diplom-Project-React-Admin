@@ -13,10 +13,11 @@
 
 .container {
     display: flex;
+    height: 88vh;
     align-items: center;
     justify-content: center;
     background: var(--bg-color);
-    height: 100vh;
+    /*height: 100vh;*/
     animation: color 8s linear infinite;
 }
 

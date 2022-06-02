@@ -236,11 +236,12 @@ export default {
 
   delete: (resource, params) => {
     const url = `${apiUrl}/${resource}/${params.id}`;
+    console.log(params, 'params data to delete method');
     return httpClient
       .delete(url, {
         headers: {
           ProviderRequest: 'delete',
-          ProviderParams: params.id,
+          ProviderParams: JSON.stringify({id:params.id}),
         },
       })
       .then(({ status, statusText, data }) => {
@@ -264,7 +265,7 @@ export default {
       .delete(url, {
         headers: {
           ProviderRequest: 'deleteMany',
-          ProviderParams: JSON.stringify(params.ids),
+          ProviderParams: JSON.stringify({ ids: params.ids }),
         },
       })
       .then(({ status, statusText, data }) => {

@@ -368,7 +368,7 @@ const ExecutorsField = ({ executors: ids, ...data }) => {
   if (loading || !loaded) return <CircularProgress color="inherit" />;
 
   if (error) {
-    return <p>ERROR</p>;
+    return <p style={{color:"red"}}>Ошибка при загрузке</p>;
   }
   const result = getTaskResult(data);
 

@@ -36,12 +36,13 @@ router.get('/:id?', [
       const { pagination, filter } = params;
       // Если идет запрос на все документы в коллекции подменяем количество запрашиваемых данных
       if (pagination?.perPage < 0) pagination.perPage = commentsSnap.size;
+
       if (Array.isArray(filter)) {
         const firestore = app.firestore;
         const colRef = collection(firestore, resource);
         const wheres = [];
         const items = [];
-        let queryAddition = '';
+        let queryAddition = null;
         let search = null;
         filter.forEach((f) => {
           if (f.field !== 'q') {
@@ -58,13 +59,13 @@ router.get('/:id?', [
             search = unescape(f.value);
           }
         });
-
         if (wheres.length > 0) {
           const docRefs = q(colRef, ...wheres);
           const querySnapshot = await getDocs(docRefs);
 
           querySnapshot.forEach((doc) => {
-            if (queryAddition != '') {
+            console.log(doc.data(), 'data from comments');
+            if (queryAddition) {
               if (
                 (queryAddition === 'progress_eq' &&
                   doc.data().progress === 100) ||
@@ -81,6 +82,7 @@ router.get('/:id?', [
         if (search) {
           const colRef = collection(firestore, resource);
           const querySnapshot = await getDocs(colRef);
+
           querySnapshot.forEach((doc) => {
             if (items.filter((item) => item.id === doc.id).length === 0) {
               const data = doc.data();
@@ -101,7 +103,7 @@ router.get('/:id?', [
             ? items.length
             : itemStart + pagination.perPage;
 
-        res.status(200).send({
+            res.status(200).send({
           data: items.slice(itemStart, itemEnd),
           total: items?.length,
         });
@@ -113,8 +115,9 @@ router.get('/:id?', [
       }
     } catch (e) {
       console.log(e);
+
       res.status(500).send({
-        code: 500,
+        code: e.status === 200? 200: 500,
         name: 'ServerError',
         message: `На сервере произошла ошибка ${e.message}. Попробуйте позже`,
       });

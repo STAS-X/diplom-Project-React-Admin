@@ -76,8 +76,11 @@ const getTaskResult = (data) => {
   }
 };
 
-const TaskForCommentSelector = ({ id, title, ...data }) => {
+const TaskForCommentSelector = (data) => {
+  const { id, title } = data;
   const result = getTaskResult(data);
+  if (title === undefined) return '';
+
   return (
     <Chip
       label={`${title} - id#${id}`}
@@ -100,7 +103,6 @@ const TaskForCommentSelector = ({ id, title, ...data }) => {
 };
 
 const CustomToolbar = ({ authId, ...props }) => {
-
   const redirect = useRedirect();
 
   const {
@@ -110,12 +112,6 @@ const CustomToolbar = ({ authId, ...props }) => {
     handleSubmit,
     handleSubmitWithRedirect,
   } = props;
-
-  console.log(authId, record.userId, record.taskId, 'сравнение Id');
-
-  const handleSuccess = () => {
-    console.info(`Данные задачи ${record.id} сохранены успешно`);
-  };
 
   return (
     <Toolbar
@@ -143,7 +139,7 @@ const CustomToolbar = ({ authId, ...props }) => {
             onClick={() => {
               handleSubmit();
             }}
-            redirect={`/tasks/${record.taskId}`}
+            redirect={`/tasks/${formData.taskId}`}
             handleSubmitWithRedirect={handleSubmitWithRedirect}
             disabled={authId !== record.userId || isInvalid}
           />
@@ -165,8 +161,11 @@ const validateDescription = [
 export const CommentCreate = (props) => {
   const { user: authUser } = useSelector(getAuthData());
 
-  const [currentTask] = React.useState(localStorage.getItem('currentTaskId'))
-  if (localStorage.getItem('currentTaskId')) localStorage.removeItem('currentTaskId');
+  const [currentTaskId] = React.useState(() =>
+    localStorage.getItem('currentTaskId')
+  );
+  if (localStorage.getItem('currentTaskId'))
+    localStorage.removeItem('currentTaskId');
 
   const {
     data: comments,
@@ -193,6 +192,13 @@ export const CommentCreate = (props) => {
     refresh();
   };
 
+  React.useEffect(() => {
+    if (localStorage.getItem('currentTaskId')) {
+      console.log(currentTaskId, 'current taskId');
+    }
+    return () => {};
+  }, [currentTaskId]);
+
   return (
     <>
       {authUser && (
@@ -208,7 +214,14 @@ export const CommentCreate = (props) => {
             warnWhenUnsavedChanges
             toolbar={<CustomToolbar authId={authUser.uid} />}
           >
-            <FunctionField addLabel={false} render={(record)=> <h3 className="titleDialog">Создание комментария #{record.id} </h3>} />
+            <FunctionField
+              addLabel={false}
+              render={(record) => (
+                <h3 className="titleDialog">
+                  Создание комментария {' '}
+                </h3>
+              )}
+            />
 
             <TextInput
               label="Описание"
@@ -217,41 +230,33 @@ export const CommentCreate = (props) => {
               defaultValue={'Текст описания к задаче'}
             />
 
-            <FormDataConsumer>
-              {({ formData, ...rest }) => {
-                return (
-                  <>
-                    {loaded && (
-                      <ReferenceInput
-                        label="Комментируемая задача"
-                        allowEmpty={false}
-                        source="taskId"
-                        reference="tasks"
-                        filter={
-                          total > 0 ? { id_nar: Object.keys(comments) } : {}
-                        }
-                        validate={required(
-                          total > 0?'Задача не должна иметь комментариев пользователя':'Необходимо выбрать задачу  для комментария'
-                        )}
-                        sort={{ field: 'title', order: 'ASC' }}
-                      >
-                        <SelectInput
-                          name="tasks"
-                          optionText={(choise) => (
-                            <TaskForCommentSelector {...choise}/>
-                          )}
-                          defaultValue={currentTask?currentTask:''}
-                          helperText={
-                            'Выберите задачу для комментирования'
-                          }
-                        />
-                      </ReferenceInput>
+            <>
+              {loaded && (
+                <ReferenceInput
+                  label="Комментируемая задача"
+                  defaultValue={currentTaskId}
+                  allowEmpty={false}
+                  source="taskId"
+                  reference="tasks"
+                  filter={total > 0 ? { id_nar: Object.keys(comments) } : {}}
+                  validate={required(
+                    total > 0
+                      ? 'Задача не должна иметь комментариев пользователя'
+                      : 'Необходимо выбрать задачу  для комментария'
+                  )}
+                  sort={{ field: 'title', order: 'ASC' }}
+                >
+                  <SelectInput
+                    name="tasks"
+                    optionText={(choise) => (
+                      <TaskForCommentSelector {...choise} />
                     )}
-                    {!loaded && <CircularProgress color="inherit" />}
-                  </>
-                );
-              }}
-            </FormDataConsumer>
+                    helperText={'Выберите задачу для комментирования'}
+                  />
+                </ReferenceInput>
+              )}
+              {!loaded && <CircularProgress color="inherit" />}
+            </>
 
             <RichTextInput
               label="Комментарий"
