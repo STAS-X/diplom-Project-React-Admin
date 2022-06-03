@@ -30,6 +30,13 @@ div.aside {
   flex-direction: row !important;
 }
 
+
+@keyframes backSlide {
+  from {background-position:0 0;}
+  50% {background-position:0 100vh;}
+  to {background-position:0 0;}  
+}
+
 .rotateMenu {
   animation: spin 300ms;
   transform: rotate(180deg);
@@ -62,4 +69,42 @@ div.aside {
 
 div.Toastify__toast {
   box-shadow: 0 8px 12px 0 rgb(0 0 0 / 15%), 0 15px 20px 0 rgb(0 0 0 / 20%);
+}
+
+
+@import url(https://fonts.googleapis.com/css?family=Exo:100);
+
+/* Background data (Original source: https://subtlepatterns.com/grid-me/) */
+:root {
+    --bg-url: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAIAAACRXR/mAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAABnSURBVHja7M5RDYAwDEXRDgmvEocnlrQS2SwUFST9uEfBGWs9c97nbGtDcquqiKhOImLs/UpuzVzWEi1atGjRokWLFi1atGjRokWLFi1atGjRokWLFi1af7Ukz8xWp8z8AAAA//8DAJ4LoEAAlL1nAAAAAElFTkSuQmCC") repeat 0 0;
+    --bg-width: 50px;
+    --bg-height: 100px;
+    --bg-direction: bg-scrolling-reverse;
+}
+
+/* Animations */
+@keyframes bg-scrolling-reverse {
+  100% { background-position: var(--bg-width) var(--bg-height) }
+}
+
+@keyframes bg-scrolling {
+  0% { background-position: var(--bg-width) var(--bg-height) }
+}
+
+/* Main styles */
+.animationMainBack {
+  margin-top: 13.5rem;
+  color: #999;
+  font: 400 16px/1.5 exo, ubuntu, "segoe ui", helvetica, arial, sans-serif;
+  text-align: center;
+  /* img size is 50x50 */
+  background: var(--bg-url);
+  
+  animation: var(--bg-direction) linear 1s infinite; /* Safari 4+ */
+  &:before {
+    content: '"INFINITY"';
+    font-size: 8rem;
+    font-weight: 100;
+    font-style: normal;
+  }
 }

@@ -7,18 +7,25 @@ import { green, blueGrey, blue, cyan, pink } from '@material-ui/core/colors';
 const CaruselImages = (props) => {
   const { index } = props;
 
-  var items = Array.from(
+  var images = Array.from(
     { length: 8 },
-    (_, i) => `%PUBLIC_URL%/../images/image${i+1}.jpg`
+    (_, i) => `%PUBLIC_URL%/../images/image${i + 1}.jpg`
   );
 
   const handleChangeSlide = (current, previous) => {
     console.log(current, previous, 'slider changed');
-    const currentItem = document.getElementById(`carusel-item-${current}`);
-    const previousItem = document.getElementById(`carusel-item-${previous}`);
-    //itemCarusel.addEventListener(ontransitionend, ({target})=>{target.style.opacity=1}, {once:true});
-    currentItem.style.opacity = 1;
-    previousItem.style.opacity = 0.15;
+    images.forEach((_, index) => {
+      const currentImage = document.getElementById(`carusel-item-${index}`);
+      if (index === current) {
+        setTimeout(() => {
+          currentImage.style.opacity = 1;
+        }, 100);
+      } else {
+        setTimeout(() => {
+          currentImage.style.opacity = 0.15;
+        }, 100);
+      }
+    });
   };
 
   const initProps = {
@@ -52,15 +59,25 @@ const CaruselImages = (props) => {
   };
 
   return (
-    <Carousel {...initProps} height="60vh" sx={{mt:2}} IndicatorIcon={<ImageHome />}>
-      {items.map((image, i) => (
+    <Carousel
+      {...initProps}
+      height="80vh"
+      sx={{ mt: 2 }}
+      IndicatorIcon={<ImageHome />}
+    >
+      {images.map((image, i) => (
         <CardMedia
           key={i}
           id={`carusel-item-${i}`}
           title={`Картинка ${i + 1}`}
           image={image}
-          component='img'
-          sx={{ width: '100%', height: '100%', mt:10, transition:'opacity 1.5s' }}
+          component="img"
+          sx={{
+            width: '100%',
+            height: '100%',
+            mt: 10,
+            transition: 'opacity 3s !important',
+          }}
         />
       ))}
     </Carousel>

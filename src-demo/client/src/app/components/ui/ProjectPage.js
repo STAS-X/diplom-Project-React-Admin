@@ -14,6 +14,7 @@ import {
   ExpandMore as ExpandMoreIcon,
 } from '@material-ui/icons';
 import CaruselImages from './carusel/Carusel';
+import RotationWords from './rotate_text/rotateText';
 import { getRandomInt } from '../../utils/getRandomInt';
 import { red } from '@mui/material/colors';
 
@@ -47,7 +48,7 @@ const ProjectPage = () => {
         action={
           <IconButton
             aria-label="settings"
-            onClick={() => setIndex(getRandomInt(0,7))}
+            onClick={() => setIndex(getRandomInt(0, 7))}
           >
             <MoreVertIcon />
           </IconButton>
@@ -56,6 +57,7 @@ const ProjectPage = () => {
         subheader="проект написан в период март-май 2022 года"
       />
       <CardContent>
+        <RotationWords />
         <ExpandMore
           expand={expanded}
           onClick={handleExpandClick}
