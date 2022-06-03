@@ -161,12 +161,8 @@ const validateDescription = [
 export const CommentCreate = (props) => {
   const { user: authUser } = useSelector(getAuthData());
 
-  const [currentTaskId] = React.useState(() =>
-    localStorage.getItem('currentTaskId')
-  );
-  if (localStorage.getItem('currentTaskId'))
-    localStorage.removeItem('currentTaskId');
-
+  const [currentTaskId] = React.useState(localStorage.getItem('currentTaskId'));
+    
   const {
     data: comments,
     total,
@@ -193,11 +189,11 @@ export const CommentCreate = (props) => {
   };
 
   React.useEffect(() => {
-    if (localStorage.getItem('currentTaskId')) {
-      console.log(currentTaskId, 'current taskId');
-    }
-    return () => {};
-  }, [currentTaskId]);
+
+    return () => {
+      if (localStorage.getItem('currentTaskId')) localStorage.removeItem('currentTaskId');
+    };
+  }, []);
 
   return (
     <>
@@ -247,7 +243,6 @@ export const CommentCreate = (props) => {
                   sort={{ field: 'title', order: 'ASC' }}
                 >
                   <SelectInput
-                    name="tasks"
                     optionText={(choise) => (
                       <TaskForCommentSelector {...choise} />
                     )}

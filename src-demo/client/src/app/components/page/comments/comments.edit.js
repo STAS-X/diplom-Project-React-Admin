@@ -174,8 +174,6 @@ export const CommentEdit = (props) => {
   const [currentTaskId] = React.useState(() =>
     localStorage.getItem('currentTaskId')
   );
-  if (localStorage.getItem('currentTaskId'))
-    localStorage.removeItem('currentTaskId');
 
   const {
     data: comments,
@@ -208,6 +206,13 @@ export const CommentEdit = (props) => {
 
     return () => {};
   }, [isLoaded]);
+
+  React.useEffect(() => {
+
+    return () => {
+      if (localStorage.getItem('currentTaskId')) localStorage.removeItem('currentTaskId');
+    };
+  }, []);
 
   return (
     <>
@@ -259,7 +264,6 @@ export const CommentEdit = (props) => {
             sort={{ field: 'title', order: 'ASC' }}
           >
             <SelectInput
-              name="tasks"
               optionText={(choise) => <TaskForCommentSelector {...choise} />}
               helperText="Выберите исполнителей"
             />

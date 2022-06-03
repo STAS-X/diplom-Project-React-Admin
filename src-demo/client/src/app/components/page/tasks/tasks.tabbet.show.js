@@ -38,6 +38,7 @@ import {
   
 } from '@mui/material';
 import TaskCard from '../../common/cards/task.card.list';
+import ComponentEmptyPage from '../../ui/empty/emptyPage';
 import {useSelector} from 'react-redux';
 import { getAuthData } from '../../../store/authcontext';
 import {Visibility,VisibilityOff, ViewList, People as UserIcon, Pages as TaskIcon, Comment as CommentIcon  } from '@material-ui/icons';
@@ -112,12 +113,13 @@ const MyCommentDataGrid = ({taskId, ...props}) => {
   const commentList = commentRef.current;
 
   const isAppColorized = useSelector(getAppColorized());
+  const { user: authUser } = useSelector(getAuthData());
 
   const { data, loaded, loading, total } = useListContext();
 
   const commentRowStyle = (id) => (record, index) => {
     return {
-      backgroundColor: record.taskId === id ? green[200] : red[100],
+      backgroundColor: record.userId === id ? green[200] : red[100],
     };
   };
 
@@ -147,7 +149,7 @@ const MyCommentDataGrid = ({taskId, ...props}) => {
 
   return (
 
-          <Datagrid isRowSelectable={ record => true} rowStyle={isAppColorized ? commentRowStyle(taskId) : () => {}} ref={commentRef} >
+          <Datagrid isRowSelectable={ record => true} rowStyle={isAppColorized ? commentRowStyle(authUser.uid) : () => {}} ref={commentRef} >
             <TextField label="Описание" sortable={false} source="description" />
             <DateField
               locales="ru-Ru"
@@ -158,7 +160,13 @@ const MyCommentDataGrid = ({taskId, ...props}) => {
             />
             <TextField label="Комментарий" source="body" />
             <ShowButton />
-            <EditButton />
+            <FunctionField
+                label=""
+                render={(record) => {
+                if (record.id === authUser.uid)
+                    return <EditButton basePath="/comments" label="" record={record} />;
+                }}
+            />
           </Datagrid>
 
   )
@@ -252,6 +260,7 @@ return (
             {...props}
             actions={<></>}
             perPage={5}
+            empty={<ComponentEmptyPage path={'comments'} resourceId={props.id} title={'Комментарии отсутствуют. Хотите создать новый?'} />}
             pagination={<Pagination rowsPerPageOptions={[5, 10, 20]} />}
             bulkActionButtons={<CommentBulkActionButtons />}
           >

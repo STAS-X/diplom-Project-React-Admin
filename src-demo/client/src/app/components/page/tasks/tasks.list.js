@@ -72,6 +72,7 @@ import TaskCard from '../../common/cards/task.card.list';
 import TaskDraggableComponent from '../../common/drag_drop/task.card.draggable';
 import { getAuthData } from '../../../store/authcontext';
 import TaskProgressBar from '../../common/progressbar/task.progress';
+import ComponentEmptyPage from '../../ui/empty/emptyPage';
 import {
   getAppColorized,
   getAppLoading,
@@ -442,7 +443,7 @@ export const TaskList = (props) => {
   const [tasksIds, setTasksIds] = React.useState([]);
   const [hoverId, setHoverId] = React.useState();
 
-  const { loadedOnce: isLoading, ids } = useSelector(
+  const { loadedOnce: isLoading, total, ids } = useSelector(
     (state) => state.admin.resources.tasks.list
   );
   const tasks = useSelector((state) => state.admin.resources.tasks.data);
@@ -463,14 +464,16 @@ export const TaskList = (props) => {
             !isLoading && isAppLoading ? { height: '0px', display: 'none' } : {}
           }
         >
-          {!(!isLoading && isAppLoading) && (
+          {total>0 && !(!isLoading && isAppLoading) && (
             <TaskToolbar
               tasksIds={tasksIds}
               setTasksIds={setTasksIds}
               userId={authUser.uid}
             />
           )}
-          {!isCarding && !(!isLoading && isAppLoading) && (
+          {total===0 && !(!isLoading && isAppLoading) && (<ComponentEmptyPage path={'tasks'} title={'Задачи отсутствуют. Хотите создать новую?'} />)}
+
+          {!isCarding && total>0 && !(!isLoading && isAppLoading) && (
             <MyDatagrid
               isAppColorized={isAppColorized}
               authId={authUser.uid}
@@ -480,14 +483,14 @@ export const TaskList = (props) => {
               setHoverId={setHoverId}
             />
           )}
-          {isCarding && !(!isLoading && isAppLoading) && (
+          {isCarding && total>0 && !(!isLoading && isAppLoading) && (
             <TaskDraggableComponent
               list={ids.map((id) => tasks[id])}
               ids={ids}
             />
           )}
 
-          {!(!isLoading && isAppLoading) && (
+          {total>0 && !(!isLoading && isAppLoading) && (
             <TaskPagination isAppColorized={isAppColorized} />
           )}
         </ListBase>

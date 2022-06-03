@@ -36,6 +36,7 @@ import {
   
 } from '@mui/material';
 import UserCardExpand from '../../common/cards/user.card.expand';
+import ComponentEmptyPage from '../../ui/empty/emptyPage';
 import {useSelector} from 'react-redux';
 import { getAuthData } from '../../../store/authcontext';
 import {Visibility,VisibilityOff, ViewList, People as UserIcon, Pages as TaskIcon, Comment as CommentIcon  } from '@material-ui/icons';
@@ -105,10 +106,11 @@ const MyTaskDataGrid = ({userId, ...props}) => {
   const taskList = taskRef.current;
 
   const isAppColorized = useSelector(getAppColorized());
-
+  const { user: authUser } = useSelector(getAuthData());
+  
   const { data, loaded, loading, total } = useListContext();
 
-  const taskRowStyle = (id) => (record, index) => {
+  const taskRowStyle = (id) => (record) => {
     return {
       backgroundColor: record.userId === id ? green[200] : red[100],
     };
@@ -138,8 +140,9 @@ const MyTaskDataGrid = ({userId, ...props}) => {
 
   if (!loaded || loading) return <CircularProgress color="inherit" />
 
+
   return (
-          <Datagrid isRowSelectable={ record => true} rowStyle={isAppColorized ? taskRowStyle(userId) : () => {}} ref={taskRef} >
+          <Datagrid isRowSelectable={ record => true} rowStyle={isAppColorized ? taskRowStyle(authUser.uid) : () => {}} ref={taskRef} >
             <TextField label="Заголовок" source="title" />
             <TextField label="Описание" sortable={false} source="description" />
             <DateField
@@ -164,7 +167,7 @@ const MyTaskDataGrid = ({userId, ...props}) => {
                     }}
             />
             <ShowButton />
-            <EditButton />
+            {authUser.uid === userId && <EditButton />}
           </Datagrid>
   )
 
@@ -184,10 +187,11 @@ const MyCommentDataGrid = ({userId, ...props}) => {
   const commentList = commentRef.current;
 
   const isAppColorized = useSelector(getAppColorized());
+  const { user: authUser } = useSelector(getAuthData());
 
   const { data, loaded, loading, total } = useListContext();
 
-  const commentRowStyle = (id) => (record, index) => {
+  const commentRowStyle = (id) => (record) => {
     return {
       backgroundColor: record.userId === id ? green[200] : red[100],
     };
@@ -219,7 +223,7 @@ const MyCommentDataGrid = ({userId, ...props}) => {
 
   return (
 
-          <Datagrid isRowSelectable={ record => true} rowStyle={isAppColorized ? commentRowStyle(userId) : () => {}} ref={commentRef} >
+          <Datagrid isRowSelectable={ record => true} rowStyle={isAppColorized ? commentRowStyle(authUser.uid) : () => {}} ref={commentRef} >
             <TextField label="Описание" sortable={false} source="description" />
             <DateField
               locales="ru-Ru"
@@ -230,7 +234,7 @@ const MyCommentDataGrid = ({userId, ...props}) => {
             />
             <TextField label="Комментарий" source="body" />
             <ShowButton />
-            <EditButton />
+            {authUser.uid === userId && <EditButton />}
           </Datagrid>
 
   )
@@ -239,7 +243,7 @@ const MyCommentDataGrid = ({userId, ...props}) => {
 
 export const UserTabbetShow = (props) => {
   const { data: user, loaded} = useGetOne('users', props.id);
-  //const { user: authUser } = useSelector(getAuthData());
+  const { user: authUser } = useSelector(getAuthData());
   const { pathname } = props.history.location;
   if (pathname.slice(-4)==="show") {
     const newTab = localStorage.getItem('currentTab')
@@ -281,6 +285,7 @@ return (
           <List {...props} 
             actions={<></>} 
             perPage={5} 
+            empty={<ComponentEmptyPage path={'tasks'} title={'Задачи отсутствуют'} isAuth={authUser.uid===props.id} />}
             pagination={<Pagination rowsPerPageOptions={[5, 10, 20]}/>} 
             bulkActionButtons={<TaskBulkActionButtons />}
             >
@@ -300,6 +305,7 @@ return (
           <List {...props} 
             actions={<></>} 
             perPage={5} 
+            empty={<ComponentEmptyPage path={'comments'} title={'Комментарии отсутствуют'} isAuth={authUser.uid===props.id} />}
             pagination={<Pagination rowsPerPageOptions={[5, 10, 20]}/>} 
             bulkActionButtons={<CommentBulkActionButtons />}
             >

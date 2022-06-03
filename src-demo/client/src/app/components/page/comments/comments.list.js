@@ -50,6 +50,7 @@ import EditCommentIcon from '@material-ui/icons/EditAttributesRounded';
 import MailIcon from '@material-ui/icons/MailOutline';
 import CommentAsideCard from '../../common/cards/comment.card.aside';
 import CommentCard from '../../common/cards/comment.card.list';
+import ComponentEmptyPage from '../../ui/empty/emptyPage';
 import CommentDraggableComponent from '../../common/drag_drop/comment.card.draggable';
 import { dateFormatter } from '../../../utils/displayDate';
 import { getAuthData } from '../../../store/authcontext';
@@ -303,7 +304,7 @@ export const CommentList = (props) => {
   const isAppLoading = useSelector(getAppLoading());
   const isCarding = useSelector(getAppCarding());
 
-  const { loadedOnce: isLoading, ids } = useSelector(
+  const { loadedOnce: isLoading, total, ids } = useSelector(
     (state) => state.admin.resources.comments.list
   );
   const comments = useSelector((state) => state.admin.resources.comments.data);
@@ -321,13 +322,14 @@ export const CommentList = (props) => {
             !isLoading && isAppLoading ? { height: '0px', display: 'none' } : {}
           }
         >
-          {!(!isLoading && isAppLoading) && (
+          {total>0 && !(!isLoading && isAppLoading) && (
             <CommentToolbar
               commentsIds={commentsIds}
               setCommentsIds={setCommentsIds}
               userId={authUser.uid}
             />
           )}
+          {total===0 && !(!isLoading && isAppLoading) && (<ComponentEmptyPage path={'comments'} title={'Комментарии отсутствуют. Хотите создать новый?'} />)}
           {!isCarding && !(!isLoading && isAppLoading) && (
             <MyDatagrid
               isAppColorized={isAppColorized}
@@ -338,13 +340,13 @@ export const CommentList = (props) => {
               setHoverId={setHoverId}
             />
           )}
-          {isCarding && !(!isLoading && isAppLoading) && (
+          {total>0 && isCarding && !(!isLoading && isAppLoading) && (
             <CommentDraggableComponent
               list={ids.map((id) => comments[id])}
               ids={ids}
             />
           )}
-          {!(!isLoading && isAppLoading) && (
+          {total>0 && !(!isLoading && isAppLoading) && (
             <CommentPagination isAppColorized={isAppColorized} />
           )}
         </ListBase>
