@@ -1,19 +1,11 @@
-import React, { useEffect, useMemo } from 'react';
-import ReactDOM from 'react-dom';
+import React from 'react';
 import { useSelector } from 'react-redux';
-import { styled } from '@mui/material/styles';
 import DeleteIcon from '@material-ui/icons/DeleteRounded';
 import UnSelectedIcon from '@material-ui/icons/UndoRounded';
 import CreateCommentIcon from '@material-ui/icons/AddCommentRounded';
 import EditCommentIcon from '@material-ui/icons/EditAttributesRounded';
-import MailIcon from '@material-ui/icons/MailOutline';
-import TagFacesIcon from '@material-ui/icons/TagFaces';
-import ChevronLeft from '@material-ui/icons/ChevronLeft';
-import ChevronRight from '@material-ui/icons/ChevronRight';
 import {
-  getRandomInt,
   dateWithMonths,
-  dateWithDays,
 } from '../../../utils/getRandomInt';
 import { green, blue, red } from '@mui/material/colors';
 import {
@@ -22,53 +14,35 @@ import {
   TextField,
   ShowButton,
   EditButton,
-  DeleteButton,
-  RichTextField,
   FilterButton,
   FilterForm,
   CreateButton,
-  ChipField,
   DateField,
   TextInput,
   SortButton,
   FunctionField,
   useListContext,
-  DatagridBody,
-  ArrayField,
-  NumberField,
-  RecordContextProvider,
-  useUnselectAll,
   DeleteWithConfirmButton,
   useDeleteMany,
-  useGetOne,
   useRefresh,
   useNotify,
   useGetMany,
   useGetList,
-  useRecordContext,
   useTranslate,
   Pagination as RaPagination,
   PaginationActions as RaPaginationActions,
 } from 'react-admin';
 import {
-  TableCell,
-  TableRow,
-  Toolbar,
   Box,
   CircularProgress,
   Stack,
-  Card,
   Chip,
   Button,
-  Divider,
   Avatar,
   Checkbox,
 } from '@mui/material';
-import { makeStyles } from '@material-ui/core/styles';
-import { dateFormatter } from '../../../utils/displayDate';
 import Loading from '../../ui/loading/loading';
 import TaskAsideCard from '../../common/cards/task.card.aside';
-import TaskCard from '../../common/cards/task.card.list';
 import TaskDraggableComponent from '../../common/drag_drop/task.card.draggable';
 import { getAuthData } from '../../../store/authcontext';
 import TaskProgressBar from '../../common/progressbar/task.progress';

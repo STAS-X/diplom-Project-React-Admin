@@ -6,8 +6,6 @@ import {
   Card,
   CardMedia,
   Grid,
-  Box,
-  Divider,
   CardContent,
   Typography,
   CircularProgress,
@@ -17,16 +15,12 @@ import {
   SimpleShowLayout,
   TextField,
   DateField,
-  FunctionField,
-  RichTextField,
   useGetOne,
   useGetList,
 } from 'react-admin';
 import TaskProgressBar from '../../common/progressbar/task.progress';
-import { getAuthData } from '../../../store/authcontext';
 import { getAppColorized } from '../../../store/appcontext';
 import { dateFormatter } from '../../../utils/displayDate';
-import { getRandomInt } from '../../../utils/getRandomInt';
 
 const useStyles = (isCurrentUser, isColorized, loaded) =>
   makeStyles({

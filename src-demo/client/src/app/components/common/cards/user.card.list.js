@@ -6,27 +6,20 @@ import { emphasize } from '@material-ui/core/styles/colorManipulator';
 import {
   Card,
   CardMedia,
-  Button,
-  Divider,
   Grid,
-  Box,
   CardContent,
   Typography,
-  CircularProgress,
 } from '@material-ui/core';
 import { Stack } from '@mui/material';
 import { getAuthData } from '../../../store/authcontext';
 import { getAppColorized } from '../../../store/appcontext';
-import { dateFormatter } from '../../../utils/displayDate';
 import {
   EmailField,
   SimpleShowLayout,
   ShowButton,
   EditButton,
   TextField,
-  Labeled,
   DateField,
-  useDelete,
 } from 'react-admin';
 
 const useStyles = (isCurrentUser, isColorized, isDragging) =>

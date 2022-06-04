@@ -10,26 +10,20 @@ import {
   TextField,
   ShowButton,
   EditButton,
-  DeleteButton,
   EmailField,
   FilterButton,
   FilterForm,
-  CreateButton,
-  Pagination,
   DateField,
   TextInput,
   SortButton,
   FunctionField,
-  useGetOne,
   useListContext,
   useTranslate,
-  RecordContextProvider,
   Pagination as RaPagination,
   PaginationActions as RaPaginationActions,
 } from 'react-admin';
-import { Stack, Card, Chip } from '@mui/material';
+import { Stack, Chip } from '@mui/material';
 import UserCardExpand from '../../common/cards/user.card.expand';
-import UserCard from '../../common/cards/user.card.list';
 import UserDraggableComponent from '../../common/drag_drop/user.card.draggable';
 import { getAuthData } from '../../../store/authcontext';
 import {

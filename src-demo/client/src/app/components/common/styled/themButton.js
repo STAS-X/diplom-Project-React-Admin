@@ -4,10 +4,6 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import Switch from '@mui/material/Switch';
 import FormControlLabel from '@mui/material/FormControlLabel';
-// Import a couple of SVG files we'll use in the design: https://www.flaticon.com
-// import { ReactComponent as MoonIcon } from './icons/moon.svg';
-// import { ReactComponent as SunIcon } from './icons/sun.svg';
-// import { Button } from '@mui/material';
 import { useSelector, useDispatch } from 'react-redux';
 import { getAppTheme, setAppTheme } from '../../../store/appcontext';
 

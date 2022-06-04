@@ -36,7 +36,6 @@ import {
 } from 'react-admin';
 import RichTextInput from 'ra-input-rich-text';
 import { makeStyles } from '@material-ui/core/styles';
-//import { useFormState } from 'react-hook-form';
 import { green, blue, red } from '@mui/material/colors';
 import {
   Stack,

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useSelector } from 'react-redux';
 import { green, blue, red } from '@mui/material/colors';
 import {
@@ -7,14 +7,12 @@ import {
   TextField,
   ShowButton,
   EditButton,
-  DeleteButton,
   RichTextField,
   FunctionField,
   FilterButton,
   FilterForm,
   DeleteWithConfirmButton,
   CreateButton,
-  Pagination,
   DateField,
   TextInput,
   SortButton,
@@ -38,42 +36,20 @@ import {
   Button,
 } from '@mui/material';
 import {
-  getRandomInt,
   dateWithMonths,
-  dateWithDays,
 } from '../../../utils/getRandomInt';
 import Loading from '../../ui/loading/loading';
 import DeleteIcon from '@material-ui/icons/DeleteRounded';
 import UnSelectedIcon from '@material-ui/icons/UndoRounded';
-import CreateCommentIcon from '@material-ui/icons/AddCommentRounded';
-import EditCommentIcon from '@material-ui/icons/EditAttributesRounded';
-import MailIcon from '@material-ui/icons/MailOutline';
 import CommentAsideCard from '../../common/cards/comment.card.aside';
-import CommentCard from '../../common/cards/comment.card.list';
 import ComponentEmptyPage from '../../ui/empty/emptyPage';
 import CommentDraggableComponent from '../../common/drag_drop/comment.card.draggable';
-import { dateFormatter } from '../../../utils/displayDate';
 import { getAuthData } from '../../../store/authcontext';
 import {
   getAppColorized,
   getAppLoading,
   getAppCarding,
 } from '../../../store/appcontext';
-import ContentFilter from '@material-ui/icons/FilterList';
-
-// const PostFilterButton = (props) => {
-//   const { showFilter } = useListContext();
-//   return (
-//     <Button {...props}
-//       size="small"
-//       color="primary"
-//       onClick={() => showFilter('main')}
-//       startIcon={<ContentFilter />}
-//     >
-//       Filter
-//     </Button>
-//   );
-// };
 
 const QuickFilter = ({ label }) => {
   const translate = useTranslate();

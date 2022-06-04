@@ -43,7 +43,7 @@ import {useSelector} from 'react-redux';
 import { getAuthData } from '../../../store/authcontext';
 import {Visibility,VisibilityOff, ViewList, People as UserIcon, Pages as TaskIcon, Comment as CommentIcon  } from '@material-ui/icons';
 import { dateFormatter } from '../../../utils/displayDate';
-//import BulkTaskButton  from './CustomBulkTaskButton';
+
 
 const CommentBulkActionButtons = (props) => {
   return (

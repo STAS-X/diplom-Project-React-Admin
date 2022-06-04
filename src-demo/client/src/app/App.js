@@ -26,25 +26,16 @@ import { TaskEdit } from './components/page/tasks/tasks.edit';
 import { TaskCreate } from './components/page/tasks/tasks.create';
 
 import { UserList } from './components/page/users/users.list';
-import { UserShow } from './components/page/users/users.show';
 import { UserTabbetShow } from './components/page/users/users.tabbet.show';
 import { UserEdit } from './components/page/users/users.edit';
 
 import CustomLayout from './components/common/custom/customLayout';
-//import { CustomAppConsumer } from './components/common/context/themProvider';
 
 import CustomLoginPage from './components/ui/CustomLoginPage';
-// import MyAppBar from './components/common/custom/MyAppBar';
 
 import DashBoardPage from './components/ui/DashBoardPage';
 import NotFound from './components/ui/NotFound';
 
-// const MyLayout = ({ children, ...props }) => (
-//   <Layout {...props} appBar={MyAppBar}>
-//     <h1>React Admin sample</h1>
-//     {children}
-//   </Layout>
-// );
 
 const App = (props) => {
   const theme = useSelector(getAppTheme());
