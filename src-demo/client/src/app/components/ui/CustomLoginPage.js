@@ -29,7 +29,8 @@ const SignInScreen = ({ setData, ...props }) => {
     signInOptions: [
       {
         provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
-        signInMethod: firebase.auth.EmailAuthProvider.EMAIL_LINK_SIGN_IN_METHOD,
+        signInMethod:
+          firebase.auth.EmailAuthProvider.EMAIL_PASSWORD_SIGN_IN_METHOD,
         //   firebase.auth.EmailAuthProvider.EMAIL_PASSWORD_SIGN_IN_METHOD,
         emailLinkSignIn: function () {
           return {
@@ -200,7 +201,7 @@ const CustomLoginForm = ({ ...props }) => {
   },[])
   return (
     <div>
-      <div style={{ fontFamily: 'monospace', marginLeft: '15px' }}>
+      <div style={{ fontFamily: 'monospace', marginLeft: '15px', display:'grid' }}>
         <p>Пользователь: test@example.com</p>
         <p>Пароль: password</p>
       </div>

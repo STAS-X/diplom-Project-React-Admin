@@ -115,13 +115,19 @@ const userFilters = (userId) => [
 ];
 
 const UserToolbar = ({ userId }) => {
+  const { hideFilter, displayedFilters } = useListContext();
   const filters = userFilters(userId);
+
+  const handleHideAllFilters = (e) => {
+    Object.keys(displayedFilters).forEach((filter) => hideFilter(filter));
+  };
+
   return (
     <Stack direction="row" justifyContent="space-between">
       <FilterForm filters={filters} />
       <div>
         <SortButton fields={['name', 'age', 'loggedOut']} />
-        <FilterButton filters={filters} />
+        <FilterButton filters={filters} onClick={handleHideAllFilters} />
         {/*<CreateButton />*/}
       </div>
     </Stack>

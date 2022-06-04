@@ -251,6 +251,11 @@ const UnselectButton = ({ setTasksIds }) => {
 
 const TaskToolbar = ({ tasksIds, setTasksIds, userId }) => {
   const filters = taskFilters(userId);
+  const { hideFilter, displayedFilters } = useListContext();
+
+  const handleHideAllFilters = (e) => {
+    Object.keys(displayedFilters).forEach((filter) => hideFilter(filter));
+  };
 
   return (
     <Stack direction="row" justifyContent="space-between">
@@ -266,7 +271,7 @@ const TaskToolbar = ({ tasksIds, setTasksIds, userId }) => {
             'commentable',
           ]}
         />
-        <FilterButton filters={filters} />
+        <FilterButton filters={filters} onClick={handleHideAllFilters} />
         <CreateButton />
         <DeleteTasksButton tasksIds={tasksIds} setTasksIds={setTasksIds} />
         {tasksIds.length > 0 && <UnselectButton setTasksIds={setTasksIds} />}
@@ -443,15 +448,20 @@ export const TaskList = (props) => {
   const [tasksIds, setTasksIds] = React.useState([]);
   const [hoverId, setHoverId] = React.useState();
 
-  const { loadedOnce: isLoading, total, ids } = useSelector(
-    (state) => state.admin.resources.tasks.list
-  );
+  const {
+    loadedOnce: isLoading,
+    total,
+    displayedFilters,
+    ids,
+  } = useSelector((state) => state.admin.resources.tasks.list);
   const tasks = useSelector((state) => state.admin.resources.tasks.data);
 
   const { user: authUser } = useSelector(getAuthData());
   const isAppColorized = useSelector(getAppColorized());
   const isAppLoading = useSelector(getAppLoading());
   const isCarding = useSelector(getAppCarding());
+
+  const isZeroElements = total === 0 && displayedFilters;
 
   return (
     <>
@@ -464,16 +474,21 @@ export const TaskList = (props) => {
             !isLoading && isAppLoading ? { height: '0px', display: 'none' } : {}
           }
         >
-          {total>0 && !(!isLoading && isAppLoading) && (
+          {!isZeroElements && !(!isLoading && isAppLoading) && (
             <TaskToolbar
               tasksIds={tasksIds}
               setTasksIds={setTasksIds}
               userId={authUser.uid}
             />
           )}
-          {total===0 && !(!isLoading && isAppLoading) && (<ComponentEmptyPage path={'tasks'} title={'Задачи отсутствуют. Хотите создать новую?'} />)}
+          {isZeroElements && !(!isLoading && isAppLoading) && (
+            <ComponentEmptyPage
+              path={'tasks'}
+              title={'Задачи отсутствуют. Хотите создать новую?'}
+            />
+          )}
 
-          {!isCarding && total>0 && !(!isLoading && isAppLoading) && (
+          {!isCarding && !isZeroElements && !(!isLoading && isAppLoading) && (
             <MyDatagrid
               isAppColorized={isAppColorized}
               authId={authUser.uid}
@@ -483,14 +498,14 @@ export const TaskList = (props) => {
               setHoverId={setHoverId}
             />
           )}
-          {isCarding && total>0 && !(!isLoading && isAppLoading) && (
+          {isCarding && !isZeroElements && !(!isLoading && isAppLoading) && (
             <TaskDraggableComponent
               list={ids.map((id) => tasks[id])}
               ids={ids}
             />
           )}
 
-          {total>0 && !(!isLoading && isAppLoading) && (
+          {!isZeroElements && !(!isLoading && isAppLoading) && (
             <TaskPagination isAppColorized={isAppColorized} />
           )}
         </ListBase>

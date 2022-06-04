@@ -214,13 +214,18 @@ const UnselectButton = ({ setCommentsIds }) => {
 
 const CommentToolbar = ({ commentsIds, setCommentsIds, userId }) => {
   const filters = commentFilters(userId);
+  const { hideFilter, displayedFilters } = useListContext();
+
+  const handleHideAllFilters = (e) => {
+    Object.keys(displayedFilters).forEach((filter) => hideFilter(filter));
+  };
 
   return (
     <Stack direction="row" justifyContent="space-between">
       <FilterForm filters={filters} />
       <div>
         <SortButton fields={['title', 'createdAt']} />
-        <FilterButton filters={filters} />
+        <FilterButton filters={filters} onClick={handleHideAllFilters} />
         <CreateButton />
         <DeleteTasksButton
           commentsIds={commentsIds}
@@ -304,12 +309,13 @@ export const CommentList = (props) => {
   const isAppLoading = useSelector(getAppLoading());
   const isCarding = useSelector(getAppCarding());
 
-  const { loadedOnce: isLoading, total, ids } = useSelector(
+  const { loadedOnce: isLoading, total, displayedFilters, ids } = useSelector(
     (state) => state.admin.resources.comments.list
   );
   const comments = useSelector((state) => state.admin.resources.comments.data);
 
   //const [isTransition, setTransition]=React.useState(false);
+  const isZeroElements = total === 0 && displayedFilters;
 
   return (
     <>
@@ -322,15 +328,20 @@ export const CommentList = (props) => {
             !isLoading && isAppLoading ? { height: '0px', display: 'none' } : {}
           }
         >
-          {total>0 && !(!isLoading && isAppLoading) && (
+          {!isZeroElements && !(!isLoading && isAppLoading) && (
             <CommentToolbar
               commentsIds={commentsIds}
               setCommentsIds={setCommentsIds}
               userId={authUser.uid}
             />
           )}
-          {total===0 && !(!isLoading && isAppLoading) && (<ComponentEmptyPage path={'comments'} title={'Комментарии отсутствуют. Хотите создать новый?'} />)}
-          {!isCarding && !(!isLoading && isAppLoading) && (
+          {isZeroElements && !(!isLoading && isAppLoading) && (
+            <ComponentEmptyPage
+              path={'comments'}
+              title={'Комментарии отсутствуют. Хотите создать новый?'}
+            />
+          )}
+          {!isCarding && !isZeroElements && !(!isLoading && isAppLoading) && (
             <MyDatagrid
               isAppColorized={isAppColorized}
               authId={authUser.uid}
@@ -340,13 +351,13 @@ export const CommentList = (props) => {
               setHoverId={setHoverId}
             />
           )}
-          {total>0 && isCarding && !(!isLoading && isAppLoading) && (
+          {isCarding && !isZeroElements && !(!isLoading && isAppLoading) && (
             <CommentDraggableComponent
               list={ids.map((id) => comments[id])}
               ids={ids}
             />
           )}
-          {total>0 && !(!isLoading && isAppLoading) && (
+          {!isZeroElements && !(!isLoading && isAppLoading) && (
             <CommentPagination isAppColorized={isAppColorized} />
           )}
         </ListBase>
