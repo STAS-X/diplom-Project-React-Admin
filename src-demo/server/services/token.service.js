@@ -1,6 +1,5 @@
 const jwt = require('jsonwebtoken');
 const config = require('config');
-//const Token = require('../models/Token');
 const { getDoc, collection, doc } = require('firebase/firestore');
 
 class TokenService {

@@ -1,6 +1,4 @@
 const express = require('express');
-const User = require('../models/User');
-const Token = require('../models/Token');
 const { nanoid } = require('nanoid');
 const { body, validationResult } = require('express-validator');
 const auth = require('../middleware/auth.middlware');
