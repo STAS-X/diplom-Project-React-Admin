@@ -59,7 +59,6 @@ const QuickFilter = ({ label }) => {
 };
 
 const PaginationActions = (props) => {
-  //console.log(props, 'pagination inside props');
   return (
     <RaPaginationActions
       {...props}
@@ -275,7 +274,6 @@ const getTaskResult = (data) => {
 };
 
 const KeywordsField = ({ keywords }) => {
-  console.log(keywords);
   if (!keywords) return <h5>Тэги не заданы</h5>;
 
   const tagsCount = keywords.length;

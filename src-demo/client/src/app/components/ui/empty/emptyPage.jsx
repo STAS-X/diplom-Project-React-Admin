@@ -67,7 +67,6 @@ const ComponentEmptyPage = ({path, isAuth, resourceId, title}) => {
                 variant="contained"
                 color="primary"
                 onClick={()=> {
-                    console.log(resourceId, 'get resourceId');
                                 if (resourceId) {
                                     if (path === "comments") localStorage.setItem('currentTaskId',resourceId);
                                 }

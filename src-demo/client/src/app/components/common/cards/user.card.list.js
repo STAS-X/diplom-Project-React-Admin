@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
 import { green, blue, red } from '@material-ui/core/colors';
@@ -101,7 +101,7 @@ const UserCard = ({record:user, isDragging}) => {
   const { user: authUser } = useSelector(getAuthData());
   const colorized = useSelector(getAppColorized());
   //const classes = useCallback((num) => , [taskCompleted]);
-  console.log(isDragging,'is dragging');
+
   const classes = useStyles(authUser.uid === user.id, colorized, isDragging)();
   const cardRef = useRef();
 

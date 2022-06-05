@@ -13,7 +13,7 @@ const CaruselImages = (props) => {
   );
 
   const handleChangeSlide = (current, previous) => {
-    console.log(current, previous, 'slider changed');
+
     images.forEach((_, index) => {
       const currentImage = document.getElementById(`carusel-item-${index}`);
       if (index === current) {

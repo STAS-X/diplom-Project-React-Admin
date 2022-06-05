@@ -2,59 +2,30 @@ import * as React from 'react';
 import { useSelector } from 'react-redux';
 import {
   Edit,
-  BooleanInput,
   DateInput,
   SaveButton,
-  EditButton,
   SimpleForm,
   TextInput,
   SelectInput,
   FunctionField,
-  NumberInput,
   ReferenceInput,
-  FileInput,
-  FileField,
-  ArrayInput,
-  SimpleFormIterator,
   useNotify,
   useRedirect,
   useRefresh,
-  useRecordContext,
   FormDataConsumer,
   Toolbar,
-  useEditContext,
-  useEditController,
-  Title,
   useGetOne,
   useGetList,
   required,
   minLength,
-  maxLength,
-  minValue,
-  maxValue,
-  number,
 } from 'react-admin';
 import RichTextInput from 'ra-input-rich-text';
-import { makeStyles } from '@material-ui/core/styles';
 import { green, blue, red } from '@mui/material/colors';
 import {
-  Stack,
-  Box,
-  Typography,
-  Avatar,
   Chip,
-  CircularProgress,
 } from '@mui/material';
 import TaskEditIcon from '@material-ui/icons/EditRounded';
-import DeleteIcon from '@material-ui/icons/DeleteRounded';
-import TaskProgressBar from '../../common/progressbar/task.progress';
-import TagsField from '../../common/fields/task.tags';
 import { getAuthData } from '../../../store/authcontext';
-import {
-  getRandomInt,
-  dateWithDays,
-  normalise,
-} from '../../../utils/getRandomInt';
 import { dateFormatter } from '../../../utils/displayDate';
 
 const getTaskResult = (data) => {
@@ -186,7 +157,6 @@ export const CommentEdit = (props) => {
   );
 
   const transform = (data) => {
-    console.log(data, 'transform data from edit');
     return {
       ...data,
       userId: authUser.uid,

@@ -1,17 +1,11 @@
 import axios from 'axios';
-import { useState } from 'react';
 //import { toastDarkBounce } from '../utils/animateTostify';
 import { setAppError } from '../store/appcontext';
 import {
   setAuthRefreshToken,
-  getAuthToken,
-  getAuthData,
 } from '../store/authcontext';
 import configFile from '../config/default.json';
-import { useSelector } from 'react-redux';
-import authService from './auth.service';
 import { getHook } from 'react-hooks-outside';
-import localStorageService from './localStorage.service';
 import { firebaseApp, authProvider } from '../dbapp/initFireBase';
 
 const http = axios.create({
@@ -28,10 +22,8 @@ http.interceptors.request.use(
       const { getState } = getHook('store');
       const dispatch = getHook('dispatch');
 
-      //console.log(useStore.getState);
-      //const token  = useStore((state) => state.authContext.token);
       const token = getState().authContext.token;
-      const { uid } = getState().authContext.auth;
+      const user = getState().authContext.auth;
 
       const {
         expirationTime = null,
@@ -64,7 +56,7 @@ http.interceptors.request.use(
         config.headers = {
           ...config.headers,
           Authorization: accessToken ? `Bearer ${accessToken}` : '',
-          UserUid: accessToken ? `${uid}` : '',
+          UserUid: accessToken ? `${user.uid}` : '',
           // DataUserId: `${user.uid}`
         };
       }
@@ -99,11 +91,9 @@ http.interceptors.request.use(
 
 http.interceptors.response.use(
   (res) => {
-    console.log(res, res.data, 'request response');
     return res;
   },
   function (error) {
-    console.info(error.response, 'get error response');
     const expectedErrors = error.response
       ? error.response.status >= 300 &&
         error.response.status <= 500 &&

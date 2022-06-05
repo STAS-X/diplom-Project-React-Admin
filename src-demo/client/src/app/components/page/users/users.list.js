@@ -38,7 +38,6 @@ const QuickFilter = ({ label }) => {
 };
 
 const PaginationActions = (props) => {
-  //console.log(props, 'pagination inside props');
   return (
     <RaPaginationActions
       {...props}

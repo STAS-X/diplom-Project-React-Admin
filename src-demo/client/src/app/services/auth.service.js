@@ -4,7 +4,7 @@
 import configFile from '../config/default.json';
 import axios from 'axios';
 import localStorageService from './localStorage.service';
-import { setAuthError, getAuthData } from '../store/authcontext';
+import { setAuthError } from '../store/authcontext';
 import { getHook } from 'react-hooks-outside';
 
 const httpAuth = axios.create({
