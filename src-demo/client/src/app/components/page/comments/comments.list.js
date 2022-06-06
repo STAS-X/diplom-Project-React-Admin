@@ -35,9 +35,7 @@ import {
   CircularProgress,
   Button,
 } from '@mui/material';
-import {
-  dateWithMonths,
-} from '../../../utils/getRandomInt';
+import { dateWithMonths } from '../../../utils/getRandomInt';
 import Loading from '../../ui/loading/loading';
 import DeleteIcon from '@material-ui/icons/DeleteRounded';
 import UnSelectedIcon from '@material-ui/icons/UndoRounded';
@@ -129,20 +127,23 @@ const DeleteTasksButton = ({ commentsIds, setCommentsIds }) => {
   const notify = useNotify();
   const [deleteMany, { loading, loaded, data, total, error }] = useDeleteMany(
     'comments',
-    commentsIds
+    commentsIds,
+    {
+      mutationMode: 'undoable',
+      onSuccess: () => {
+        notify(`Комментарии ${commentsIds} удаляются`, { undoable: true });
+        setCommentsIds([]);
+        refresh();
+      },
+      onError: (error) =>
+        notify('Ошибка при уалении комментаиев!', { type: 'warning' }),
+    }
   );
   const handleClick = () => {
     if (confirm('Уверены, что хотите удалить задачи?')) {
       deleteMany();
     }
   };
-
-  if (loaded && !error && data?.length > 0) {
-    //console.info(isLoading, total, error,'test for delete many');
-    notify(`Задачи ${commentsIds} удалены успешно`, { type: 'info' });
-    setCommentsIds([]);
-    refresh();
-  }
 
   return (
     <Button
@@ -260,7 +261,7 @@ const CommentTaskField = ({ taskId }) => {
   if (!loaded && loading) return <CircularProgress color="inherit" />;
 
   if (error) {
-    return <p style={{color:"red"}}>Задача удалена</p>;
+    return <p style={{ color: 'red' }}>Задача удалена</p>;
   }
   return (
     task && (
@@ -285,13 +286,26 @@ export const CommentList = (props) => {
   const isAppLoading = useSelector(getAppLoading());
   const isCarding = useSelector(getAppCarding());
 
-  const { loadedOnce: isLoading, total, displayedFilters, ids } = useSelector(
-    (state) => state.admin.resources.comments.list
-  );
+  const {
+    loadedOnce: isLoading,
+    total,
+    displayedFilters,
+    ids,
+  } = useSelector((state) => state.admin.resources.comments.list);
   const comments = useSelector((state) => state.admin.resources.comments.data);
 
   //const [isTransition, setTransition]=React.useState(false);
   const isZeroElements = total === 0 && displayedFilters;
+
+  React.useEffect(() => {
+    setCommentsIds(
+      localStorage.getItem('commentsIds')
+        ? JSON.parse(localStorage.getItem('commentsIds'))
+        : []
+    );
+
+    return () => {};
+  }, []);
 
   return (
     <>
@@ -415,21 +429,6 @@ const MyDatagrid = ({
     }
   };
 
-  React.useEffect(() => {
-    setCommentsIds(commentsIds);
-    localStorage.setItem('commentsIds', JSON.stringify(commentsIds));
-    return () => {};
-  }, [commentsIds]);
-  React.useEffect(() => {
-    setCommentsIds(
-      localStorage.getItem('commentsIds')
-        ? JSON.parse(localStorage.getItem('commentsIds'))
-        : []
-    );
-
-    return () => {};
-  }, []);
-
   return (
     <Stack>
       <Datagrid
@@ -458,12 +457,15 @@ const MyDatagrid = ({
               checked={commentsIds.findIndex((id) => id === record.id) > -1}
               onClick={(event) => {
                 if (commentsIds.findIndex((id) => id === record.id) < 0) {
-                  commentsIds.push(record.id);
+                  setCommentsIds((prevComments) => {
+                    prevComments.push(record.id);
+                    return prevComments;
+                  });
                 } else {
-                  const index = commentsIds.findIndex((id) => id === record.id);
-                  delete commentsIds[index];
+                  setCommentsIds((prevComments) =>
+                    prevComments.filter((id) => id !== record.id)
+                  );
                 }
-                setCommentsIds(commentsIds.filter((task) => task !== null));
               }}
             />
           )}

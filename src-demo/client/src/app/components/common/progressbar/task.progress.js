@@ -15,7 +15,7 @@ function CircularProgressWithLabel(props) {
       <CircularProgress
         variant="determinate"
         color={value < 30 ? 'error' : value < 70 ? 'secondary' : 'success'}
-        {...props}
+        value={value}
       />
       <Box
         sx={{
@@ -62,13 +62,13 @@ const CircularDynamic = (props) => {
 const CircularDeterminate = (props) => {
     const { value } = props;
   return (
-    <Box sx={{ position: 'relative', display: 'inline-flex'  }}>
+    <Box sx={{ position: 'relative', display: 'inline-flex' }}>
       <CircularProgress
         variant="determinate"
         color={value < 30 ? 'error' : value < 70 ? 'secondary' : 'success'}
-        {...props}
+        value={value}
       />
-            <Box
+      <Box
         sx={{
           top: 0,
           left: 0,
@@ -83,7 +83,7 @@ const CircularDeterminate = (props) => {
         <Typography variant="caption" component="div" color="text.secondary">
           {`${value}%`}
         </Typography>
-        </Box>
+      </Box>
     </Box>
   );
 };
@@ -91,12 +91,15 @@ const CircularDeterminate = (props) => {
 const LinearDeterminate = (props) => {
     const { value } = props;
   return (
-<Box sx={{ display: 'flex', alignItems: 'center' }}>
+    <Box sx={{ display: 'flex', alignItems: 'center' }}>
       <Box sx={{ width: '100%', mr: 1 }}>
-        <LinearProgress variant="determinate" {...props} />
+        <LinearProgress variant="determinate" value={value} />
       </Box>
       <Box sx={{ minWidth: 10 }}>
-        <Typography variant="body2" color="text.secondary">{`${value}%`}</Typography>
+        <Typography
+          variant="body2"
+          color="text.secondary"
+        >{`${value}%`}</Typography>
       </Box>
     </Box>
   );

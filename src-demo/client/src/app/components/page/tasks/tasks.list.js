@@ -4,9 +4,7 @@ import DeleteIcon from '@material-ui/icons/DeleteRounded';
 import UnSelectedIcon from '@material-ui/icons/UndoRounded';
 import CreateCommentIcon from '@material-ui/icons/AddCommentRounded';
 import EditCommentIcon from '@material-ui/icons/EditAttributesRounded';
-import {
-  dateWithMonths,
-} from '../../../utils/getRandomInt';
+import { dateWithMonths } from '../../../utils/getRandomInt';
 import { green, blue, red } from '@mui/material/colors';
 import {
   Datagrid,
@@ -74,8 +72,11 @@ const TaskPagination = ({ isAppColorized, ...props }) => {
       'thead.MuiTableHead-root tr.MuiTableRow-root th'
     );
     if (rowHead) {
-        const ths=Array.from(rowHead);
-        ths.forEach(th => th.style.backgroundColor = isAppColorized ? blue[100] : 'whitesmoke');
+      const ths = Array.from(rowHead);
+      ths.forEach(
+        (th) =>
+          (th.style.backgroundColor = isAppColorized ? blue[100] : 'whitesmoke')
+      );
     }
     const paging = document.querySelector('div.MuiTablePagination-toolbar');
     if (paging) {
@@ -163,20 +164,24 @@ const DeleteTasksButton = ({ tasksIds, setTasksIds }) => {
   const notify = useNotify();
   const [deleteMany, { loading, loaded, data, total, error }] = useDeleteMany(
     'tasks',
-    tasksIds
+    tasksIds,
+    {
+      mutationMode: 'undoable',
+      onSuccess: () => {
+        notify(`Задачи ${tasksIds} удаляются`, { undoable: true });
+        setTasksIds([]);
+        refresh();
+      },
+      onError: (error) =>
+        notify('Ошибка при уалении задач!', { type: 'warning' }),
+    }
   );
+
   const handleClick = () => {
     if (confirm('Уверены, что хотите удалить задачи?')) {
       deleteMany();
     }
   };
-
-  if (loaded && !error && data?.length > 0) {
-    //console.info(isLoading, total, error,'test for delete many');
-    notify(`Задачи ${tasksIds} удалены успешно`);
-    setTasksIds([]);
-    refresh();
-  }
 
   return (
     <Button
@@ -346,7 +351,7 @@ const ExecutorsField = ({ executors: ids, ...data }) => {
   if (loading || !loaded) return <CircularProgress color="inherit" />;
 
   if (error) {
-    return <p style={{color:"red"}}>Ошибка при загрузке</p>;
+    return <p style={{ color: 'red' }}>Ошибка при загрузке</p>;
   }
   const result = getTaskResult(data);
 
@@ -434,6 +439,16 @@ export const TaskList = (props) => {
   const isCarding = useSelector(getAppCarding());
 
   const isZeroElements = total === 0 && displayedFilters;
+
+  React.useEffect(() => {
+    setTasksIds(
+      localStorage.getItem('tasksIds')
+        ? JSON.parse(localStorage.getItem('tasksIds'))
+        : []
+    );
+
+    return () => {};
+  }, []);
 
   return (
     <>
@@ -592,21 +607,6 @@ const MyDatagrid = ({
     }
   };
 
-  React.useEffect(() => {
-    setTasksIds(tasksIds);
-    localStorage.setItem('tasksIds', JSON.stringify(tasksIds));
-    return () => {};
-  }, [tasksIds]);
-  React.useEffect(() => {
-    setTasksIds(
-      localStorage.getItem('tasksIds')
-        ? JSON.parse(localStorage.getItem('tasksIds'))
-        : []
-    );
-
-    return () => {};
-  }, []);
-
   return (
     <Stack>
       <Datagrid
@@ -635,12 +635,15 @@ const MyDatagrid = ({
               checked={tasksIds.findIndex((id) => id === record.id) > -1}
               onClick={(event) => {
                 if (tasksIds.findIndex((id) => id === record.id) < 0) {
-                  tasksIds.push(record.id);
+                  setCommentsIds((prevTasks) => {
+                    prevTasks.push(record.id);
+                    return prevTasks;
+                  });
                 } else {
-                  const index = tasksIds.findIndex((id) => id === record.id);
-                  delete tasksIds[index];
+                  setCommentsIds((prevTasks) =>
+                    prevTasks.filter((id) => id !== record.id)
+                  );
                 }
-                setTasksIds(tasksIds.filter((task) => task !== null));
               }}
             />
           )}

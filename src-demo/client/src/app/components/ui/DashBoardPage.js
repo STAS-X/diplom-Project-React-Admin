@@ -15,7 +15,7 @@ import {
   ExpandMore as ExpandMoreIcon,
 } from '@material-ui/icons';
 import { red } from '@mui/material/colors';
-import { getRandomInt } from '../../utils/getRandomInt'
+import { getRandomInt } from '../../utils/getRandomInt';
 
 const ExpandMore = styled((props) => {
   const { expand, ...other } = props;
@@ -44,21 +44,33 @@ const DashBordPage = () => {
           </Avatar>
         }
         action={
-          <IconButton aria-label="settings" 
-                      onClick={() => {
-                        if (getComputedStyle(document.documentElement).getPropertyValue("--bg-direction") === "bg-scrolling-reverse") {
-                            document.documentElement.style.setProperty("--bg-direction", "bg-scrolling")
-                        } else {
-                            document.documentElement.style.setProperty("--bg-direction", "bg-scrolling-reverse");
-                        }
-                      }}>
+          <IconButton
+            aria-label="settings"
+            onClick={() => {
+              const deltaX = getRandomInt(-5, 5);
+              const deltaY = getRandomInt(-5, 5);
+              const reverse = getRandomInt(0, 1);
+              document.documentElement.style.setProperty(
+                '--bg-width',
+                `${(deltaX ===0?1:deltaX) * 50}px`
+              );
+              document.documentElement.style.setProperty(
+                '--bg-height',
+                `${(deltaY === 0 ? 1 : deltaY) * 50}px`
+              );
+              document.documentElement.style.setProperty(
+                '--bg-direction',
+                reverse === 0 ? 'bg-scrolling-reverse' : 'bg-scrolling'
+              );
+            }}
+          >
             <MoreIcon />
           </IconButton>
         }
         title="Главная страница проекта"
         subheader="проект написан в 2022 году"
       />
-      <CardContent style={{position:'relative'}}>
+      <CardContent style={{ position: 'relative' }}>
         <ExpandMore
           expand={expanded}
           onClick={handleExpandClick}
@@ -116,13 +128,16 @@ const DashBordPage = () => {
             sx={{ ml: 1.6, mt: 1 }}
           >
             Желаю приятного проведения времени и получения положительных эмоций!{' '}
-            <br />Цитата дня:{' '}
+            <br />
+            Цитата дня:{' '}
             <cite>- Никогда не ошибается тот, кто ничего не делает.</cite>
             <sup> Теодор Рузвельт.</sup>
           </Typography>
         </Collapse>
-        <Box className="animationMainBack" sx={{mx: 1, my:1, height:'75vh'}}>
-        </Box>
+        <Box
+          className="animationMainBack"
+          sx={{ mx: 1, my: 1, height: '75vh' }}
+        ></Box>
       </CardContent>
     </Card>
   );
