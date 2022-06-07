@@ -46,7 +46,6 @@ const darkTheme = createTheme({
 
 const MyLayout = ({ children, dashboard, title }) => {
   const [theme] = useTheme();
-  console.log(useTheme());
 
   return (
         <Button onClick={() => setTheme(theme.palette.mode === 'dark' ? lightTheme : darkTheme)}>

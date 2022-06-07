@@ -1,36 +1,37 @@
 {
-  "name": "jfd-server",
-  "version": "1.0.0",
-  "description": "",
-  "main": "app.js",
-  "scripts": {
-    "start": "cross-env NODE_ENV=production node app.js",
-    "serve": "cross-env NODE_ENV=development nodemon --harmony app.js",
-    "client": "cd ../client && cross-env NODE_ENV=development BROWSER=none PORT=3000 npx react-scripts start",
-    "dev": "concurrently \"npm run serve\" \"npm run client\"",
-    "prod": "concurrently \"npm run start\" \"npm run client\""
-  },
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "bcryptjs": "^2.4.3",
-    "chalk": "^4.1.2",
-    "concurrently": "^7.0.0",
-    "config": "^3.3.7",
-    "cors": "^2.8.5",
-    "cross-env": "^7.0.3",
-    "express": "^4.17.3",
-    "express-validator": "^6.14.0",
-    "firebase-admin": "^10.1.0",
-    "firebase-functions": "^3.20.1",
-    "jsonwebtoken": "^8.5.1",
-    "kill-port": "^1.6.1",
-    "mongoose": "^6.2.8",
-    "nanoid": "^3.3.3",
-    "react-admin-firebase": "^3.3.1",
-    "react-scripts": "^4.0.3"
-  },
-  "devDependencies": {
-    "nodemon": "^2.0.15"
-  }
+	"name": "jfd-server",
+	"version": "1.0.0",
+	"description": "",
+	"main": "app.js",
+	"scripts": {
+		"start": "cross-env NODE_ENV=production node app.js",
+		"serve": "cross-env NODE_ENV=development nodemon --harmony app.js",
+		"client": "cd ../client && cross-env NODE_ENV=development BROWSER=none PORT=3000 npx react-scripts start",
+		"copy_nm": "cpx ../client/node_modules2/**/* ../client/node_modules && cpx ./node_modules2/**/* ./node_modules && echo Обновления к NPM модулям для построения приложения скопированы!",
+		"dev": "concurrently \"npm run copy_nm\" \"npm run serve\" \"npm run client\"",
+		"prod": "concurrently \"npm run copy_nm\" \"npm run start\" \"npm run client\""
+	},
+	"author": "",
+	"license": "ISC",
+	"dependencies": {
+		"bcryptjs": "^2.4.3",
+		"chalk": "^4.1.2",
+		"concurrently": "^7.0.0",
+		"config": "^3.3.7",
+		"cors": "^2.8.5",
+		"cpx": "^1.5.0",
+		"cross-env": "^7.0.3",
+		"express": "^4.17.3",
+		"express-validator": "^6.14.0",
+		"firebase": "^9.8.2",
+		"firebase-admin": "^10.1.0",
+		"jsonwebtoken": "^8.5.1",
+		"kill-port": "^1.6.1",
+		"nanoid": "^3.3.3",
+		"react-admin-firebase": "^3.3.1",
+		"react-scripts": "^4.0.3"
+	},
+	"devDependencies": {
+		"nodemon": "^2.0.15"
+	}
 }

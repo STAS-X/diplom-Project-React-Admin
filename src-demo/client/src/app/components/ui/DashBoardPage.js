@@ -56,7 +56,26 @@ const DashBordPage = () => {
           </Avatar>
         }
         action={
-          <IconButton aria-label="settings" onClick={handleChangeBackground}>
+          <IconButton
+            aria-label="settings"
+            onClick={() => {
+              const deltaX = getRandomInt(-5, 5);
+              const deltaY = getRandomInt(-5, 5);
+              const reverse = getRandomInt(0, 1);
+              document.documentElement.style.setProperty(
+                '--bg-width',
+                `${(deltaX ===0?1:deltaX) * 50}px`
+              );
+              document.documentElement.style.setProperty(
+                '--bg-height',
+                `${(deltaY === 0 ? 1 : deltaY) * 50}px`
+              );
+              document.documentElement.style.setProperty(
+                '--bg-direction',
+                reverse === 0 ? 'bg-scrolling-reverse' : 'bg-scrolling'
+              );
+            }}
+          >
             <MoreIcon />
           </IconButton>
         }

@@ -91,12 +91,15 @@ const CircularDeterminate = (props) => {
 const LinearDeterminate = (props) => {
     const { value } = props;
   return (
-<Box sx={{ display: 'flex', alignItems: 'center' }}>
+    <Box sx={{ display: 'flex', alignItems: 'center' }}>
       <Box sx={{ width: '100%', mr: 1 }}>
         <LinearProgress variant="determinate" value={value} />
       </Box>
       <Box sx={{ minWidth: 10 }}>
-        <Typography variant="body2" color="text.secondary">{`${value}%`}</Typography>
+        <Typography
+          variant="body2"
+          color="text.secondary"
+        >{`${value}%`}</Typography>
       </Box>
     </Box>
   );

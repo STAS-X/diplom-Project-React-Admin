@@ -35,12 +35,8 @@ import {
   maxValue,
   number,
 } from 'react-admin';
-import { makeStyles } from '@material-ui/core/styles';
-//import { useFormState } from 'react-hook-form';
-import { green, blue, red } from '@mui/material/colors';
 import { Stack, Box, Typography, Avatar, Chip } from '@mui/material';
 import AddCommentIcon from '@material-ui/icons/AddCommentRounded';
-import DeleteIcon from '@material-ui/icons/DeleteRounded';
 import TaskProgressBar from '../../common/progressbar/task.progress';
 import TagsField from '../../common/fields/task.tags';
 import { getAuthData } from '../../../store/authcontext';
@@ -133,7 +129,6 @@ const CustomToolbar = ({ authId, ...props }) => {
     { field: 'id', order: 'ASC' },
     { userId: authId, taskId: record.id }
   );
-  console.log(comments, authId, record.id, 'get list of comments');
 
   return (
     <Toolbar
@@ -161,8 +156,6 @@ const CustomToolbar = ({ authId, ...props }) => {
             label="Перейти к комментарию"
             icon={<AddCommentIcon />}
             onClick={() => {
-              //localStorage.setItem('redirectTo', 'comments');
-              //console.log(record, 'record context');
               localStorage.setItem('currentTaskId', record.id);
               handleSubmit();
               //setOnSuccess(handleSuccess);
@@ -215,12 +208,10 @@ export const TaskEdit = (props) => {
     data: { userId: editUserId },
     loaded: isLoaded,
   } = useGetOne('tasks', props.id);
-  //const fstate = useFormState();
-  //console.log(fstate, 'get state of form')
+
   const { user: authUser } = useSelector(getAuthData());
 
   const transform = (data) => {
-    console.log(data, 'transform data from edit');
     return {
       ...data,
       userId: authUser.uid,

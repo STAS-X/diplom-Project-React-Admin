@@ -6,7 +6,7 @@ import {
   SimpleForm,
   TextInput,
   SelectInput,
-   ReferenceInput,
+  ReferenceInput,
   FunctionField,
   useRedirect,
   FormDataConsumer,
@@ -147,7 +147,6 @@ export const CommentCreate = (props) => {
   );
 
   const transform = (data) => {
-    console.log(data, 'transform data from edit');
     return {
       ...data,
       createdAt: dateFormatter(Date.now()),

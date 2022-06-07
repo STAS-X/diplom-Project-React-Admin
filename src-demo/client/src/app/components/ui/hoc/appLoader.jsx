@@ -5,7 +5,7 @@ import {
 } from '../../../utils/animateTostify';
 import PropTypes from 'prop-types';
 
-import { useDispatch, useSelector, useStore } from 'react-redux';
+import { useSelector } from 'react-redux';
 
 import localStorageService from '../../../services/localStorage.service';
 import { authProvider, firebaseApp } from '../../../dbapp/initFireBase';
@@ -27,7 +27,7 @@ import {
 import { getHook } from 'react-hooks-outside';
 import history from '../../../../app/utils/history';
 
-const AppLoader = ({ children, ...props }) => {
+const AppLoader = ({ children }) => {
   //const authProvider = useAuthProvider();
   const dispatch = getHook('dispatch');
 
@@ -93,7 +93,6 @@ const AppLoader = ({ children, ...props }) => {
   }, []);
 
   useEffect(() => {
-    //console.log('Произошла ошибка');
     if (memoError) {
       dispatch(setAppError(null));
       dispatch(setAuthError(null));

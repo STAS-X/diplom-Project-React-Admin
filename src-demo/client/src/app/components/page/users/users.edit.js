@@ -60,7 +60,6 @@ const CustomToolbar = ({ authUser, profileURL, ...props }) => {
           <SaveButton
             label="Сохранить"
             onClick={() => {
-              console.log(formData, 'data from edit context');
               handleSubmit();
               dispatch(
                 setAuthUser({
@@ -177,9 +176,6 @@ export const UserEdit = (props) => {
   const redirect = useRedirect();
 
   const { id: editUserId } = props;
-  //const rec= useRecordContext();
-  //const fstate = useFormState();
-  //console.log(fstate, 'get state of form')
   const { user: authUser } = useSelector(getAuthData());
 
   const [profileURL, setProfileURL] = React.useState(null);

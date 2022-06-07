@@ -1,7 +1,7 @@
 {
   "isFireBase": true,
   "apiDataEndpoint": "http://localhost:8080/api",
-  "apiDataEndpointProd": "https://localhost/api",
+  "apiDataEndpointProd": "https://a7625-4c0c.b.d-f.pw/api",
   "firebaseConfig": {
     "apiKey": "AIzaSyDIfqfzxSnigmrqo2Lp2Ot2M0YPL3ckjs4",
     "authDomain": "fastcompanyxxx.firebaseapp.com",

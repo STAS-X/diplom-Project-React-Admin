@@ -1,32 +1,23 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import { green, blue, red } from '@material-ui/core/colors';
+import { green, red } from '@material-ui/core/colors';
 import { emphasize } from '@material-ui/core/styles/colorManipulator';
 import {
   Card,
   CardMedia,
   Grid,
-  Box,
-  Divider,
   CardContent,
   Typography,
-  CircularProgress,
 } from '@material-ui/core';
 import { useSelector } from 'react-redux';
 import {
   SimpleShowLayout,
   TextField,
   DateField,
-  FunctionField,
-  RichTextField,
   useGetOne,
-  useGetList,
 } from 'react-admin';
-import TaskProgressBar from '../../common/progressbar/task.progress';
-import { getAuthData } from '../../../store/authcontext';
 import { getAppColorized } from '../../../store/appcontext';
-import { dateFormatter } from '../../../utils/displayDate';
-import { getRandomInt } from '../../../utils/getRandomInt';
+import { getAuthData } from '../../../store/authcontext';
 
 const useStyles = (isCurrentUser, isColorized, loaded) =>
   makeStyles({

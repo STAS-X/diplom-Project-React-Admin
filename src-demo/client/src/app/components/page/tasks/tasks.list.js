@@ -1,20 +1,10 @@
-import React, { useEffect, useMemo } from 'react';
-import ReactDOM from 'react-dom';
+import React from 'react';
 import { useSelector } from 'react-redux';
-import { styled } from '@mui/material/styles';
 import DeleteIcon from '@material-ui/icons/DeleteRounded';
 import UnSelectedIcon from '@material-ui/icons/UndoRounded';
 import CreateCommentIcon from '@material-ui/icons/AddCommentRounded';
 import EditCommentIcon from '@material-ui/icons/EditAttributesRounded';
-import MailIcon from '@material-ui/icons/MailOutline';
-import TagFacesIcon from '@material-ui/icons/TagFaces';
-import ChevronLeft from '@material-ui/icons/ChevronLeft';
-import ChevronRight from '@material-ui/icons/ChevronRight';
-import {
-  getRandomInt,
-  dateWithMonths,
-  dateWithDays,
-} from '../../../utils/getRandomInt';
+import { dateWithMonths } from '../../../utils/getRandomInt';
 import { green, blue, red } from '@mui/material/colors';
 import {
   Datagrid,
@@ -22,53 +12,35 @@ import {
   TextField,
   ShowButton,
   EditButton,
-  DeleteButton,
-  RichTextField,
   FilterButton,
   FilterForm,
   CreateButton,
-  ChipField,
   DateField,
   TextInput,
   SortButton,
   FunctionField,
   useListContext,
-  DatagridBody,
-  ArrayField,
-  NumberField,
-  RecordContextProvider,
-  useUnselectAll,
   DeleteWithConfirmButton,
   useDeleteMany,
-  useGetOne,
   useRefresh,
   useNotify,
   useGetMany,
   useGetList,
-  useRecordContext,
   useTranslate,
   Pagination as RaPagination,
   PaginationActions as RaPaginationActions,
 } from 'react-admin';
 import {
-  TableCell,
-  TableRow,
-  Toolbar,
   Box,
   CircularProgress,
   Stack,
-  Card,
   Chip,
   Button,
-  Divider,
   Avatar,
   Checkbox,
 } from '@mui/material';
-import { makeStyles } from '@material-ui/core/styles';
-import { dateFormatter } from '../../../utils/displayDate';
 import Loading from '../../ui/loading/loading';
 import TaskAsideCard from '../../common/cards/task.card.aside';
-import TaskCard from '../../common/cards/task.card.list';
 import TaskDraggableComponent from '../../common/drag_drop/task.card.draggable';
 import { getAuthData } from '../../../store/authcontext';
 import TaskProgressBar from '../../common/progressbar/task.progress';
@@ -85,7 +57,6 @@ const QuickFilter = ({ label }) => {
 };
 
 const PaginationActions = (props) => {
-  //console.log(props, 'pagination inside props');
   return (
     <RaPaginationActions
       {...props}
@@ -198,12 +169,14 @@ const DeleteTasksButton = ({ tasksIds, setTasksIds }) => {
       mutationMode: 'undoable',
       onSuccess: () => {
         notify(`Задачи ${tasksIds} удаляются`, { undoable: true });
+        setTasksIds([]);
         refresh();
       },
       onError: (error) =>
-        notify('Ошибка при удалении задачи!', { type: 'warning' }),
+        notify('Ошибка при уалении задач!', { type: 'warning' }),
     }
   );
+
   const handleClick = () => {
     if (confirm('Уверены, что хотите удалить задачи?')) {
       deleteMany();
@@ -256,6 +229,11 @@ const UnselectButton = ({ setTasksIds }) => {
 
 const TaskToolbar = ({ tasksIds, setTasksIds, userId }) => {
   const filters = taskFilters(userId);
+  const { hideFilter, displayedFilters } = useListContext();
+
+  const handleHideAllFilters = (e) => {
+    Object.keys(displayedFilters).forEach((filter) => hideFilter(filter));
+  };
 
   return (
     <Stack direction="row" justifyContent="space-between">
@@ -271,7 +249,7 @@ const TaskToolbar = ({ tasksIds, setTasksIds, userId }) => {
             'commentable',
           ]}
         />
-        <FilterButton filters={filters} />
+        <FilterButton filters={filters} onClick={handleHideAllFilters} />
         <CreateButton />
         <DeleteTasksButton tasksIds={tasksIds} setTasksIds={setTasksIds} />
         {tasksIds.length > 0 && <UnselectButton setTasksIds={setTasksIds} />}
@@ -301,7 +279,6 @@ const getTaskResult = (data) => {
 };
 
 const KeywordsField = ({ keywords }) => {
-  console.log(keywords);
   if (!keywords) return <h5>Тэги не заданы</h5>;
 
   const tagsCount = keywords.length;
@@ -451,6 +428,10 @@ export const TaskList = (props) => {
   const {
     loadedOnce: isLoading,
     total,
+<<<<<<< HEAD
+=======
+    displayedFilters,
+>>>>>>> b845dfc8cb12d8ddb2e95020001afb6967fd150e
     ids,
   } = useSelector((state) => state.admin.resources.tasks.list);
   const tasks = useSelector((state) => state.admin.resources.tasks.data);
@@ -460,6 +441,8 @@ export const TaskList = (props) => {
   const isAppLoading = useSelector(getAppLoading());
   const isCarding = useSelector(getAppCarding());
 
+  const isZeroElements = total === 0 && displayedFilters;
+
   React.useEffect(() => {
     setTasksIds(
       localStorage.getItem('tasksIds')
@@ -468,7 +451,6 @@ export const TaskList = (props) => {
     );
 
     return () => {
-      localStorage.setItem('tasksIds', JSON.stringify([]));
     };
   }, []);
 
@@ -483,21 +465,21 @@ export const TaskList = (props) => {
             !isLoading && isAppLoading ? { height: '0px', display: 'none' } : {}
           }
         >
-          {total > 0 && !(!isLoading && isAppLoading) && (
+          {!isZeroElements && !(!isLoading && isAppLoading) && (
             <TaskToolbar
               tasksIds={tasksIds}
               setTasksIds={setTasksIds}
               userId={authUser.uid}
             />
           )}
-          {total === 0 && !(!isLoading && isAppLoading) && (
+          {isZeroElements && !(!isLoading && isAppLoading) && (
             <ComponentEmptyPage
               path={'tasks'}
               title={'Задачи отсутствуют. Хотите создать новую?'}
             />
           )}
 
-          {!isCarding && total > 0 && !(!isLoading && isAppLoading) && (
+          {!isCarding && !isZeroElements && !(!isLoading && isAppLoading) && (
             <MyDatagrid
               isAppColorized={isAppColorized}
               authId={authUser.uid}
@@ -507,14 +489,14 @@ export const TaskList = (props) => {
               setHoverId={setHoverId}
             />
           )}
-          {isCarding && total > 0 && !(!isLoading && isAppLoading) && (
+          {isCarding && !isZeroElements && !(!isLoading && isAppLoading) && (
             <TaskDraggableComponent
               list={ids.map((id) => tasks[id])}
               ids={ids}
             />
           )}
 
-          {total > 0 && !(!isLoading && isAppLoading) && (
+          {!isZeroElements && !(!isLoading && isAppLoading) && (
             <TaskPagination isAppColorized={isAppColorized} />
           )}
         </ListBase>
@@ -628,11 +610,6 @@ const MyDatagrid = ({
     }
   };
 
-  React.useEffect(() => {
-    localStorage.setItem('tasksIds', JSON.stringify(tasksIds));
-    return () => {};
-  }, [tasksIds]);
-
   return (
     <Stack>
       <Datagrid
@@ -654,6 +631,7 @@ const MyDatagrid = ({
       >
         <FunctionField
           label="Выбрать"
+<<<<<<< HEAD
           render={(record) => {
             return (
               <Checkbox
@@ -674,6 +652,26 @@ const MyDatagrid = ({
               />
             );
           }}
+=======
+          render={(record) => (
+            <Checkbox
+              disabled={record.userId !== authId}
+              checked={tasksIds.findIndex((id) => id === record.id) > -1}
+              onClick={(event) => {
+                if (tasksIds.findIndex((id) => id === record.id) < 0) {
+                  setCommentsIds((prevTasks) => {
+                    prevTasks.push(record.id);
+                    return prevTasks;
+                  });
+                } else {
+                  setCommentsIds((prevTasks) =>
+                    prevTasks.filter((id) => id !== record.id)
+                  );
+                }
+              }}
+            />
+          )}
+>>>>>>> b845dfc8cb12d8ddb2e95020001afb6967fd150e
         />
 
         <TextField

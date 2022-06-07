@@ -41,10 +41,8 @@ import {useSelector} from 'react-redux';
 import { getAuthData } from '../../../store/authcontext';
 import {Visibility,VisibilityOff, ViewList, People as UserIcon, Pages as TaskIcon, Comment as CommentIcon  } from '@material-ui/icons';
 import { dateFormatter } from '../../../utils/displayDate';
-//import BulkTaskButton  from './CustomBulkTaskButton';
 
 const BulkUpdateButton = ({label, status}) => {
-    const [fetched, setFetched] = React.useState(false);
     const { selectedIds } = useListContext();
     const refresh = useRefresh();
     const notify = useNotify();
@@ -66,7 +64,6 @@ const BulkUpdateButton = ({label, status}) => {
 
     React.useEffect(()=>{
       if (loaded) {
-          console.log(loaded, selectedIds, 'add params');
           refresh();
           //notify(status?'Задачи завершены успешно':'Задачи открыты для исполнения');
           unselectAll();

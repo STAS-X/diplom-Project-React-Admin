@@ -10,26 +10,20 @@ import {
   TextField,
   ShowButton,
   EditButton,
-  DeleteButton,
   EmailField,
   FilterButton,
   FilterForm,
-  CreateButton,
-  Pagination,
   DateField,
   TextInput,
   SortButton,
   FunctionField,
-  useGetOne,
   useListContext,
   useTranslate,
-  RecordContextProvider,
   Pagination as RaPagination,
   PaginationActions as RaPaginationActions,
 } from 'react-admin';
-import { Stack, Card, Chip } from '@mui/material';
+import { Stack, Chip } from '@mui/material';
 import UserCardExpand from '../../common/cards/user.card.expand';
-import UserCard from '../../common/cards/user.card.list';
 import UserDraggableComponent from '../../common/drag_drop/user.card.draggable';
 import { getAuthData } from '../../../store/authcontext';
 import {
@@ -44,7 +38,6 @@ const QuickFilter = ({ label }) => {
 };
 
 const PaginationActions = (props) => {
-  //console.log(props, 'pagination inside props');
   return (
     <RaPaginationActions
       {...props}
@@ -115,13 +108,19 @@ const userFilters = (userId) => [
 ];
 
 const UserToolbar = ({ userId }) => {
+  const { hideFilter, displayedFilters } = useListContext();
   const filters = userFilters(userId);
+
+  const handleHideAllFilters = (e) => {
+    Object.keys(displayedFilters).forEach((filter) => hideFilter(filter));
+  };
+
   return (
     <Stack direction="row" justifyContent="space-between">
       <FilterForm filters={filters} />
       <div>
         <SortButton fields={['name', 'age', 'loggedOut']} />
-        <FilterButton filters={filters} />
+        <FilterButton filters={filters} onClick={handleHideAllFilters} />
         {/*<CreateButton />*/}
       </div>
     </Stack>

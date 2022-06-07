@@ -33,17 +33,15 @@ import { green, blue, red } from '@mui/material/colors';
 import { getAppColorized } from '../../../store/appcontext';
 import {
   CircularProgress,
-  Chip,
-  TopToolbar
+  Chip
   
 } from '@mui/material';
 import TaskCard from '../../common/cards/task.card.list';
 import ComponentEmptyPage from '../../ui/empty/emptyPage';
 import {useSelector} from 'react-redux';
 import { getAuthData } from '../../../store/authcontext';
-import {Visibility,VisibilityOff, ViewList, People as UserIcon, Pages as TaskIcon, Comment as CommentIcon  } from '@material-ui/icons';
-import { dateFormatter } from '../../../utils/displayDate';
-//import BulkTaskButton  from './CustomBulkTaskButton';
+import { ViewList, Pages as TaskIcon, Comment as CommentIcon  } from '@material-ui/icons';
+
 
 const CommentBulkActionButtons = (props) => {
   return (
@@ -175,9 +173,8 @@ const MyCommentDataGrid = ({taskId, ...props}) => {
 
 export const TaskTabbetShow = (props) => {
   const { data: task, loaded} = useGetOne('tasks', props.id);
-  //const { user: authUser } = useSelector(getAuthData());
   const { pathname } = props.history.location;
-  console.log(props.history.location,'pathname');
+
   if (pathname && pathname.slice(-4)==="show") {
     const newTab = localStorage.getItem('currentTab')
     if (newTab) localStorage.removeItem('currentTab');

@@ -11,15 +11,11 @@ import { authProvider, dataProvider } from './app/dbapp/initFireBase';
 
 import { ToastContainer } from 'react-toastify';
 
-import { ReactHooksWrapper, setHook, getHook } from 'react-hooks-outside/lib';
+import { ReactHooksWrapper, setHook } from 'react-hooks-outside/lib';
 
 import { useDispatch, useSelector, useStore } from 'react-redux';
 import { useLogout, useRedirect } from 'react-admin';
 
-import registerServiceWorker from './app/api/registerServiceWorker';
-import EventMonitor from './app/components/common/event/EventMonitor';
-import { getAuthData } from './app/store/authcontext';
-import localStorageService from './app/services/localStorage.service';
 
 const store =createAdminStore({
         authProvider,
@@ -55,10 +51,9 @@ ReactDOM.render(
           </Switch>
         </AppLoader>
       </BrowserRouter>
-      <EventMonitor />
     </Provider>
     <ToastContainer />
   </React.StrictMode>,
   document.getElementById('root')
 );
-registerServiceWorker();
+

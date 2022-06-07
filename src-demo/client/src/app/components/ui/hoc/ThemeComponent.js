@@ -17,7 +17,6 @@ const styles = {
 function HigherOrderComponent({children, classes}) {
   const arrayChildren = React.Children.toArray(children.props.children);
   const newChildren = React.Children.map(arrayChildren, (child) => {
-    console.log(child.props)
     return child;
   });
 

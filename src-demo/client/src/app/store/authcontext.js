@@ -115,7 +115,6 @@ export const setAuthFromDB = (payload) => async (dispatch) => {
     if (data.user) dispatch(setAuthUser(data.user));
     if (data.token) dispatch(setAuthToken(data.token));
     dispatch(authSetAuthDBStatus(true));
-    console.log('data from server success');
   } catch (error) {
     dispatch(authSetError(error));
   }

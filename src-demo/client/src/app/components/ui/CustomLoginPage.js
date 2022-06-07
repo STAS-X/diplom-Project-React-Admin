@@ -16,9 +16,7 @@ import {
 } from '../../store/authcontext';
 //import { GoogleAuthProvider } from "firebase/auth";
 
-const dispatch = getHook('dispatch');
-
-const SignInScreen = ({ setData, ...props }) => {
+const SignInScreen = () => {
   // Configure FirebaseUI.
   const uiConfig = {
     // Popup signin flow rather than redirect flow.
@@ -29,31 +27,9 @@ const SignInScreen = ({ setData, ...props }) => {
     signInOptions: [
       {
         provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
-        signInMethod: firebase.auth.EmailAuthProvider.EMAIL_LINK_SIGN_IN_METHOD,
+        signInMethod:
+          firebase.auth.EmailAuthProvider.EMAIL_PASSWORD_SIGN_IN_METHOD,
         //   firebase.auth.EmailAuthProvider.EMAIL_PASSWORD_SIGN_IN_METHOD,
-        emailLinkSignIn: function () {
-          return {
-            // Additional state showPromo=1234 can be retrieved from URL on
-            // sign-in completion in signInSuccess callback by checking
-            // window.location.href.
-            url: 'https://www.example.com/completeSignIn',
-            // Custom FDL domain.
-            dynamicLinkDomain: 'example.page.link',
-            // Always true for email link sign-in.
-            handleCodeInApp: true,
-            // Whether to handle link in iOS app if installed.
-            iOS: {
-              bundleId: 'com.example.ios',
-            },
-            // Whether to handle link in Android app if opened in an Android
-            // device.
-            android: {
-              packageName: 'com.example.android',
-              installApp: true,
-              minimumVersion: '12',
-            },
-          };
-        },
       },
       {
         provider: firebase.auth.GoogleAuthProvider.PROVIDER_ID,
@@ -66,7 +42,6 @@ const SignInScreen = ({ setData, ...props }) => {
       signInWithPopup: () =>
         (auth, provider)
           .then((result) => {
-            console.log('sign popup');
             // This gives you a Google Access Token. You can use it to access the Google API.
             const credential = GoogleAuthProvider.credentialFromResult(result);
 
@@ -90,11 +65,6 @@ const SignInScreen = ({ setData, ...props }) => {
         // The signed-in user info.
         const user = result.user;
 
-        //dispatch(setAuthUser(localStorageService.getUser()));
-        //dispatch(setAuthToken(localStorageService.getToken()));
-        //handleUserTokenRefresh(user);
-
-        // console.log(firebase.auth().currentUser, 'LoggedSuccess');
         // This gives you a Facebook Access Token. You can use it to access the Facebook API.
       },
       // signInFailure callback must be provided to handle merge conflicts which
@@ -107,7 +77,6 @@ const SignInScreen = ({ setData, ...props }) => {
         }
         // The credential the user tried to sign in with.
         var cred = error.credential;
-        console.log(cred);
         // Copy data from anonymous user to permanent user and delete anonymous
         // user.
         // ...
@@ -119,6 +88,7 @@ const SignInScreen = ({ setData, ...props }) => {
 
   const handleUserTokenRefresh = async (user) => {
     //const logout = getHook('logout');
+    const dispatch = getHook('dispatch');
 
     const {
       displayName: name,
@@ -136,7 +106,6 @@ const SignInScreen = ({ setData, ...props }) => {
       uid,
     };
     const authToken = { ...user._delegate.stsTokenManager };
-    console.log(authToken, 'authtoken taked');
     // Проверяем на существование зарегистрированного пользователя и если он есть в firebase.auth() загружаем его в БД
     const { data } = await authService.register({
       user: authUser,
@@ -150,14 +119,12 @@ const SignInScreen = ({ setData, ...props }) => {
   };
 
   const [isSignedIn, setIsSignedIn] = useState(false); // Local signed-in state.
-  const dispatch = getHook('dispatch');
 
   useEffect(() => {
     const unregisterAuthObserver = firebase
       .auth()
       .onAuthStateChanged((user) => {
 
-        console.log('login dialog started');
         if (user) {
           setIsSignedIn(!!user);
           handleUserTokenRefresh(user);
@@ -190,11 +157,11 @@ const SignInScreen = ({ setData, ...props }) => {
   }
 };
 
-const CustomLoginForm = ({ ...props }) => {
+const CustomLoginForm = () => {
   React.useEffect(()=>{
-    //document.querySelector('.MuiButton-label').textContent='ВОЙТИ';
-    document.querySelector('#username-label').textContent='Пользователь';
-    document.querySelector('#password-label').textContent='Пароль';
+    //document.querySelector('.MuiButton-label').insertAdjacentHTML('afterend', '<span>Войти</span>');
+    document.querySelector('#username-label').innerHTML = 'Пользователь';
+    document.querySelector('#password-label').innerHTML = 'Пароль';
 
     return ()=>{}
   },[])
@@ -204,16 +171,16 @@ const CustomLoginForm = ({ ...props }) => {
         <p>Пользователь: test@example.com</p>
         <p>Пароль: password</p>
       </div>
-      <LoginForm {...props} />
-      <SignInScreen {...props} />
+      <LoginForm />
+      <SignInScreen />
       <ForgotPasswordButton />
     </div>
   );
 };
 
-const CustomLoginPage = ({ ...props }) => (
-  <Login {...props}>
-    <CustomLoginForm {...props} />
+const CustomLoginPage = () => (
+  <Login>
+    <CustomLoginForm />
   </Login>
 );
 

@@ -1,5 +1,4 @@
 const express = require('express');
-// const User = require('../models/User');
 const auth = require('../middleware/auth.middlware');
 const { generateUserData } = require('../utils/helpers');
 // Add validation to create and update USER resource

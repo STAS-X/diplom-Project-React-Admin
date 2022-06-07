@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useSelector } from 'react-redux';
 import { green, blue, red } from '@mui/material/colors';
 import {
@@ -7,14 +7,12 @@ import {
   TextField,
   ShowButton,
   EditButton,
-  DeleteButton,
   RichTextField,
   FunctionField,
   FilterButton,
   FilterForm,
   DeleteWithConfirmButton,
   CreateButton,
-  Pagination,
   DateField,
   TextInput,
   SortButton,
@@ -37,43 +35,19 @@ import {
   CircularProgress,
   Button,
 } from '@mui/material';
-import {
-  getRandomInt,
-  dateWithMonths,
-  dateWithDays,
-} from '../../../utils/getRandomInt';
+import { dateWithMonths } from '../../../utils/getRandomInt';
 import Loading from '../../ui/loading/loading';
 import DeleteIcon from '@material-ui/icons/DeleteRounded';
 import UnSelectedIcon from '@material-ui/icons/UndoRounded';
-import CreateCommentIcon from '@material-ui/icons/AddCommentRounded';
-import EditCommentIcon from '@material-ui/icons/EditAttributesRounded';
-import MailIcon from '@material-ui/icons/MailOutline';
 import CommentAsideCard from '../../common/cards/comment.card.aside';
-import CommentCard from '../../common/cards/comment.card.list';
 import ComponentEmptyPage from '../../ui/empty/emptyPage';
 import CommentDraggableComponent from '../../common/drag_drop/comment.card.draggable';
-import { dateFormatter } from '../../../utils/displayDate';
 import { getAuthData } from '../../../store/authcontext';
 import {
   getAppColorized,
   getAppLoading,
   getAppCarding,
 } from '../../../store/appcontext';
-import ContentFilter from '@material-ui/icons/FilterList';
-
-// const PostFilterButton = (props) => {
-//   const { showFilter } = useListContext();
-//   return (
-//     <Button {...props}
-//       size="small"
-//       color="primary"
-//       onClick={() => showFilter('main')}
-//       startIcon={<ContentFilter />}
-//     >
-//       Filter
-//     </Button>
-//   );
-// };
 
 const QuickFilter = ({ label }) => {
   const translate = useTranslate();
@@ -158,10 +132,11 @@ const DeleteTasksButton = ({ commentsIds, setCommentsIds }) => {
       mutationMode: 'undoable',
       onSuccess: () => {
         notify(`Комментарии ${commentsIds} удаляются`, { undoable: true });
+        setCommentsIds([]);
         refresh();
       },
       onError: (error) =>
-        notify('Ошибка при удалении комментария!', { type: 'warning' }),
+        notify('Ошибка при уалении комментаиев!', { type: 'warning' }),
     }
   );
   const handleClick = () => {
@@ -216,13 +191,18 @@ const UnselectButton = ({ setCommentsIds }) => {
 
 const CommentToolbar = ({ commentsIds, setCommentsIds, userId }) => {
   const filters = commentFilters(userId);
+  const { hideFilter, displayedFilters } = useListContext();
+
+  const handleHideAllFilters = (e) => {
+    Object.keys(displayedFilters).forEach((filter) => hideFilter(filter));
+  };
 
   return (
     <Stack direction="row" justifyContent="space-between">
       <FilterForm filters={filters} />
       <div>
         <SortButton fields={['title', 'createdAt']} />
-        <FilterButton filters={filters} />
+        <FilterButton filters={filters} onClick={handleHideAllFilters} />
         <CreateButton />
         <DeleteTasksButton
           commentsIds={commentsIds}
@@ -281,7 +261,7 @@ const CommentTaskField = ({ taskId }) => {
   if (!loaded && loading) return <CircularProgress color="inherit" />;
 
   if (error) {
-    return <p style={{color:"red"}}>Задача удалена</p>;
+    return <p style={{ color: 'red' }}>Задача удалена</p>;
   }
   return (
     task && (
@@ -306,12 +286,26 @@ export const CommentList = (props) => {
   const isAppLoading = useSelector(getAppLoading());
   const isCarding = useSelector(getAppCarding());
 
-  const { loadedOnce: isLoading, total, ids } = useSelector(
-    (state) => state.admin.resources.comments.list
-  );
+  const {
+    loadedOnce: isLoading,
+    total,
+    displayedFilters,
+    ids,
+  } = useSelector((state) => state.admin.resources.comments.list);
   const comments = useSelector((state) => state.admin.resources.comments.data);
 
   //const [isTransition, setTransition]=React.useState(false);
+  const isZeroElements = total === 0 && displayedFilters;
+
+  React.useEffect(() => {
+    setCommentsIds(
+      localStorage.getItem('commentsIds')
+        ? JSON.parse(localStorage.getItem('commentsIds'))
+        : []
+    );
+
+    return () => {};
+  }, []);
 
   return (
     <>
@@ -324,15 +318,20 @@ export const CommentList = (props) => {
             !isLoading && isAppLoading ? { height: '0px', display: 'none' } : {}
           }
         >
-          {total>0 && !(!isLoading && isAppLoading) && (
+          {!isZeroElements && !(!isLoading && isAppLoading) && (
             <CommentToolbar
               commentsIds={commentsIds}
               setCommentsIds={setCommentsIds}
               userId={authUser.uid}
             />
           )}
-          {total===0 && !(!isLoading && isAppLoading) && (<ComponentEmptyPage path={'comments'} title={'Комментарии отсутствуют. Хотите создать новый?'} />)}
-          {!isCarding && !(!isLoading && isAppLoading) && (
+          {isZeroElements && !(!isLoading && isAppLoading) && (
+            <ComponentEmptyPage
+              path={'comments'}
+              title={'Комментарии отсутствуют. Хотите создать новый?'}
+            />
+          )}
+          {!isCarding && !isZeroElements && !(!isLoading && isAppLoading) && (
             <MyDatagrid
               isAppColorized={isAppColorized}
               authId={authUser.uid}
@@ -342,13 +341,13 @@ export const CommentList = (props) => {
               setHoverId={setHoverId}
             />
           )}
-          {total>0 && isCarding && !(!isLoading && isAppLoading) && (
+          {isCarding && !isZeroElements && !(!isLoading && isAppLoading) && (
             <CommentDraggableComponent
               list={ids.map((id) => comments[id])}
               ids={ids}
             />
           )}
-          {total>0 && !(!isLoading && isAppLoading) && (
+          {!isZeroElements && !(!isLoading && isAppLoading) && (
             <CommentPagination isAppColorized={isAppColorized} />
           )}
         </ListBase>
@@ -430,21 +429,6 @@ const MyDatagrid = ({
     }
   };
 
-  React.useEffect(() => {
-    setCommentsIds(commentsIds);
-    localStorage.setItem('commentsIds', JSON.stringify(commentsIds));
-    return () => {};
-  }, [commentsIds]);
-  React.useEffect(() => {
-    setCommentsIds(
-      localStorage.getItem('commentsIds')
-        ? JSON.parse(localStorage.getItem('commentsIds'))
-        : []
-    );
-
-    return () => {};
-  }, []);
-
   return (
     <Stack>
       <Datagrid
@@ -472,12 +456,15 @@ const MyDatagrid = ({
               checked={commentsIds.findIndex((id) => id === record.id) > -1}
               onClick={(event) => {
                 if (commentsIds.findIndex((id) => id === record.id) < 0) {
-                  commentsIds.push(record.id);
+                  setCommentsIds((prevComments) => {
+                    prevComments.push(record.id);
+                    return prevComments;
+                  });
                 } else {
-                  const index = commentsIds.findIndex((id) => id === record.id);
-                  delete commentsIds[index];
+                  setCommentsIds((prevComments) =>
+                    prevComments.filter((id) => id !== record.id)
+                  );
                 }
-                setCommentsIds(commentsIds.filter((task) => task !== null));
               }}
             />
           )}

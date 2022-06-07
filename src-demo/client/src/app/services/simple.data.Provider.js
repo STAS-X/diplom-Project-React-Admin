@@ -90,7 +90,6 @@ export default {
         if (status < 200 || status >= 300) {
           return { status, message: (error && error.message) || statusText };
         }
-        console.log(data, 'get data from server');
         return {
           ...data,
         };
@@ -99,7 +98,6 @@ export default {
   },
 
   getOne: (resource, params) => {
-    console.log(params, 'params id for getOne');
     const url = `${apiUrl}/${resource}/${params.id}`;
 
     return httpClient
@@ -121,7 +119,6 @@ export default {
 
   getMany: (resource, params) => {
     const url = `${apiUrl}/${resource}`;
-    console.log(resource, params, 'getMany');
     return httpClient
       .get(url, {
         headers: {
@@ -147,7 +144,6 @@ export default {
     const {filter} = params;
     const filters = convertInputFilters(filter);
 
-    console.log(filters, resource, params, 'getManyRefs');
     return httpClient
       .get(url, {
         headers: {
@@ -170,7 +166,6 @@ export default {
 
   update: (resource, params) => {
     const url = `${apiUrl}/${resource}/${params.id}`;
-    console.log(params, 'data of item to update');
     return httpClient
       .put(url, {
         data: JSON.stringify(params),
@@ -197,7 +192,7 @@ export default {
       params.ids = {ids:params.ids, data: params.data}
       delete params.data;
     }
-    console.log(params, 'updatemany params')
+
     return httpClient
       .put(url, {
         data: JSON.stringify(params),
@@ -247,7 +242,7 @@ export default {
 
   delete: (resource, params) => {
     const url = `${apiUrl}/${resource}/${params.id}`;
-    console.log(params, 'params data to delete method');
+
     return httpClient
       .delete(url, {
         headers: {
@@ -269,7 +264,7 @@ export default {
     const query = {
       filter: JSON.stringify({ id: params.ids }),
     };
-    console.log(params, 'ids to delete');
+
     const url = `${apiUrl}/${resource}?${stringify(query)}`;
 
     return httpClient
