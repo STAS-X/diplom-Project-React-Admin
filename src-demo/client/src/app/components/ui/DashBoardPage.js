@@ -15,7 +15,7 @@ import {
   ExpandMore as ExpandMoreIcon,
 } from '@material-ui/icons';
 import { red } from '@mui/material/colors';
-import { getRandomInt } from '../../utils/getRandomInt'
+import { getRandomInt } from '../../utils/getRandomInt';
 
 const ExpandMore = styled((props) => {
   const { expand, ...other } = props;
@@ -35,6 +35,18 @@ const DashBordPage = () => {
     setExpanded(!expanded);
   };
 
+  const handleChangeBackground = () => {
+    
+    const deltaX = getRandomInt(-10,10);
+    document.documentElement.style.setProperty('--bg-width', `${deltaX === 0? 50:deltaX*50}px`);
+    const deltaY = getRandomInt(-10, 10);
+    document.documentElement.style.setProperty(
+      '--bg-height',
+      `${deltaY === 0 ? 50 : deltaY * 50}px`
+    );    
+
+  };
+
   return (
     <Card>
       <CardHeader
@@ -44,21 +56,14 @@ const DashBordPage = () => {
           </Avatar>
         }
         action={
-          <IconButton aria-label="settings" 
-                      onClick={() => {
-                        if (getComputedStyle(document.documentElement).getPropertyValue("--bg-direction") === "bg-scrolling-reverse") {
-                            document.documentElement.style.setProperty("--bg-direction", "bg-scrolling")
-                        } else {
-                            document.documentElement.style.setProperty("--bg-direction", "bg-scrolling-reverse");
-                        }
-                      }}>
+          <IconButton aria-label="settings" onClick={handleChangeBackground}>
             <MoreIcon />
           </IconButton>
         }
         title="Главная страница проекта"
         subheader="проект написан в 2022 году"
       />
-      <CardContent style={{position:'relative'}}>
+      <CardContent style={{ position: 'relative' }}>
         <ExpandMore
           expand={expanded}
           onClick={handleExpandClick}
@@ -116,13 +121,16 @@ const DashBordPage = () => {
             sx={{ ml: 1.6, mt: 1 }}
           >
             Желаю приятного проведения времени и получения положительных эмоций!{' '}
-            <br />Цитата дня:{' '}
+            <br />
+            Цитата дня:{' '}
             <cite>- Никогда не ошибается тот, кто ничего не делает.</cite>
             <sup> Теодор Рузвельт.</sup>
           </Typography>
         </Collapse>
-        <Box className="animationMainBack" sx={{mx: 1, my:1, height:'75vh'}}>
-        </Box>
+        <Box
+          className="animationMainBack"
+          sx={{ mx: 1, my: 1, height: '75vh' }}
+        ></Box>
       </CardContent>
     </Card>
   );

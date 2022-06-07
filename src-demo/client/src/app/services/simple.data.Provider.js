@@ -1,7 +1,7 @@
-import { fetchUtils } from 'react-admin';
 import { stringify } from 'query-string';
 import appConfig from '../config/default.json';
 import { getHook } from 'react-hooks-outside';
+import history from '../utils/history';
 import httpService from './http.service';
 
 const apiUrl = appConfig.isFireBase
@@ -228,9 +228,20 @@ export default {
         if (status < 200 || status >= 300) {
           return { status, message: (error && error.message) || statusText };
         }
-        return {
-          data,
-        };
+
+        const handleCheckForNewCommentForTask = (args) => {
+          const [ id, resource ] = args;
+          const {pathname}=history.location;
+          if (resource === 'tasks' && pathname === '/comments/create') {
+            localStorage.setItem('currentTaskId', id);
+          }
+        }
+
+        setTimeout((...args)=> handleCheckForNewCommentForTask(args),0, data.id, resource);
+        
+          return {
+            data,
+          };
       });
   },
 

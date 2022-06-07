@@ -153,20 +153,22 @@ const DeleteTasksButton = ({ commentsIds, setCommentsIds }) => {
   const notify = useNotify();
   const [deleteMany, { loading, loaded, data, total, error }] = useDeleteMany(
     'comments',
-    commentsIds
+    commentsIds,
+    {
+      mutationMode: 'undoable',
+      onSuccess: () => {
+        notify(`Комментарии ${commentsIds} удаляются`, { undoable: true });
+        refresh();
+      },
+      onError: (error) =>
+        notify('Ошибка при удалении комментария!', { type: 'warning' }),
+    }
   );
   const handleClick = () => {
     if (confirm('Уверены, что хотите удалить задачи?')) {
       deleteMany();
     }
   };
-
-  if (loaded && !error && data?.length > 0) {
-    //console.info(isLoading, total, error,'test for delete many');
-    notify(`Задачи ${commentsIds} удалены успешно`, { type: 'info' });
-    setCommentsIds([]);
-    refresh();
-  }
 
   return (
     <Button
@@ -463,7 +465,6 @@ const MyDatagrid = ({
         }}
       >
         <FunctionField
-          {...props}
           label="Выбрать"
           render={(record) => (
             <Checkbox

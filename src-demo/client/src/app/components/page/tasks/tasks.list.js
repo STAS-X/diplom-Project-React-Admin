@@ -101,8 +101,11 @@ const TaskPagination = ({ isAppColorized, ...props }) => {
       'thead.MuiTableHead-root tr.MuiTableRow-root th'
     );
     if (rowHead) {
-        const ths=Array.from(rowHead);
-        ths.forEach(th => th.style.backgroundColor = isAppColorized ? blue[100] : 'whitesmoke');
+      const ths = Array.from(rowHead);
+      ths.forEach(
+        (th) =>
+          (th.style.backgroundColor = isAppColorized ? blue[100] : 'whitesmoke')
+      );
     }
     const paging = document.querySelector('div.MuiTablePagination-toolbar');
     if (paging) {
@@ -190,20 +193,22 @@ const DeleteTasksButton = ({ tasksIds, setTasksIds }) => {
   const notify = useNotify();
   const [deleteMany, { loading, loaded, data, total, error }] = useDeleteMany(
     'tasks',
-    tasksIds
+    tasksIds,
+    {
+      mutationMode: 'undoable',
+      onSuccess: () => {
+        notify(`Задачи ${tasksIds} удаляются`, { undoable: true });
+        refresh();
+      },
+      onError: (error) =>
+        notify('Ошибка при удалении задачи!', { type: 'warning' }),
+    }
   );
   const handleClick = () => {
     if (confirm('Уверены, что хотите удалить задачи?')) {
       deleteMany();
     }
   };
-
-  if (loaded && !error && data?.length > 0) {
-    //console.info(isLoading, total, error,'test for delete many');
-    notify(`Задачи ${tasksIds} удалены успешно`);
-    setTasksIds([]);
-    refresh();
-  }
 
   return (
     <Button
@@ -369,7 +374,7 @@ const ExecutorsField = ({ executors: ids, ...data }) => {
   if (loading || !loaded) return <CircularProgress color="inherit" />;
 
   if (error) {
-    return <p style={{color:"red"}}>Ошибка при загрузке</p>;
+    return <p style={{ color: 'red' }}>Ошибка при загрузке</p>;
   }
   const result = getTaskResult(data);
 
@@ -443,15 +448,29 @@ export const TaskList = (props) => {
   const [tasksIds, setTasksIds] = React.useState([]);
   const [hoverId, setHoverId] = React.useState();
 
-  const { loadedOnce: isLoading, total, ids } = useSelector(
-    (state) => state.admin.resources.tasks.list
-  );
+  const {
+    loadedOnce: isLoading,
+    total,
+    ids,
+  } = useSelector((state) => state.admin.resources.tasks.list);
   const tasks = useSelector((state) => state.admin.resources.tasks.data);
 
   const { user: authUser } = useSelector(getAuthData());
   const isAppColorized = useSelector(getAppColorized());
   const isAppLoading = useSelector(getAppLoading());
   const isCarding = useSelector(getAppCarding());
+
+  React.useEffect(() => {
+    setTasksIds(
+      localStorage.getItem('tasksIds')
+        ? JSON.parse(localStorage.getItem('tasksIds'))
+        : []
+    );
+
+    return () => {
+      localStorage.setItem('tasksIds', JSON.stringify([]));
+    };
+  }, []);
 
   return (
     <>
@@ -464,16 +483,21 @@ export const TaskList = (props) => {
             !isLoading && isAppLoading ? { height: '0px', display: 'none' } : {}
           }
         >
-          {total>0 && !(!isLoading && isAppLoading) && (
+          {total > 0 && !(!isLoading && isAppLoading) && (
             <TaskToolbar
               tasksIds={tasksIds}
               setTasksIds={setTasksIds}
               userId={authUser.uid}
             />
           )}
-          {total===0 && !(!isLoading && isAppLoading) && (<ComponentEmptyPage path={'tasks'} title={'Задачи отсутствуют. Хотите создать новую?'} />)}
+          {total === 0 && !(!isLoading && isAppLoading) && (
+            <ComponentEmptyPage
+              path={'tasks'}
+              title={'Задачи отсутствуют. Хотите создать новую?'}
+            />
+          )}
 
-          {!isCarding && total>0 && !(!isLoading && isAppLoading) && (
+          {!isCarding && total > 0 && !(!isLoading && isAppLoading) && (
             <MyDatagrid
               isAppColorized={isAppColorized}
               authId={authUser.uid}
@@ -483,14 +507,14 @@ export const TaskList = (props) => {
               setHoverId={setHoverId}
             />
           )}
-          {isCarding && total>0 && !(!isLoading && isAppLoading) && (
+          {isCarding && total > 0 && !(!isLoading && isAppLoading) && (
             <TaskDraggableComponent
               list={ids.map((id) => tasks[id])}
               ids={ids}
             />
           )}
 
-          {total>0 && !(!isLoading && isAppLoading) && (
+          {total > 0 && !(!isLoading && isAppLoading) && (
             <TaskPagination isAppColorized={isAppColorized} />
           )}
         </ListBase>
@@ -574,7 +598,6 @@ const MyDatagrid = ({
   ...props
 }) => {
   const taskRef = React.useRef();
-  const { loaded, loading } = useListContext();
 
   const taskRowStyle = (id) => (record, index) => {
     return {
@@ -606,19 +629,9 @@ const MyDatagrid = ({
   };
 
   React.useEffect(() => {
-    setTasksIds(tasksIds);
     localStorage.setItem('tasksIds', JSON.stringify(tasksIds));
     return () => {};
   }, [tasksIds]);
-  React.useEffect(() => {
-    setTasksIds(
-      localStorage.getItem('tasksIds')
-        ? JSON.parse(localStorage.getItem('tasksIds'))
-        : []
-    );
-
-    return () => {};
-  }, []);
 
   return (
     <Stack>
@@ -640,23 +653,27 @@ const MyDatagrid = ({
         }}
       >
         <FunctionField
-          {...props}
           label="Выбрать"
-          render={(record) => (
-            <Checkbox
-              disabled={record.userId !== authId}
-              checked={tasksIds.findIndex((id) => id === record.id) > -1}
-              onClick={(event) => {
-                if (tasksIds.findIndex((id) => id === record.id) < 0) {
-                  tasksIds.push(record.id);
-                } else {
-                  const index = tasksIds.findIndex((id) => id === record.id);
-                  delete tasksIds[index];
-                }
-                setTasksIds(tasksIds.filter((task) => task !== null));
-              }}
-            />
-          )}
+          render={(record) => {
+            return (
+              <Checkbox
+                disabled={record.userId !== authId}
+                checked={tasksIds.findIndex((id) => id === record.id) > -1}
+                onClick={(event) => {
+                  if (tasksIds.findIndex((id) => id === record.id) > -1) {
+                    setTasksIds((prevTasksIds) =>
+                      prevTasksIds.filter((id) => id !== record.id)
+                    );
+                  } else {
+                    setTasksIds((prevTasksIds) => {
+                      prevTasksIds.push(record.id);
+                      return prevTasksIds;
+                    });
+                  }
+                }}
+              />
+            );
+          }}
         />
 
         <TextField

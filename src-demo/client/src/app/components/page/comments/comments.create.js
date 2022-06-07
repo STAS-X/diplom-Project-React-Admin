@@ -2,34 +2,17 @@ import * as React from 'react';
 import { useSelector } from 'react-redux';
 import {
   Create,
-  DateInput,
   SaveButton,
-  EditButton,
   SimpleForm,
   TextInput,
   SelectInput,
-  NumberInput,
-  ReferenceInput,
+   ReferenceInput,
   FunctionField,
-  FileInput,
-  FileField,
-  ArrayInput,
-  SimpleFormIterator,
-  useNotify,
   useRedirect,
-  useRecordContext,
   FormDataConsumer,
   Toolbar,
-  useEditContext,
-  useEditController,
-  Title,
-  useRefresh,
   required,
   minLength,
-  maxLength,
-  minValue,
-  maxValue,
-  number,
   useGetList,
 } from 'react-admin';
 import RichTextInput from 'ra-input-rich-text';
@@ -37,23 +20,11 @@ import { makeStyles } from '@material-ui/core/styles';
 //import { useFormState } from 'react-hook-form';
 import { green, blue, red } from '@mui/material/colors';
 import {
-  Stack,
-  Box,
-  Typography,
-  Avatar,
   Chip,
   CircularProgress,
 } from '@mui/material';
 import TaskEditIcon from '@material-ui/icons/EditRounded';
-import DeleteIcon from '@material-ui/icons/DeleteRounded';
-import TaskProgressBar from '../../common/progressbar/task.progress';
-import TagsField from '../../common/fields/task.tags';
 import { getAuthData } from '../../../store/authcontext';
-import {
-  getRandomInt,
-  dateWithDays,
-  normalise,
-} from '../../../utils/getRandomInt';
 import { dateFormatter } from '../../../utils/displayDate';
 
 const getTaskResult = (data) => {
@@ -160,9 +131,10 @@ const validateDescription = [
 
 export const CommentCreate = (props) => {
   const { user: authUser } = useSelector(getAuthData());
+  const [killTimer, setKillTimer] = React.useState(0);
 
-  const [currentTaskId] = React.useState(localStorage.getItem('currentTaskId'));
-    
+  const [currentTaskId, setCurrentTaskId] = React.useState(null);
+
   const {
     data: comments,
     total,
@@ -188,10 +160,22 @@ export const CommentCreate = (props) => {
     refresh();
   };
 
-  React.useEffect(() => {
+  const handleUpdateTaskId = () => {
+    if (localStorage.getItem('currentTaskId') && !currentTaskId) {
+      setCurrentTaskId(localStorage.getItem('currentTaskId'));
+      console.log(
+        localStorage.getItem('currentTaskId'),
+        'currentTaskId changed'
+      );
+      localStorage.removeItem('currentTaskId');
+      clearTimeout(killTimer);
+    }
+  };
 
+  React.useEffect(() => {
+    setKillTimer(setInterval(() => handleUpdateTaskId(), 1000));
     return () => {
-      if (localStorage.getItem('currentTaskId')) localStorage.removeItem('currentTaskId');
+      clearTimeout(killTimer);
     };
   }, []);
 
@@ -200,6 +184,7 @@ export const CommentCreate = (props) => {
       {authUser && (
         <Create
           {...props}
+          key={currentTaskId}
           transform={transform}
           onFailure={handleFailure}
           hasShow={false}
@@ -213,9 +198,7 @@ export const CommentCreate = (props) => {
             <FunctionField
               addLabel={false}
               render={(record) => (
-                <h3 className="titleDialog">
-                  Создание комментария {' '}
-                </h3>
+                <h3 className="titleDialog">Создание комментария </h3>
               )}
             />
 
@@ -226,32 +209,30 @@ export const CommentCreate = (props) => {
               defaultValue={'Текст описания к задаче'}
             />
 
-            <>
-              {loaded && (
-                <ReferenceInput
-                  label="Комментируемая задача"
-                  defaultValue={currentTaskId}
-                  allowEmpty={false}
-                  source="taskId"
-                  reference="tasks"
-                  filter={total > 0 ? { id_nar: Object.keys(comments) } : {}}
-                  validate={required(
-                    total > 0
-                      ? 'Задача не должна иметь комментариев пользователя'
-                      : 'Необходимо выбрать задачу  для комментария'
+            {loaded && (
+              <ReferenceInput
+                label="Комментируемая задача"
+                defaultValue={currentTaskId}
+                allowEmpty={false}
+                source="taskId"
+                reference="tasks"
+                filter={total > 0 ? { id_nar: Object.keys(comments) } : {}}
+                validate={required(
+                  total > 0
+                    ? 'Задача не должна иметь комментариев пользователя'
+                    : 'Необходимо выбрать задачу  для комментария'
+                )}
+                sort={{ field: 'title', order: 'ASC' }}
+              >
+                <SelectInput
+                  optionText={(choise) => (
+                    <TaskForCommentSelector {...choise} />
                   )}
-                  sort={{ field: 'title', order: 'ASC' }}
-                >
-                  <SelectInput
-                    optionText={(choise) => (
-                      <TaskForCommentSelector {...choise} />
-                    )}
-                    helperText={'Выберите задачу для комментирования'}
-                  />
-                </ReferenceInput>
-              )}
-              {!loaded && <CircularProgress color="inherit" />}
-            </>
+                  helperText={'Выберите задачу для комментирования'}
+                />
+              </ReferenceInput>
+            )}
+            {!loaded && <CircularProgress color="inherit" />}
 
             <RichTextInput
               label="Комментарий"

@@ -14,8 +14,8 @@ function CircularProgressWithLabel(props) {
     <Box sx={{ position: 'relative', display: 'inline-flex' }}>
       <CircularProgress
         variant="determinate"
+        value={value}
         color={value < 30 ? 'error' : value < 70 ? 'secondary' : 'success'}
-        {...props}
       />
       <Box
         sx={{
@@ -62,13 +62,13 @@ const CircularDynamic = (props) => {
 const CircularDeterminate = (props) => {
     const { value } = props;
   return (
-    <Box sx={{ position: 'relative', display: 'inline-flex'  }}>
+    <Box sx={{ position: 'relative', display: 'inline-flex' }}>
       <CircularProgress
         variant="determinate"
+        value={value}
         color={value < 30 ? 'error' : value < 70 ? 'secondary' : 'success'}
-        {...props}
       />
-            <Box
+      <Box
         sx={{
           top: 0,
           left: 0,
@@ -83,7 +83,7 @@ const CircularDeterminate = (props) => {
         <Typography variant="caption" component="div" color="text.secondary">
           {`${value}%`}
         </Typography>
-        </Box>
+      </Box>
     </Box>
   );
 };
@@ -93,7 +93,7 @@ const LinearDeterminate = (props) => {
   return (
 <Box sx={{ display: 'flex', alignItems: 'center' }}>
       <Box sx={{ width: '100%', mr: 1 }}>
-        <LinearProgress variant="determinate" {...props} />
+        <LinearProgress variant="determinate" value={value} />
       </Box>
       <Box sx={{ minWidth: 10 }}>
         <Typography variant="body2" color="text.secondary">{`${value}%`}</Typography>
@@ -102,14 +102,14 @@ const LinearDeterminate = (props) => {
   );
 };
 
-const TaskProgressBar = ({id, value, ...props}) => {
+const TaskProgressBar = ({id, value}) => {
   switch (id) {
     case 1:
-      return <CircularDeterminate value={value>100?100:value} {...props} />;
+      return <CircularDeterminate value={value>100?100:value}  />;
     case 2:
-      return <LinearDeterminate value={value>100?100:value} {...props}/>;
+      return <LinearDeterminate value={value>100?100:value} />;
     default:
-      return <CircularDynamic value={value>100?100:value} {...props} />;
+      return <CircularDynamic value={value>100?100:value} />;
   }
 };
 

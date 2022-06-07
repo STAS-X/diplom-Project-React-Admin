@@ -4,14 +4,9 @@ import { useState } from 'react';
 import { setAppError } from '../store/appcontext';
 import {
   setAuthRefreshToken,
-  getAuthToken,
-  getAuthData,
 } from '../store/authcontext';
 import configFile from '../config/default.json';
-import { useSelector } from 'react-redux';
-import authService from './auth.service';
 import { getHook } from 'react-hooks-outside';
-import localStorageService from './localStorage.service';
 import { firebaseApp, authProvider } from '../dbapp/initFireBase';
 
 const http = axios.create({

@@ -17,20 +17,15 @@ import {
   setAuthDBStatus,
   setAuthError,
   setAuthLogout,
-  setAuthLoggedStatus,
   getLoggedStatus,
-  setAuthUser,
-  setAuthToken,
 } from '../../../store/authcontext';
 import {
   getAppError,
   setAppError,
   setAppTitle,
 } from '../../../store/appcontext';
-import authService from '../../../services/auth.service';
 import { getHook } from 'react-hooks-outside';
 import history from '../../../../app/utils/history';
-import { useLogout, useRedirect, useAuthProvider } from 'react-admin';
 
 const AppLoader = ({ children, ...props }) => {
   //const authProvider = useAuthProvider();

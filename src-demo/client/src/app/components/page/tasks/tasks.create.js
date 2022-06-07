@@ -149,7 +149,7 @@ const CustomToolbar = (props) => {
             label={'Создать и комментировать'}
             onClick={() => {
               localStorage.setItem('currentTaskId', record.id);
-              handleSubmit('/comments/create');
+              handleSubmit();
             }}
             redirect={'/comments/create'}
             handleSubmitWithRedirect={handleSubmitWithRedirect}
@@ -189,8 +189,7 @@ const validateExecDate = (value, allValues) => {
 export const TaskCreate = (props) => {
   //const notify = useNotify();
   //const refresh = useRefresh();
-  const { id: taskId } = props;
-
+ 
   const { user: authUser } = useSelector(getAuthData());
 
   const transform = (data) => {

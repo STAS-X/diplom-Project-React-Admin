@@ -192,7 +192,7 @@ const SignInScreen = ({ setData, ...props }) => {
 
 const CustomLoginForm = ({ ...props }) => {
   React.useEffect(()=>{
-    document.querySelector('.MuiButton-label').textContent='ВОЙТИ';
+    //document.querySelector('.MuiButton-label').textContent='ВОЙТИ';
     document.querySelector('#username-label').textContent='Пользователь';
     document.querySelector('#password-label').textContent='Пароль';
 
@@ -200,7 +200,7 @@ const CustomLoginForm = ({ ...props }) => {
   },[])
   return (
     <div>
-      <div style={{ fontFamily: 'monospace', marginLeft: '15px' }}>
+      <div style={{ fontFamily: 'monospace', marginLeft: '15px', display:'grid' }}>
         <p>Пользователь: test@example.com</p>
         <p>Пароль: password</p>
       </div>

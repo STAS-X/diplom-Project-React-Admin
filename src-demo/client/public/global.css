@@ -100,7 +100,7 @@ div.Toastify__toast {
   /* img size is 50x50 */
   background: var(--bg-url);
   
-  animation: var(--bg-direction) linear 1s infinite; /* Safari 4+ */
+  animation: var(--bg-direction) linear 2.5s infinite; /* Safari 4+ */
   &:before {
     content: '"INFINITY"';
     font-size: 8rem;

@@ -170,10 +170,9 @@ export const CommentEdit = (props) => {
   } = useGetOne('comments', props.id);
 
   const { user: authUser } = useSelector(getAuthData());
+  const [killTimer, setKillTimer] = React.useState(0);
 
-  const [currentTaskId] = React.useState(() =>
-    localStorage.getItem('currentTaskId')
-  );
+  const [currentTaskId, setCurrentTaskId] = React.useState(null);
 
   const {
     data: comments,
@@ -207,17 +206,27 @@ export const CommentEdit = (props) => {
     return () => {};
   }, [isLoaded]);
 
-  React.useEffect(() => {
+  const handleUpdateTaskId = () => {
+    if (localStorage.getItem('currentTaskId') && !currentTaskId) {
+      setCurrentTaskId(localStorage.getItem('currentTaskId'));
+      localStorage.removeItem('currentTaskId');
+      clearTimeout(killTimer);
+    }
+  };
 
+  React.useEffect(() => {
+    setKillTimer(setInterval(() => handleUpdateTaskId(), 1000));
     return () => {
-      if (localStorage.getItem('currentTaskId')) localStorage.removeItem('currentTaskId');
+      clearTimeout(killTimer);
     };
   }, []);
+
 
   return (
     <>
       <Edit
         {...props}
+        key={currentTaskId}
         mutationMode="undoable"
         transform={transform}
         onFailure={handleFailure}
