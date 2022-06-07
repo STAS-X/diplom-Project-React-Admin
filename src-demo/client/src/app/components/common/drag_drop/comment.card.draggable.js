@@ -65,14 +65,18 @@ const CommentDragStack = React.memo(function CommentDragStack({ comments }) {
 
 const CommentDraggableComponent = ({ list: comments, ids }) => {
   const [state, setState] = useState(null);
-  const [rowCards, setRowCards] = useState(4);
+  const [rowCards, setRowCards] = useState(
+    document.getElementById('main-content')
+      ? Math.floor(document.getElementById('main-content').clientWidth / 400)
+      : 4
+  );
   const commentsByRows = {};
 
   React.useEffect(() => {
     //if (!state) {
     setRowCards((prev) =>
       document.getElementById('main-content')
-        ? Math.floor(document.getElementById('main-content').clientWidth / 350)
+        ? Math.floor(document.getElementById('main-content').clientWidth / 400)
         : prev
     );
 

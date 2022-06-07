@@ -428,10 +428,7 @@ export const TaskList = (props) => {
   const {
     loadedOnce: isLoading,
     total,
-<<<<<<< HEAD
-=======
     displayedFilters,
->>>>>>> b845dfc8cb12d8ddb2e95020001afb6967fd150e
     ids,
   } = useSelector((state) => state.admin.resources.tasks.list);
   const tasks = useSelector((state) => state.admin.resources.tasks.data);
@@ -450,8 +447,7 @@ export const TaskList = (props) => {
         : []
     );
 
-    return () => {
-    };
+    return () => {};
   }, []);
 
   return (
@@ -524,7 +520,6 @@ const ControlButtons = ({ record, authId }) => {
     { field: 'id', order: 'ASC' },
     { taskId: record.id }
   );
-  if (loaded) console.info(comment, 'comments from hook');
 
   return (
     <FunctionField
@@ -631,28 +626,6 @@ const MyDatagrid = ({
       >
         <FunctionField
           label="Выбрать"
-<<<<<<< HEAD
-          render={(record) => {
-            return (
-              <Checkbox
-                disabled={record.userId !== authId}
-                checked={tasksIds.findIndex((id) => id === record.id) > -1}
-                onClick={(event) => {
-                  if (tasksIds.findIndex((id) => id === record.id) > -1) {
-                    setTasksIds((prevTasksIds) =>
-                      prevTasksIds.filter((id) => id !== record.id)
-                    );
-                  } else {
-                    setTasksIds((prevTasksIds) => {
-                      prevTasksIds.push(record.id);
-                      return prevTasksIds;
-                    });
-                  }
-                }}
-              />
-            );
-          }}
-=======
           render={(record) => (
             <Checkbox
               disabled={record.userId !== authId}
@@ -671,7 +644,6 @@ const MyDatagrid = ({
               }}
             />
           )}
->>>>>>> b845dfc8cb12d8ddb2e95020001afb6967fd150e
         />
 
         <TextField

@@ -33,21 +33,6 @@ const move = (source, destination, droppableSource, droppableDestination, rowCar
   return result;
 };
 
-//const grid=8;
-
-// const getItemStyle = (isDragging, draggableStyle) => ({
-//   // some basic styles to make the items look a bit nicer
-//   userSelect: 'none',
-//   padding: grid * 2,
-//   margin: `0 0 ${grid}px 0`,
-
-//   // change background colour if dragging
-//   ...(isDragging? {background: 'black'}:{}),
-
-//   // styles we need to apply on draggables
-//   ...draggableStyle
-// });
-
 function UserDragCard({ data, index }) {
   return (
     <Draggable draggableId={data.id} index={index}>
@@ -74,14 +59,18 @@ const UserDragStack = React.memo(function UserDragStack({ users }) {
 
 const UserDraggableComponent = ({ list: users, ids }) => {
   const [state, setState] = useState(null);
-  const [rowCards, setRowCards] = useState(4);
+  const [rowCards, setRowCards] = useState(
+    document.getElementById('main-content')
+      ? Math.floor(document.getElementById('main-content').clientWidth / 400)
+      : 4
+  );
   const usersByRows = {};
 
   React.useEffect(() => {
     //if (!state) {
     setRowCards((prev) =>
       document.getElementById('main-content')
-        ? Math.floor(document.getElementById('main-content').clientWidth / 350)
+        ? Math.floor(document.getElementById('main-content').clientWidth / 400)
         : prev
     );
 

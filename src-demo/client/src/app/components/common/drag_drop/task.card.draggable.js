@@ -14,7 +14,13 @@ const reorder = (list, startIndex, endIndex) => {
 /**
  * Moves an item from one list to another list.
  */
-const move = (source, destination, droppableSource, droppableDestination, rowCards) => {
+const move = (
+  source,
+  destination,
+  droppableSource,
+  droppableDestination,
+  rowCards
+) => {
   const sourceClone = Array.from(source);
   const destClone = Array.from(destination);
   let visaVersa = [];
@@ -59,14 +65,18 @@ const TaskDragStack = React.memo(function TaskDragStack({ tasks }) {
 
 const TaskDraggableComponent = ({ list: tasks, ids }) => {
   const [state, setState] = useState(null);
-  const [rowCards, setRowCards] = useState(4);
+  const [rowCards, setRowCards] = useState(
+    document.getElementById('main-content')
+      ? Math.floor(document.getElementById('main-content').clientWidth / 400)
+      : 4
+  );
   const tasksByRows = {};
 
   React.useEffect(() => {
     //if (!state) {
     setRowCards((prev) =>
       document.getElementById('main-content')
-        ? Math.floor(document.getElementById('main-content').clientWidth / 350)
+        ? Math.floor(document.getElementById('main-content').clientWidth / 400)
         : prev
     );
 

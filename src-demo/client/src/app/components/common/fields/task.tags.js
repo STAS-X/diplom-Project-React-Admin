@@ -40,8 +40,8 @@ const TagsField = ({keywords}) => {
         <Stack direction="row" display="inline-grid" >
             <SelectArrayInput label="Тэги задачи" optionValue="name" choices={choices} onChange={({target})=>setCount(Array.isArray(target.value)?target.value.length:0)} optionText={(choise) => <TagChip tag={choise} count={count}/>} source="keywords" />
             <Stack direction="row" display="inline-flex" justifyContent="space-around" >
-                <Button startIcon={<AddIcon/>} sx={{width: '40%', mb: 3}} variant="contained" onClick={()=> setOpen(true)}>Добавить</Button>
-                <Button startIcon={<DeleteIcon/>} disabled={!(choices.length>inputKeys)} sx={{width: '40%', mb: 3}} variant="contained" onClick={()=>setChoices(prevChoices => { const newChoices=prevChoices.length>0?prevChoices.slice(0,inputKeys):prevChoices;
+                <Button startIcon={<AddIcon/>} sx={{width: '45%', mb: 3}} variant="contained" onClick={()=> setOpen(true)}>Добавить</Button>
+                <Button startIcon={<DeleteIcon/>} disabled={!(choices.length>inputKeys)} sx={{width: '45%', mb: 3}} variant="contained" onClick={()=>setChoices(prevChoices => { const newChoices=prevChoices.length>0?prevChoices.slice(0,inputKeys):prevChoices;
                                                                                                                                         return newChoices})}>Удалить</Button>
             </Stack>
             <CreateNewTagDialog open={open} setOpen={setOpen} setChoices={setChoices} />
