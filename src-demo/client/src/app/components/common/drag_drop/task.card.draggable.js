@@ -74,12 +74,6 @@ const TaskDraggableComponent = ({ list: tasks, ids }) => {
 
   React.useEffect(() => {
     //if (!state) {
-    setRowCards((prev) =>
-      document.getElementById('main-content')
-        ? Math.floor(document.getElementById('main-content').clientWidth / 400)
-        : prev
-    );
-
     for (let num = 0; num + 1 <= Math.ceil(tasks.length / rowCards); num++) {
       tasksByRows[`draglist${num + 1}`] = tasks.slice(
         num * rowCards,
@@ -90,6 +84,16 @@ const TaskDraggableComponent = ({ list: tasks, ids }) => {
     //}
     return () => {};
   }, [ids]);
+
+  React.useEffect(() => {
+    setRowCards((prev) =>
+      document.getElementById('main-content')
+        ? Math.floor(document.getElementById('main-content').clientWidth / 400)
+        : prev
+    );
+
+    return () => {};
+  }, []);
 
   function onDragEnd(result) {
     const { source, destination } = result;

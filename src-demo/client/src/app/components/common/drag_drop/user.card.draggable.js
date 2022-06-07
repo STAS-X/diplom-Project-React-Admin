@@ -14,7 +14,13 @@ const reorder = (list, startIndex, endIndex) => {
 /**
  * Moves an item from one list to another list.
  */
-const move = (source, destination, droppableSource, droppableDestination, rowCards) => {
+const move = (
+  source,
+  destination,
+  droppableSource,
+  droppableDestination,
+  rowCards
+) => {
   const sourceClone = Array.from(source);
   const destClone = Array.from(destination);
   let visaVersa = [];
@@ -68,12 +74,6 @@ const UserDraggableComponent = ({ list: users, ids }) => {
 
   React.useEffect(() => {
     //if (!state) {
-    setRowCards((prev) =>
-      document.getElementById('main-content')
-        ? Math.floor(document.getElementById('main-content').clientWidth / 400)
-        : prev
-    );
-
     for (let num = 0; num + 1 <= Math.ceil(users.length / rowCards); num++) {
       usersByRows[`draglist${num + 1}`] = users.slice(
         num * rowCards,
@@ -84,6 +84,16 @@ const UserDraggableComponent = ({ list: users, ids }) => {
     //}
     return () => {};
   }, [ids]);
+
+  React.useEffect(() => {
+    setRowCards((prev) =>
+      document.getElementById('main-content')
+        ? Math.floor(document.getElementById('main-content').clientWidth / 400)
+        : prev
+    );
+
+    return () => {};
+  }, []);
 
   function onDragEnd(result) {
     const { source, destination } = result;
