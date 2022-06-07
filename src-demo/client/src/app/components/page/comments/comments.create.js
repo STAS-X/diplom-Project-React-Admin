@@ -95,7 +95,6 @@ const CustomToolbar = ({ authId, ...props }) => {
     >
       <SaveButton
         label="Сохранить"
-        key={1}
         onClick={() => {
           handleSubmit();
         }}
@@ -131,8 +130,6 @@ const validateDescription = [
 
 export const CommentCreate = (props) => {
   const { user: authUser } = useSelector(getAuthData());
-  const [killTimer, setKillTimer] = React.useState(0);
-
   const [currentTaskId, setCurrentTaskId] = React.useState(null);
 
   const {
@@ -162,19 +159,20 @@ export const CommentCreate = (props) => {
   const handleUpdateTaskId = () => {
     if (localStorage.getItem('currentTaskId') && !currentTaskId) {
       setCurrentTaskId(localStorage.getItem('currentTaskId'));
-      console.log(
-        localStorage.getItem('currentTaskId'),
-        'currentTaskId changed'
-      );
-      localStorage.removeItem('currentTaskId');
-      clearTimeout(killTimer);
+      setTimeout(()=>localStorage.removeItem('currentTaskId'),100);
+      clearTimeout(window.commetToTaskIdTimeout);
+      window.commetToTaskIdTimeout=0;
     }
   };
 
   React.useEffect(() => {
-    setKillTimer(setInterval(() => handleUpdateTaskId(), 1000));
+    if (window.commetToTaskIdTimeout>0) clearTimeout(window.commetToTaskIdTimeout);
+      window.commetToTaskIdTimeout = setInterval(
+        () => handleUpdateTaskId(),
+        1000
+      );
     return () => {
-      clearTimeout(killTimer);
+      clearTimeout(window.commetToTaskIdTimeout);
     };
   }, []);
 
@@ -224,10 +222,10 @@ export const CommentCreate = (props) => {
                 sort={{ field: 'title', order: 'ASC' }}
               >
                 <SelectInput
+                  helperText={'Выберите задачу для комментирования'}
                   optionText={(choise) => (
                     <TaskForCommentSelector {...choise} />
                   )}
-                  helperText={'Выберите задачу для комментирования'}
                 />
               </ReferenceInput>
             )}

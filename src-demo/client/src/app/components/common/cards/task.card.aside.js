@@ -24,19 +24,18 @@ import {
 import TaskProgressBar from '../../common/progressbar/task.progress';
 import { getAuthData } from '../../../store/authcontext';
 import { getAppColorized } from '../../../store/appcontext';
-import { dateFormatter } from '../../../utils/displayDate';
-import { getRandomInt } from '../../../utils/getRandomInt';
 
-const useStyles = (isCurrentUser, isColorized, loaded) =>
+const useStyles = (isCurrentUser, isColorized, loading) =>
   makeStyles({
     root: {
       right: 0,
       transition: '300ms ease-out',
-      width: loaded ? 380 : 0,
       height: 'min-content',
       zIndex: 1,
       //maxWidth: '200px',
-      opacity: loaded ? 1 : 0,
+      ...(loading
+        ? { transform: 'translateX(-100%)', opacity: 0 }
+        : { opacity: 1 }),
       marginRight: '2em',
       marginTop: '3em',
       position: 'absolute',
@@ -78,7 +77,7 @@ function TaskCardCreator({ task }) {
   const classes = useStyles(
     user ? authUser.uid === user.id : false,
     colorized,
-    !userLoading
+    userLoading
   )();
 
   return (

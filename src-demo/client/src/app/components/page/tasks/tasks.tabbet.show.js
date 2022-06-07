@@ -162,7 +162,7 @@ const MyCommentDataGrid = ({taskId, ...props}) => {
                 label=""
                 render={(record) => {
                 if (record.id === authUser.uid)
-                    return <EditButton basePath="/comments" label="" record={record} />;
+                    return <EditButton label="" record={record} />;
                 }}
             />
           </Datagrid>

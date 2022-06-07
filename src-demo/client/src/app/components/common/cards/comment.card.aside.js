@@ -12,6 +12,7 @@ import {
 import { useSelector } from 'react-redux';
 import {
   SimpleShowLayout,
+  RichTextField,
   TextField,
   DateField,
   useGetOne,
@@ -19,19 +20,21 @@ import {
 import { getAppColorized } from '../../../store/appcontext';
 import { getAuthData } from '../../../store/authcontext';
 
-const useStyles = (isCurrentUser, isColorized, loaded) =>
+const useStyles = (isCurrentUser, isColorized, loading) =>
   makeStyles({
     root: {
+      width: 340,
       right: 0,
-      width: loaded === true ? 340 : 0,
       height: 'min-content',
       transition: '300ms ease-out',
       zIndex: 1,
       //maxWidth: '200px',
-      opacity: loaded === true ? 1 : 0,
       marginRight: '2em',
       marginTop: '3em',
       position: 'absolute',
+      ...(loading
+        ? { transform: 'translateX(-100%)', opacity: 0 }
+        : { opacity: 1 }),
       backgroundColor: isColorized
         ? emphasize(isCurrentUser ? green[100] : red[100], 0.05)
         : 'whitesmoke',
@@ -66,13 +69,12 @@ function CommentCardCreator({ comment }) {
   const {
     data: task,
     loading: taskLoading,
-    loaded: taskLoaded,
   } = useGetOne('tasks', comment.taskId);
 
   const classes = useStyles(
     user ? authUser.uid === user.id : false,
     colorized,
-    !userLoading
+    userLoading && taskLoading
   )();
 
   return (

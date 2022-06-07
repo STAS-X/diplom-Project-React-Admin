@@ -92,7 +92,7 @@ const CommentPagination = ({ isAppColorized, ...props }) => {
     <RaPagination
       {...props}
       rowsPerPageOptions={[10, 15, 20]}
-      ActionsComponent={RaPaginationActions}
+      ActionsComponent={PaginationActions}
     />
   );
 };
@@ -357,7 +357,7 @@ export const CommentList = (props) => {
   );
 };
 
-const ControlButtons = ({ record, authId }) => {
+const ControlButtons = ({ authId }) => {
   return (
     <FunctionField
       label=""
@@ -366,10 +366,10 @@ const ControlButtons = ({ record, authId }) => {
 
         return (
           <Box sx={{ position: 'relative', display: 'inline-flex' }}>
-            <ShowButton basePath="/comments" label="" record={record} />
+            <ShowButton label="" record={record} />
             {record.userId === authId && (
               <>
-                <EditButton basePath="/comments" label="" record={record} />
+                <EditButton label="" record={record} />
                 <DeleteWithConfirmButton
                   record={record}
                   label=""

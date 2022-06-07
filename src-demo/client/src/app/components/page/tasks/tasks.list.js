@@ -94,7 +94,7 @@ const TaskPagination = ({ isAppColorized, ...props }) => {
     <RaPagination
       {...props}
       rowsPerPageOptions={[10, 15, 20]}
-      ActionsComponent={RaPaginationActions}
+      ActionsComponent={PaginationActions}
     />
   );
 };
@@ -508,7 +508,7 @@ const ProgressBarField = (id, progress) => (
   </Box>
 );
 
-const ControlButtons = ({ record, authId }) => {
+const ControlButtons = ({ record, authId, ...props }) => {
   const {
     data: comment,
     loading,
@@ -529,7 +529,7 @@ const ControlButtons = ({ record, authId }) => {
 
         return (
           <Box sx={{ position: 'relative', display: 'inline-flex' }}>
-            <ShowButton basePath="/tasks" label="" record={record} />
+            <ShowButton label="" record={record} />
             {loading && !loaded && <CircularProgress color="inherit" />}
             {loaded && Object.keys(comment).length > 0 && (
               <EditButton
@@ -544,11 +544,13 @@ const ControlButtons = ({ record, authId }) => {
                 basePath="/comments"
                 icon={<CreateCommentIcon />}
                 label=""
+                onClick={() => localStorage.setItem('currentTaskId', record.id)}
+                redirect={'/comments/create'}
               />
             )}
             {record.userId === authId && (
               <>
-                <EditButton basePath="/tasks" label="" record={record} />
+                <EditButton label="" record={record} />
                 <DeleteWithConfirmButton
                   record={record}
                   label=""

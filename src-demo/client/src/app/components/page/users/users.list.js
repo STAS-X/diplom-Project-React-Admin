@@ -75,7 +75,7 @@ const UserPagination = ({ isAppColorized, ...props }) => {
     <RaPagination
       {...props}
       rowsPerPageOptions={[10, 15, 20]}
-      ActionsComponent={RaPaginationActions}
+      ActionsComponent={PaginationActions}
     />
   );
 };

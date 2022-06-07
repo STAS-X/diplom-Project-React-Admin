@@ -1,25 +1,20 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import { emphasize } from '@material-ui/core/styles/colorManipulator';
-import { green, blue, red } from '@material-ui/core/colors';
+import { green, red } from '@material-ui/core/colors';
 import { useSelector } from 'react-redux';
 import {
   Grid,
-  Box,
   Button,
-  Divider,
   Card,
-  CardMedia,
   CardContent,
   Typography,
-  CircularProgress,
 } from '@material-ui/core';
 import { Stack } from '@mui/material';
 import {
   SimpleShowLayout,
   TextField,
   DateField,
-  FunctionField,
   RichTextField,
   ShowButton,
   EditButton,
@@ -27,12 +22,9 @@ import {
   useNotify,
   useGetOne,
   useDelete,
-  useGetList,
 } from 'react-admin';
 import { getAuthData } from '../../../store/authcontext';
 import { getAppColorized } from '../../../store/appcontext';
-import { dateFormatter } from '../../../utils/displayDate';
-import { getRandomInt } from '../../../utils/getRandomInt';
 import DeleteIcon from '@material-ui/icons/DeleteRounded';
 
 const useStyles = (isCurrentUser, isColorized, isTaskLoaded, isDragging) =>

@@ -140,8 +140,6 @@ export const CommentEdit = (props) => {
   } = useGetOne('comments', props.id);
 
   const { user: authUser } = useSelector(getAuthData());
-  const [killTimer, setKillTimer] = React.useState(0);
-
   const [currentTaskId, setCurrentTaskId] = React.useState(null);
 
   const {
@@ -178,15 +176,21 @@ export const CommentEdit = (props) => {
   const handleUpdateTaskId = () => {
     if (localStorage.getItem('currentTaskId') && !currentTaskId) {
       setCurrentTaskId(localStorage.getItem('currentTaskId'));
-      localStorage.removeItem('currentTaskId');
-      clearTimeout(killTimer);
+      setTimeout(() => localStorage.removeItem('currentTaskId'), 100);
+      clearTimeout(window.commetToTaskIdTimeout);
+      window.commetToTaskIdTimeout = 0;
     }
   };
 
   React.useEffect(() => {
-    setKillTimer(setInterval(() => handleUpdateTaskId(), 1000));
+    if (window.commetToTaskIdTimeout > 0)
+      clearTimeout(window.commetToTaskIdTimeout);
+    window.commetToTaskIdTimeout = setInterval(
+      () => handleUpdateTaskId(),
+      1000
+    );
     return () => {
-      clearTimeout(killTimer);
+      clearTimeout(window.commetToTaskIdTimeout);
     };
   }, []);
 
