@@ -634,12 +634,12 @@ const MyDatagrid = ({
               checked={tasksIds.findIndex((id) => id === record.id) > -1}
               onClick={(event) => {
                 if (tasksIds.findIndex((id) => id === record.id) < 0) {
-                  setCommentsIds((prevTasks) => {
+                  setTasksIds((prevTasks) => {
                     prevTasks.push(record.id);
                     return prevTasks;
                   });
                 } else {
-                  setCommentsIds((prevTasks) =>
+                  setTasksIds((prevTasks) =>
                     prevTasks.filter((id) => id !== record.id)
                   );
                 }

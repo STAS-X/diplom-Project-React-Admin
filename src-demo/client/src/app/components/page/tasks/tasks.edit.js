@@ -26,7 +26,7 @@ import {
   number,
 } from 'react-admin';
 import { Stack, Box, Typography, Avatar, Chip } from '@mui/material';
-import AddCommentIcon from '@material-ui/icons/AddCommentRounded';
+import {AddCommentRounded as AddCommentIcon, Add} from '@material-ui/icons';
 import TaskProgressBar from '../../common/progressbar/task.progress';
 import TagsField from '../../common/fields/task.tags';
 import { getAuthData } from '../../../store/authcontext';
@@ -130,19 +130,18 @@ const CustomToolbar = ({ authId, ...props }) => {
       }}
     >
       <SaveButton
-        label="Сохранить"
-        key={1}
-        onClick={() => {
+        label={'Сохранить'}
+        icon={<Add />}
+        onSucces={() => {
           handleSubmit();
           //setOnSuccess(handleSuccess);
         }}
-        redirect={'show'}
+        redirect={`/tasks/${record.id}/show`}
         disabled={isInvalid || pristine}
       />
       <FormDataConsumer>
         {({ formData, ...rest }) => (
           <SaveButton
-            disabled={!loaded}
             label="Перейти к комментарию"
             icon={<AddCommentIcon />}
             onClick={() => {
@@ -151,7 +150,7 @@ const CustomToolbar = ({ authId, ...props }) => {
               //setOnSuccess(handleSuccess);
             }}
             redirect={
-              (loaded && total === 1)
+              loaded && total === 1
                 ? `/comments/${comments[Object.keys(comments)[0]].id}`
                 : '/comments/create'
             }

@@ -8,7 +8,6 @@ import {
   SelectInput,
   ReferenceInput,
   FunctionField,
-  useRedirect,
   FormDataConsumer,
   Toolbar,
   required,
@@ -16,14 +15,10 @@ import {
   useGetList,
 } from 'react-admin';
 import RichTextInput from 'ra-input-rich-text';
-import { makeStyles } from '@material-ui/core/styles';
 //import { useFormState } from 'react-hook-form';
 import { green, blue, red } from '@mui/material/colors';
-import {
-  Chip,
-  CircularProgress,
-} from '@mui/material';
-import TaskEditIcon from '@material-ui/icons/EditRounded';
+import { Chip, CircularProgress } from '@mui/material';
+import { EditRounded as TaskEditIcon, Add } from '@material-ui/icons';
 import { getAuthData } from '../../../store/authcontext';
 import { dateFormatter } from '../../../utils/displayDate';
 
@@ -74,7 +69,6 @@ const TaskForCommentSelector = (data) => {
 };
 
 const CustomToolbar = ({ authId, ...props }) => {
-  const redirect = useRedirect();
 
   const {
     invalid: isInvalid,
@@ -94,8 +88,9 @@ const CustomToolbar = ({ authId, ...props }) => {
       }}
     >
       <SaveButton
-        label="Сохранить"
-        onClick={() => {
+        label={'Создать'}
+        icon={<Add />}
+        onSuccess={() => {
           handleSubmit();
         }}
         redirect={'show'}
@@ -159,18 +154,19 @@ export const CommentCreate = (props) => {
   const handleUpdateTaskId = () => {
     if (localStorage.getItem('currentTaskId') && !currentTaskId) {
       setCurrentTaskId(localStorage.getItem('currentTaskId'));
-      setTimeout(()=>localStorage.removeItem('currentTaskId'),100);
+      setTimeout(() => localStorage.removeItem('currentTaskId'), 100);
       clearTimeout(window.commetToTaskIdTimeout);
-      window.commetToTaskIdTimeout=0;
+      window.commetToTaskIdTimeout = 0;
     }
   };
 
   React.useEffect(() => {
-    if (window.commetToTaskIdTimeout>0) clearTimeout(window.commetToTaskIdTimeout);
-      window.commetToTaskIdTimeout = setInterval(
-        () => handleUpdateTaskId(),
-        1000
-      );
+    if (window.commetToTaskIdTimeout > 0)
+      clearTimeout(window.commetToTaskIdTimeout);
+    window.commetToTaskIdTimeout = setInterval(
+      () => handleUpdateTaskId(),
+      1000
+    );
     return () => {
       clearTimeout(window.commetToTaskIdTimeout);
     };

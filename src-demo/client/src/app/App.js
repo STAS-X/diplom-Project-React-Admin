@@ -1,6 +1,5 @@
-import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { Admin, Resource, defaultTheme, useLogout } from 'react-admin';
+import { Admin, Resource, defaultTheme } from 'react-admin';
 
 import UserIcon from '@material-ui/icons/People';
 import CommentIcon from '@material-ui/icons/Comment';
@@ -40,7 +39,8 @@ import NotFound from './components/ui/NotFound';
 const App = (props) => {
   const theme = useSelector(getAppTheme());
   const mainAppPage = useSelector(getAppTitle());
-  const loggedStatus = useSelector(getLoggedStatus());
+  //const loggedStatus = useSelector(getLoggedStatus());
+
 
   const changeTheme = (theme) => {
     if (theme === 'light') {
@@ -53,6 +53,7 @@ const App = (props) => {
           contrastThreshold: 3,
           tonalOffset: 0.2,
         },
+
         typography: {
           // Use the system font instead of the default Roboto font.
           fontFamily: [
@@ -77,30 +78,6 @@ const App = (props) => {
       },
     });
   };
-
-  const switchToAppPage = (currentPage) => {
-    if (!loggedStatus) return '/login';
-    switch (currentPage) {
-      case 'Главная страница':
-        return '/main';
-      case 'Пользователи':
-        return '/users';
-      case 'Задачи':
-        return '/tasks';
-      case 'Комментарии':
-        return '/comments';
-      case 'О проекте':
-        return '/project';          
-      default:
-        return '/main';
-    }
-    //
-  };
-
-  useEffect(() => {
-    props.history.replace(switchToAppPage(mainAppPage));
-    return () => {};
-  }, []);
 
   //const isLogged = useSelector(getLoggedStatus());
 

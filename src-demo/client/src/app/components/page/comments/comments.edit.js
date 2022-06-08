@@ -24,7 +24,7 @@ import { green, blue, red } from '@mui/material/colors';
 import {
   Chip,
 } from '@mui/material';
-import TaskEditIcon from '@material-ui/icons/EditRounded';
+import {EditRounded as TaskEditIcon, Add} from '@material-ui/icons';
 import { getAuthData } from '../../../store/authcontext';
 import { dateFormatter } from '../../../utils/displayDate';
 
@@ -94,12 +94,12 @@ const CustomToolbar = ({ authId, ...props }) => {
       }}
     >
       <SaveButton
-        label="Сохранить"
-        key={1}
-        onClick={() => {
+        label={'Сохранить'}
+        icon={<Add />}
+        onSucces={() => {
           handleSubmit();
         }}
-        redirect={'show'}
+        redirect={`/comments/${record.id}/show`}
         disabled={isInvalid || pristine}
       />
       <FormDataConsumer>

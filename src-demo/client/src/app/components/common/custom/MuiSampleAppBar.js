@@ -142,7 +142,7 @@ const CustomAppBar = (currentPage) => (props) => {
   //   logout();
   // };
   const handleLogout = () => {
-    dispatch(setAuthLogout());
+    dispatch(setAuthLogout());    
     logout();
   };
 

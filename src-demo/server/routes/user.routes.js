@@ -147,7 +147,6 @@ router.put('/:id?', [
   validate(userValidations),
   async (req, res) => {
     try {
-      console.log('update user');
       const dataProvider = app.provider;
       const query = req.body.headers.ProviderRequest;
       const params = JSON.parse(req.body.data);

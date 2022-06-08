@@ -176,7 +176,6 @@ export const UserList = (props) => {
 
 const MyDatagrid = ({ isAppColorized, isCarding, authId, ...props }) => {
   const userRef = React.useRef();
-  const { loaded, loading } = useListContext();
 
   const userRowStyle = (id) => (record, index) => {
     return {

@@ -3,7 +3,6 @@ import { connect, useSelector, useDispatch } from 'react-redux';
 import { Menu, MenuItemLink, getResources } from 'react-admin';
 import DefaultIcon from '@material-ui/icons/ViewList';
 import ProjectIcon from '@material-ui/icons/HelpRounded';
-import { setAppTitle } from '../../../store/appcontext';
 // import LabelIcon from '@material-ui/icons/Label';
 
 const CustomSideBar = ({onMenuClick, ...props}) => {

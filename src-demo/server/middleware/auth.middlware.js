@@ -26,8 +26,7 @@ module.exports = async (req, res, next) => {
       ? req.headers.authorization.split(' ')[1]
       : null;
     const userUid=req.headers.useruid?req.headers.useruid:null
-
-    const isValid = await tokenService.validateAccess(token);
+    const isValid = await tokenService.validateAccess(token, userUid);
 
     if (!isValid) {
       return res.status(401).send({
@@ -37,13 +36,9 @@ module.exports = async (req, res, next) => {
       });
     }
     const firestore = app.firestore;
-
-    console.log(req.body, 'get data from PUT DELETE query');
- 
-
-    const userSnap = await getDoc(doc(firestore, 'auth', 'user'));
+    const userSnap = await getDoc(doc(firestore, 'auth', userUid));
     if (userSnap.exists() > 0) {
-      const user = userSnap.data();
+      const {user} = userSnap.data();
       //req.userId = user.uid;
 
       if (req.method === 'PUT' || req.method === 'DELETE') {

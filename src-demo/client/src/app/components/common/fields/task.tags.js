@@ -24,7 +24,6 @@ import {
   DialogActions,
   DialogContent,
   TextField,
-  CircularProgress,
 } from '@mui/material';
 import AddIcon from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';

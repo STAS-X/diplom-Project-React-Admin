@@ -60,10 +60,12 @@ const authService = {
 
   logout: async () => {
     const token = localStorageService.getToken();
+    const user = localStorageService.getUser();
     return httpAuth
       .delete('signOut/', {
         headers: {
           Authorization: token ? `Bearer ${token.accessToken}` : '',
+          UserUid: `${user.uid}`,
         },
       })
       .then(({ status, statusText, data }) => {

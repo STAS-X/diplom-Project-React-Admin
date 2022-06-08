@@ -12,23 +12,18 @@ import {
   FunctionField,
   SaveButton,
   Toolbar,
-  useNotify,
-  useRedirect,
   ReferenceArrayInput,
   FormDataConsumer,
   required,
   minLength,
-  maxLength,
   minValue,
   maxValue,
   number,
 } from 'react-admin';
-import { Box, Typography, Chip, Stack, Avatar, Button } from '@mui/material';
-import AddCommentIcon from '@material-ui/icons/AddCommentRounded';
-import DeleteIcon from '@material-ui/icons/DeleteRounded';
+import { Box, Typography, Chip, Stack, Avatar } from '@mui/material';
+import {AddCommentRounded as AddCommentIcon, Add} from '@material-ui/icons';
 import TaskProgressBar from '../../common/progressbar/task.progress';
 import TagsField from '../../common/fields/task.tags';
-import { green, blue, red } from '@mui/material/colors';
 import { getAuthData } from '../../../store/authcontext';
 import {
   getRandomInt,
@@ -103,11 +98,10 @@ const ExecutorChipSelector = ({ id, name, data }) => {
 };
 
 const CustomToolbar = (props) => {
-  const notify = useNotify();
-  const redirect = useRedirect();
   //const refresh = useRefresh();
   const {
     invalid: isInvalid,
+    pristine,
     record,
     handleSubmit,
     handleSubmitWithRedirect,
@@ -123,11 +117,13 @@ const CustomToolbar = (props) => {
       }}
     >
       <SaveButton
-        label="Создать"
-        onClick={() => {
+        label={'Создать'}
+        icon={<Add />}
+        onSuccess={() => {
           handleSubmit();
         }}
-        disabled={isInvalid}
+        redirect={'show'}
+        disabled={isInvalid || pristine}
       />
       <FormDataConsumer>
         {({ formData, ...rest }) => (

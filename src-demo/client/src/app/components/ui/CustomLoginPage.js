@@ -1,5 +1,6 @@
 // LoginPage.js
 import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { Redirect } from 'react-router-dom';
 import { Login, LoginForm } from 'react-admin';
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
@@ -7,16 +8,38 @@ import firebase from 'firebase/compat/app';
 import ForgotPasswordButton from './CustomForgotPassword';
 import { getHook } from 'react-hooks-outside';
 import authService from '../../services/auth.service';
-import {nanoid} from 'nanoid';
+import { nanoid } from 'nanoid';
 import {
   setAuthLoggedStatus,
   setAuthDBStatus,
   setAuthUser,
   setAuthToken,
 } from '../../store/authcontext';
+import {useRedirect} from 'react-admin';
+import { getAppTitle } from '../../store/appcontext';
 //import { GoogleAuthProvider } from "firebase/auth";
 
+const switchToAppPage = (currentPage) => {
+  switch (currentPage) {
+    case 'Главная страница':
+      return '/main';
+    case 'Пользователи':
+      return '/users';
+    case 'Задачи':
+      return '/tasks';
+    case 'Комментарии':
+      return '/comments';
+    case 'О проекте':
+      return '/project';
+    default:
+      return '/main';
+  }
+  //
+};
+
 const SignInScreen = () => {
+  const redirect = useRedirect();
+  const mainAppPage = useSelector(getAppTitle());
   // Configure FirebaseUI.
   const uiConfig = {
     // Popup signin flow rather than redirect flow.
@@ -124,7 +147,6 @@ const SignInScreen = () => {
     const unregisterAuthObserver = firebase
       .auth()
       .onAuthStateChanged((user) => {
-
         if (user) {
           setIsSignedIn(!!user);
           handleUserTokenRefresh(user);
@@ -146,28 +168,30 @@ const SignInScreen = () => {
       </div>
     );
   } else {
-    return <Redirect to="/main" />;
-    // return (
-    //   <div style={{ marginLeft: '10px' }}>
-    //     <h4>Добро пожаловать в приложение</h4>
-    //     <p>{firebase.auth().currentUser.displayName}!</p>
-    //     <a onClick={() => firebase.auth().signOut()}>Sign-out</a>
-    //   </div>
-    // );
+
+    return <Redirect to={switchToAppPage(mainAppPage)} />
+
+      // <div style={{ marginLeft: '10px' }}>
+      //   <h4>Добро пожаловать в приложение</h4>
+      //   <p>{firebase.auth().currentUser.displayName}!</p>
+      //   <a onClick={() => firebase.auth().signOut()}>Sign-out</a>
+      // </div>
   }
 };
 
 const CustomLoginForm = () => {
-  React.useEffect(()=>{
+  React.useEffect(() => {
     //document.querySelector('.MuiButton-label').insertAdjacentHTML('afterend', '<span>Войти</span>');
     document.querySelector('#username-label').innerHTML = 'Пользователь';
     document.querySelector('#password-label').innerHTML = 'Пароль';
 
-    return ()=>{}
-  },[])
+    return () => {};
+  }, []);
   return (
     <div>
-      <div style={{ fontFamily: 'monospace', marginLeft: '15px', display:'grid' }}>
+      <div
+        style={{ fontFamily: 'monospace', marginLeft: '15px', display: 'grid' }}
+      >
         <p>Пользователь: test@example.com</p>
         <p>Пароль: password</p>
       </div>

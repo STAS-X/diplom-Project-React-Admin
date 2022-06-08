@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect } from 'react';
 import {
   toastDarkBounce,
   toastErrorBounce,
@@ -6,7 +6,7 @@ import {
 import PropTypes from 'prop-types';
 
 import { useSelector } from 'react-redux';
-
+import { Redirect, useLocation } from 'react-router-dom';
 import localStorageService from '../../../services/localStorage.service';
 import { authProvider, firebaseApp } from '../../../dbapp/initFireBase';
 import {
@@ -25,15 +25,15 @@ import {
   setAppTitle,
 } from '../../../store/appcontext';
 import { getHook } from 'react-hooks-outside';
-import history from '../../../../app/utils/history';
 
 const AppLoader = ({ children }) => {
   //const authProvider = useAuthProvider();
   const dispatch = getHook('dispatch');
+  //const {pathname} = useLocation();
 
   const { user: authUser, token: authToken } = useSelector(getAuthData());
 
-  const pathname = useSelector((state) => state.router.location.pathname);
+  const {pathname} = useSelector((state) => state.router.location);
   const isLoggedStatus = useSelector(getLoggedStatus());
 
   const authDBStatus = useSelector(getAuthDBStatus());
@@ -43,12 +43,19 @@ const AppLoader = ({ children }) => {
   // const memoLogged = useMemo(() => isLoggedIn, [isLoggedIn]);
 
   const handleLogout = () => {
-    authProvider.logout().then(()=>history.push('/login'));
+    authProvider.logout().then(() => (
+      <Redirect
+        to={{
+          pathname: '/login',
+          state: { location },
+        }}
+      />
+    ));
   };
 
   useEffect(() => {
-    dispatch(
-      setAppTitle(
+    if (isLoggedStatus) {
+      const newTitlePage =
         pathname.split('/')[1] === 'users'
           ? 'Пользователи'
           : pathname.split('/')[1] === 'tasks'
@@ -57,9 +64,11 @@ const AppLoader = ({ children }) => {
           ? 'Комментарии'
           : pathname.split('/')[1] === 'main'
           ? 'Главная страница'
-          : 'О проекте'
-      )
-    );
+          : pathname.split('/')[1] === 'project'
+          ? 'О проекте'
+          : '';
+      if (newTitlePage) dispatch(setAppTitle(newTitlePage));
+    }
     return () => {};
   }, [pathname]);
 
