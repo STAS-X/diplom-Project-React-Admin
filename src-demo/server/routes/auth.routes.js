@@ -56,7 +56,7 @@ router.post('/signIn', [
           id: user.uid,
         };
       } else {
-        querySnapshot.forEach( (doc) => {
+        querySnapshot.forEach((doc) => {
           userDB = doc.data();
         });
       }
@@ -98,7 +98,7 @@ router.delete('/signOut', [
           limit(1)
         );
         const querySnapshot = await getDocs(q);
-        querySnapshot.forEach((doc) => {
+        querySnapshot.forEach(async (doc) => {
           await firestore
             .collection('users')
             .doc(doc.id)
