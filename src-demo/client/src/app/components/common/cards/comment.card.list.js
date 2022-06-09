@@ -194,7 +194,7 @@ const CommentCard = ({ record: comment, isDragging }) => {
         )};
       };
 
-      cardAnimate.addEventListener('animationend', handleAnimationEnd, {once:true});
+      cardAnimate.addEventListener('animationend', handleAnimationEnd);
       cardAnimate.addEventListener('mouseenter', handleMouseEnter);
     }
 
