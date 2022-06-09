@@ -15,9 +15,15 @@ import {
   setAuthUser,
   setAuthToken,
 } from '../../store/authcontext';
-import {useRedirect} from 'react-admin';
 import { getAppTitle } from '../../store/appcontext';
-//import { GoogleAuthProvider } from "firebase/auth";
+// import {
+//   getAuth,
+//   signOut,
+//   getRedirectResult,
+//   signInWithRedirect,
+//   GoogleAuthProvider,
+// } from 'firebase/auth';
+
 
 const switchToAppPage = (currentPage) => {
   switch (currentPage) {
@@ -38,15 +44,15 @@ const switchToAppPage = (currentPage) => {
 };
 
 const SignInScreen = () => {
-  const redirect = useRedirect();
   const mainAppPage = useSelector(getAppTitle());
+  //const auth=getAuth();
   // Configure FirebaseUI.
   const uiConfig = {
     // Popup signin flow rather than redirect flow.
     signInFlow: 'popup',
     // Redirect to /signedIn after sign in is successful. Alternatively you can provide a callbacks.signInSuccess function.
-    signInSuccessUrl: '/',
-    // We will display Google and Facebook as auth providers.
+    signInSuccessUrl: '/main',
+    // We will display Google and Email as auth providers.
     signInOptions: [
       {
         provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
@@ -144,6 +150,7 @@ const SignInScreen = () => {
   const [isSignedIn, setIsSignedIn] = useState(false); // Local signed-in state.
 
   useEffect(() => {
+
     const unregisterAuthObserver = firebase
       .auth()
       .onAuthStateChanged((user) => {
@@ -168,14 +175,13 @@ const SignInScreen = () => {
       </div>
     );
   } else {
+    return <Redirect to={switchToAppPage(mainAppPage)} />;
 
-    return <Redirect to={switchToAppPage(mainAppPage)} />
-
-      // <div style={{ marginLeft: '10px' }}>
-      //   <h4>Добро пожаловать в приложение</h4>
-      //   <p>{firebase.auth().currentUser.displayName}!</p>
-      //   <a onClick={() => firebase.auth().signOut()}>Sign-out</a>
-      // </div>
+    // <div style={{ marginLeft: '10px' }}>
+    //   <h4>Добро пожаловать в приложение</h4>
+    //   <p>{firebase.auth().currentUser.displayName}!</p>
+    //   <a onClick={() => firebase.auth().signOut()}>Sign-out</a>
+    // </div>
   }
 };
 

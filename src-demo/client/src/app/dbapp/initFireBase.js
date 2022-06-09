@@ -14,4 +14,5 @@ export const authProvider = FirebaseAuthProvider(appConfig.firebaseConfig, {
   app: firebaseApp,
 });
 
+
 export const dataProvider = simpleDataProvider;

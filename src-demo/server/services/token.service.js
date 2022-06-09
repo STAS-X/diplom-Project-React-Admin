@@ -44,9 +44,10 @@ class TokenService {
 
   async validateRefresh(refreshToken, uid) {
     try {
-      const tokenSnap = await getDoc(doc(this.#firestore, 'auth', uid));
 
-      if (tokenSnap.exists()) {
+      const tokenSnap = doc(this.#firestore, 'auth', uid)?await getDoc(doc(this.#firestore, 'auth', uid)):null;
+
+      if (tokenSnap?.exists()) {
         const { token } = tokenSnap.data();
 
         return (
@@ -63,9 +64,9 @@ class TokenService {
 
   async validateAccess(accessToken, uid) {
     try {
-      const tokenSnap = await getDoc(doc(this.#firestore, 'auth', uid));
+      const tokenSnap = doc(this.#firestore, 'auth', uid)?await getDoc(doc(this.#firestore, 'auth', uid)):null;
 
-      if (tokenSnap.exists()) {
+      if (tokenSnap?.exists()) {
         const { token } = tokenSnap.data();
 
         return (

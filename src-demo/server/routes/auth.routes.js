@@ -89,8 +89,10 @@ router.delete('/signOut', [
 
       const userUid = req.headers.useruid ? req.headers.useruid : null;
 
-      const userAuthSnap = await getDoc(doc(firestore, 'auth', userUid));
-      if (userAuthSnap.exists()) {
+      const userAuthSnap = doc(firestore, 'auth', userUid)
+        ? await getDoc(doc(firestore, 'auth', userUid))
+        : null;
+      if (userAuthSnap?.exists()) {
         // Меняем поле даты последнего входа
         const q = query(
           collection(firestore, 'users'),
@@ -103,11 +105,14 @@ router.delete('/signOut', [
             .collection('users')
             .doc(doc.id)
             .update({ lastLogOut: Date.now() });
-          await firestore.collection('auth').doc(userUid).update({ user: { loggedIn: false } });
+          await firestore
+            .collection('auth')
+            .doc(userUid)
+            .update({ user: { loggedIn: false } });
           await firestore.collection('auth').doc(userUid).delete();
         });
+      } else return res.status(500).send({ signOut: false });
 
-      }
       return res.status(200).send({ signOut: true });
     } catch (error) {
       console.info(error, 'get error from signOut');
@@ -126,10 +131,12 @@ router.get('/authData', [
       const firestore = app.firestore;
 
       const userUid = req.headers.useruid ? req.headers.useruid : null;
-      const userAuthSnap = await getDoc(doc(firestore, 'auth', userUid));
+      const userAuthSnap = doc(firestore, 'auth', userUid)
+        ? await getDoc(doc(firestore, 'auth', userUid))
+        : null;
       let userDB;
 
-      if (!userAuthSnap.exists()) {
+      if (!userAuthSnap?.exists()) {
         return res.status(500).send({
           token: null,
           user: null,
