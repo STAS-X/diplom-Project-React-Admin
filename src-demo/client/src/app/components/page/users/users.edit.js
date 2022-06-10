@@ -259,7 +259,18 @@ export const UserEdit = (props) => {
               parse={dateFormatter}
               //defaultValue={dateFormatter(new Date())}
             />
-            <EmailField label="Логин" source="email" />
+
+            <FunctionField
+              label="Логин"
+              render={(record) => {
+                <EmailField
+                  label="Логин"
+                  source={
+                    record.providerId === 'phone' ? 'phone' : 'email'
+                  }
+                />;
+              }}
+            />
 
             <DateField
               locales="ru-Ru"

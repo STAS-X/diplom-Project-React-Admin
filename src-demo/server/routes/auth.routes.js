@@ -1,10 +1,8 @@
 const express = require('express');
 const { nanoid } = require('nanoid');
-const { body, validationResult } = require('express-validator');
+const { body } = require('express-validator');
 const auth = require('../middleware/auth.middlware');
-const bcrypt = require('bcryptjs');
 const tokenService = require('../services/token.service');
-const { generateUserData } = require('../utils/helpers');
 const { validate } = require('../utils/validations');
 const router = express.Router({ mergeParams: true });
 const app = require('../app.js');
@@ -18,14 +16,21 @@ const {
   getDocs,
   collection,
 } = require('firebase/firestore');
-const jwt = require('jsonwebtoken');
-const config = require('config');
 
 const validations = [
   body('email')
+    .if(body('providerId').not().equals('phone'))
+    .exists()
+    .withMessage('Ошибка валидации: логин (почта) должен быть указан')
     .normalizeEmail()
     .isEmail()
-    .withMessage('Ошибка валидации: значение email некорректно'),
+    .withMessage('Ошибка валидации: логин должен быть задан как EMAIL'),
+  body('phone')
+    .if(body('providerId').equals('phone'))
+    .exists()
+    .withMessage('Ошибка валидации: логин (телефон) должен быть указан')
+    .isMobilePhone()
+    .withMessage('Ошибка валидации: логин должен быть задан как PHONE'),
 ];
 
 router.post('/signIn', [

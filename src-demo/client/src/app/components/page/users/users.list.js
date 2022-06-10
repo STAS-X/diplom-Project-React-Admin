@@ -198,7 +198,23 @@ const MyDatagrid = ({ isAppColorized, isCarding, authId, ...props }) => {
       />
       <TextField label="Имя" source="name" />
       <TextField label="Возраст" source="age" defaultValue={'не указан'} />
-      <EmailField label="Почта" sortable={false} source="email" />
+      <FunctionField
+        label="Логин"
+        render={(record) => {
+          if (record.providerId === 'phone') {
+              return <TextField label="Логин" sortable={false} color="primary" source="phone" />
+          }
+          return (
+            <EmailField
+              label="Логин"
+              sortable={false}
+              color="primary"
+              source="email"
+            />
+          );
+        }}
+      />
+      
       <TextField label="Провайдер входа" sortable={false} source="providerId" />
       <DateField
         label="Дата последнего входа"

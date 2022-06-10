@@ -18,12 +18,7 @@ import {
 import { getAppTitle } from '../../store/appcontext';
 // import {
 //   getAuth,
-//   signOut,
-//   getRedirectResult,
-//   signInWithRedirect,
-//   GoogleAuthProvider,
 // } from 'firebase/auth';
-
 
 const switchToAppPage = (currentPage) => {
   switch (currentPage) {
@@ -46,6 +41,7 @@ const switchToAppPage = (currentPage) => {
 const SignInScreen = () => {
   const mainAppPage = useSelector(getAppTitle());
   //const auth=getAuth();
+
   // Configure FirebaseUI.
   const uiConfig = {
     // Popup signin flow rather than redirect flow.
@@ -61,9 +57,43 @@ const SignInScreen = () => {
         //   firebase.auth.EmailAuthProvider.EMAIL_PASSWORD_SIGN_IN_METHOD,
       },
       {
-        provider: firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-        signInMethod: firebase.auth.GoogleAuthProvider.GOOGLE_SIGN_IN_METHOD,
+        provider: firebase.auth.PhoneAuthProvider.PROVIDER_ID,
+        recaptchaParameters: {
+          type: 'image', // 'audio'
+          size: 'normal', // 'invisible' or 'compact'
+          badge: 'bottomleft', //' bottomright' or 'inline' applies to invisible.
+        },
+        defaultCountry: 'RU', // Set default country to the United Kingdom (+44).
+        // For prefilling the national number, set defaultNationNumber.
+        // This will only be observed if only phone Auth provider is used since
+        // for multiple providers, the NASCAR screen will always render first
+        // with a 'sign in with phone number' button.
+        defaultNationalNumber: '1234567890',
+        // You can also pass the full phone number string instead of the
+        // 'defaultCountry' and 'defaultNationalNumber'. However, in this case,
+        // the first country ID that matches the country code will be used to
+        // populate the country selector. So for countries that share the same
+        // country code, the selected country may not be the expected one.
+        // In that case, pass the 'defaultCountry' instead to ensure the exact
+        // country is selected. The 'defaultCountry' and 'defaultNationaNumber'
+        // will always have higher priority than 'loginHint' which will be ignored
+        // in their favor. In this case, the default country will be 'GB' even
+        // though 'loginHint' specified the country code as '+1'.
+        loginHint: '+7',
       },
+
+      {
+        provider: firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+        customParameters: {
+          // Forces account selection even when one account
+          // is available.
+          prompt: 'select_account',
+        },
+      },
+      // {
+      //   provider: firebase.auth.GithubAuthProvider.PROVIDER_ID,
+      //   signInMethod: firebase.auth.GithubAuthProvider.GITHUB_SIGN_IN_METHOD,
+      // },
     ],
     autoUpgradeAnonymousUsers: true,
     // Optional callbacks in order to get Access Token from Google,Facebook,... etc
@@ -72,7 +102,7 @@ const SignInScreen = () => {
         (auth, provider)
           .then((result) => {
             // This gives you a Google Access Token. You can use it to access the Google API.
-            const credential = GoogleAuthProvider.credentialFromResult(result);
+            const credential = provider.credentialFromResult(result);
 
             const token = credential.accessToken;
             // The signed-in user info.
@@ -86,7 +116,7 @@ const SignInScreen = () => {
             // The email of the user's account used.
             const email = error.email;
             // The AuthCredential type that was used.
-            const credential = GoogleAuthProvider.credentialFromError(error);
+            const credential = provider.credentialFromError(error);
             // ...
           }),
       signInSuccessWithAuthResult: (result) => {
@@ -118,18 +148,21 @@ const SignInScreen = () => {
   const handleUserTokenRefresh = async (user) => {
     //const logout = getHook('logout');
     const dispatch = getHook('dispatch');
+    console.log(user._delegate,'users data');
 
     const {
       displayName: name,
       email,
+      phoneNumber,
       photoURL: url,
       uid,
       providerData: [{ providerId }],
     } = user._delegate;
 
     const authUser = {
-      name: name ? name : email,
-      email,
+      name: name ? name : email ? email : phoneNumber,
+      email: email ? email : '',
+      phone: phoneNumber ? phoneNumber : '',
       url: url ? url : `https://i.pravatar.cc/300?u=${nanoid(10)}`,
       providerId,
       uid,
@@ -150,7 +183,6 @@ const SignInScreen = () => {
   const [isSignedIn, setIsSignedIn] = useState(false); // Local signed-in state.
 
   useEffect(() => {
-
     const unregisterAuthObserver = firebase
       .auth()
       .onAuthStateChanged((user) => {

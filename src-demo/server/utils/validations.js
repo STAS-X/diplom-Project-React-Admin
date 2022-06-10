@@ -4,7 +4,7 @@ const commentValidations = [
   body('description')
     .exists()
     .withMessage('Ошибка валидации: значение Заголовка должно быть указано')
-    .isLength({ min:3, max: 30 })
+    .isLength({ min: 3, max: 30 })
     .withMessage(
       'Ошибка валидации: значение Заголовка должно быть не более 30 символов'
     ),
@@ -42,7 +42,9 @@ const taskValidations = [
     .exists()
     .withMessage('Ошибка валидации: статус задачи должен присутствовать')
     .isBoolean()
-    .withMessage('Ошибка валидации: статус задачи должен иметь булево значение ИСТИНА/ЛОЖЬ'),
+    .withMessage(
+      'Ошибка валидации: статус задачи должен иметь булево значение ИСТИНА/ЛОЖЬ'
+    ),
 ];
 
 const userValidations = [
@@ -60,12 +62,18 @@ const userValidations = [
     .exists()
     .withMessage('Ошибка валидации: значение UID должно присутствовать'),
   body('email')
+    .if(body('providerId').not().equals('phone'))
     .exists()
-    .withMessage('Ошибка валидации: логин должен быть указан')
+    .withMessage('Ошибка валидации: логин (почта) должен быть указан')
     .isEmail()
     .withMessage('Ошибка валидации: логин должен быть задан как EMAIL'),
+  body('phone')
+    .if(body('providerId').equals('phone'))
+    .exists()
+    .withMessage('Ошибка валидации: логин (телефон) должен быть указан')
+    .isMobilePhone()
+    .withMessage('Ошибка валидации: логин должен быть задан как PHONE'),
 ];
-
 
 const validate = (validations) => {
   return async (req, res, next) => {
@@ -73,7 +81,9 @@ const validate = (validations) => {
       body: {
         ...(req.body.data
           ? JSON.parse(req.body.data).data
-          : req.body.user?req.body.user:req.body),
+          : req.body.user
+          ? req.body.user
+          : req.body),
       },
     };
 
@@ -88,10 +98,10 @@ const validate = (validations) => {
     }
 
     res.status(400).send({
-        code: 400,
-        name: 'ValidationError',
-        message: errors.errors[0].msg,
-        errors: errors.array(),
+      code: 400,
+      name: 'ValidationError',
+      message: errors.errors[0].msg,
+      errors: errors.array(),
     });
   };
 };

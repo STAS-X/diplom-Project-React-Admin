@@ -86,5 +86,5 @@ if (process.env.NODE_ENV === 'production') {
 
 app.listen(PORT, () => {
   signWithEmail();
-  console.log(chalk.green(`Server has been starte on ${PORT} port`));
+  console.log(chalk.green(`Server has been started on ${PORT} port`));
 });

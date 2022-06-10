@@ -6,14 +6,11 @@ import { green, blue } from '@mui/material/colors';
 import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
-import MailIcon from '@material-ui/icons/Mail';
 import Box from '@mui/material/Box';
 import Badge from '@mui/material/Badge';
 import Menu from '@mui/material/Menu';
 import MenuIcon from '@material-ui/icons/Menu';
-import Container from '@mui/material/Container';
 import Avatar from '@mui/material/Avatar';
-import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 
@@ -33,16 +30,13 @@ import { useRedirect, useRefresh } from 'react-admin';
 
 import { useLogout, setSidebarVisibility } from 'react-admin';
 import { getHook } from 'react-hooks-outside/lib';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import {
   getAppTheme,
-  getAppTitle,
   setAppTitle,
 } from '../../../store/appcontext';
 import {
   getAuthData,
-  getLoggedStatus,
-  setAuthLoggedStatus,
   setAuthLogout,
 } from '../../../store/authcontext';
 import CustomTitle from './customTitle';
@@ -273,9 +267,9 @@ const CustomAppBar = (currentPage) => (props) => {
               <StyledBadge
                 overlap="circular"
                 anchorOrigin={
-                  authUser?.providerId === 'password'
-                    ? { vertical: 'top', horizontal: 'right' }
-                    : { vertical: 'bottom', horizontal: 'right' }
+                  authUser?.providerId === 'google.com'
+                    ? { vertical: 'bottom', horizontal: 'right' }
+                    : { vertical: 'top', horizontal: 'right' }
                 }
                 variant="dot"
               >

@@ -4,11 +4,8 @@ import {
   TabbedShowLayout,
   Tab,
   TextField,
-  RichTextField,
   DateField,
   EmailField,
-  NumberField,
-  BooleanField,
   ShowButton,
   EditButton,
   FunctionField,
@@ -18,21 +15,18 @@ import {
   useList,
   Pagination,
   Datagrid,
-  ListContextProvider,
   BulkDeleteButton,
   useUpdateMany,
   useRefresh,
   useGetOne,
   useNotify,
   useUnselectAll,
-  useMutation,
   Button,
 } from 'react-admin';
 import { green, blue, red } from '@mui/material/colors';
 import { getAppColorized } from '../../../store/appcontext';
 import {
   CircularProgress,
-  TopToolbar
   
 } from '@mui/material';
 import UserCardExpand from '../../common/cards/user.card.expand';
@@ -252,61 +246,104 @@ export const UserTabbetShow = (props) => {
 
 return (
   <Show {...props} hasEdit={false}>
-    <TabbedShowLayout
-      syncWithLocation={true}
-      variant="scrollable"
-      spacing={2}
-    >
-      <Tab label="Общая информация" icon={<ViewList style={{marginRight : 5}}/>} path="user">
+    <TabbedShowLayout syncWithLocation={true} variant="scrollable" spacing={2}>
+      <Tab
+        label="Общая информация"
+        icon={<ViewList style={{ marginRight: 5 }} />}
+        path="user"
+      >
         <TextField label="Имя пользователя" source="name" />
         <TextField label="Возраст" source="age" />
-        <EmailField label="Почта" source="email" />
+        <FunctionField
+          label="Логин"
+          render={(record) => {
+            <EmailField
+              label="Логин"
+              source={record.providerId === 'phone' ? 'phone' : 'email'}
+            />;
+          }}
+        />
         <DateField label="Создан" source="createdAt" />
         <TextField label="Провайдер авторизации" source="providerId" />
-        <DateField label="Дата предыдущего входа" source="lastLogOut" locales="ru-Ru"
-                   showTime={true} options={{ dateStyle: 'long', timeStyle: 'medium' }}
-                   defaultValue={dateFormatter(Date.now())}  />
+        <DateField
+          label="Дата предыдущего входа"
+          source="lastLogOut"
+          locales="ru-Ru"
+          showTime={true}
+          options={{ dateStyle: 'long', timeStyle: 'medium' }}
+          defaultValue={dateFormatter(Date.now())}
+        />
       </Tab>
-      <Tab label="Профиль" icon={<UserIcon style={{marginRight : 5}}/>} path="card">
-        <UserCardExpand style={{ margin:20}} userId={props.id}/>
+      <Tab
+        label="Профиль"
+        icon={<UserIcon style={{ marginRight: 5 }} />}
+        path="card"
+      >
+        <UserCardExpand style={{ margin: 20 }} userId={props.id} />
       </Tab>
-      <Tab label="Задачи" icon={<TaskIcon style={{marginRight : 5}}/>} path="tasks">
+      <Tab
+        label="Задачи"
+        icon={<TaskIcon style={{ marginRight: 5 }} />}
+        path="tasks"
+      >
         <ReferenceManyField
           sort={{ field: 'createdAt', order: 'ASC' }}
           target="userId"
           perPage={5}
-          filter={{userId: props.id}}
+          filter={{ userId: props.id }}
           reference="tasks"
-          label={`Задачи пользователя ${user?user.name:props.permissions.name}`}
+          label={`Задачи пользователя ${
+            user ? user.name : props.permissions.name
+          }`}
         >
-          <List {...props} 
-            actions={<></>} 
-            perPage={5} 
-            empty={<ComponentEmptyPage path={'tasks'} title={'Задачи отсутствуют'} isAuth={authUser.uid===props.id} />}
-            pagination={<Pagination rowsPerPageOptions={[5, 10, 20]}/>} 
+          <List
+            {...props}
+            actions={<></>}
+            perPage={5}
+            empty={
+              <ComponentEmptyPage
+                path={'tasks'}
+                title={'Задачи отсутствуют'}
+                isAuth={authUser.uid === props.id}
+              />
+            }
+            pagination={<Pagination rowsPerPageOptions={[5, 10, 20]} />}
             bulkActionButtons={<TaskBulkActionButtons />}
-            >
-            <MyTaskDataGrid userId={props.id}/>
-          </List>  
+          >
+            <MyTaskDataGrid userId={props.id} />
+          </List>
         </ReferenceManyField>
       </Tab>
-      <Tab label="Комментарии" icon={<CommentIcon style={{marginRight : 5}}/>} path="comments">
+      <Tab
+        label="Комментарии"
+        icon={<CommentIcon style={{ marginRight: 5 }} />}
+        path="comments"
+      >
         <ReferenceManyField
           sort={{ field: 'createdAt', order: 'ASC' }}
           perPage={5}
-          filter={{userId: props.id}}
+          filter={{ userId: props.id }}
           reference="comments"
           target="userId"
-          label={`Комментарии пользователя ${user?user.name:props.permissions.name}`}
+          label={`Комментарии пользователя ${
+            user ? user.name : props.permissions.name
+          }`}
         >
-          <List {...props} 
-            actions={<></>} 
-            perPage={5} 
-            empty={<ComponentEmptyPage path={'comments'} title={'Комментарии отсутствуют'} isAuth={authUser.uid===props.id} />}
-            pagination={<Pagination rowsPerPageOptions={[5, 10, 20]}/>} 
+          <List
+            {...props}
+            actions={<></>}
+            perPage={5}
+            empty={
+              <ComponentEmptyPage
+                path={'comments'}
+                title={'Комментарии отсутствуют'}
+                isAuth={authUser.uid === props.id}
+              />
+            }
+            pagination={<Pagination rowsPerPageOptions={[5, 10, 20]} />}
             bulkActionButtons={<CommentBulkActionButtons />}
-            >
-           <MyCommentDataGrid userId={props.id}/>
+          >
+            <MyCommentDataGrid userId={props.id} />
           </List>
         </ReferenceManyField>
       </Tab>

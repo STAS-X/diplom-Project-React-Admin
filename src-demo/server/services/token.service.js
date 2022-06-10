@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const config = require('config');
-const { getDoc, collection, doc } = require('firebase/firestore');
+const { getDoc, doc } = require('firebase/firestore');
 
 class TokenService {
   // return accessToken, refreshToken, exporesIn

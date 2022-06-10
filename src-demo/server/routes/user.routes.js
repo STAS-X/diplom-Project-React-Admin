@@ -1,19 +1,13 @@
 const express = require('express');
 const auth = require('../middleware/auth.middlware');
-const { generateUserData } = require('../utils/helpers');
 // Add validation to create and update USER resource
 const { validate, userValidations } = require('../utils/validations');
-const { validationResult, body } = require('express-validator');
 
 const router = express.Router({ mergeParams: true });
 const app = require('../app.js');
 const {
-  getDoc,
-  setDoc,
   query: q,
   where,
-  limit,
-  doc,
   getDocs,
   collection,
 } = require('firebase/firestore');
@@ -154,6 +148,7 @@ router.put('/:id?', [
       const { data } = await dataProvider[query](resource, params);
       res.status(200).send(data);
     } catch (e) {
+      console.log(e, 'get error creating updating user');
       res.status(500).send({
         code: 500,
         name: 'ServerError',
@@ -168,7 +163,7 @@ router.post('/', [
   validate(userValidations),
   async (req, res) => {
     try {
-      console.log('create user');
+      console.log('update user');
       const dataProvider = app.provider;
       const query = req.body.headers.ProviderRequest;
       const params = JSON.parse(req.body.data);
@@ -176,7 +171,7 @@ router.post('/', [
       const { data } = await dataProvider[query](resource, params);
       res.status(200).send(data);
     } catch (e) {
-      console.log(e, 'get error user');
+      console.log(e, 'get error updating user');
       res.status(500).send({
         code: 500,
         name: 'ServerError',

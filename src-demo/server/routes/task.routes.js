@@ -1,19 +1,13 @@
 const express = require('express');
 const auth = require('../middleware/auth.middlware');
-const { generateUserData } = require('../utils/helpers');
 // Add validation to create and update USER resource
 const { validate, taskValidations } = require('../utils/validations');
-const { validationResult, body } = require('express-validator');
 
 const router = express.Router({ mergeParams: true });
 const app = require('../app.js');
 const {
-	getDoc,
-	setDoc,
 	query: q,
 	where,
-	limit,
-	doc,
 	getDocs,
 	collection,
 } = require('firebase/firestore');

@@ -14,14 +14,13 @@ import {
 import { Stack } from '@mui/material';
 import { getAuthData } from '../../../store/authcontext';
 import { getAppColorized } from '../../../store/appcontext';
-import { dateFormatter } from '../../../utils/displayDate';
 import {
   EmailField,
+  FunctionField,
   SimpleShowLayout,
   TextField,
   EditButton,
-  ShowButton,  
-  Labeled,
+  ShowButton,
   DateField,
   useGetList,
 } from 'react-admin';
@@ -211,7 +210,29 @@ const UserCardExpand = (props) => {
           }}
         >
           <SimpleShowLayout record={user}>
-            <EmailField label="Логин" source="email" color="primary" />
+            <FunctionField
+              label="Логин"
+              render={(record) => {
+                if (record.providerId === 'phone') {
+                  return (
+                    <TextField
+                      record={record}
+                      label="Логин"
+                      color="primary"
+                      source="phone"
+                    />
+                  );
+                }
+                return (
+                  <EmailField
+                    record={record}
+                    label="Логин"
+                    color="primary"
+                    source="email"
+                  />
+                );
+              }}
+            />
             <TextField
               label="Возраст"
               source="age"

@@ -15,6 +15,7 @@ import { getAuthData } from '../../../store/authcontext';
 import { getAppColorized } from '../../../store/appcontext';
 import {
   EmailField,
+  FunctionField,
   SimpleShowLayout,
   ShowButton,
   EditButton,
@@ -137,11 +138,7 @@ const UserCard = ({record:user, isDragging}) => {
   }, [cardRef.current]);
 
   return (
-    <Card
-      variant="outlined"
-      ref={cardRef}
-      className={classes.root}
-    >
+    <Card variant="outlined" ref={cardRef} className={classes.root}>
       <CardContent>
         <UserToolbar record={user} authId={authUser.uid} />
         <CardMedia
@@ -175,8 +172,31 @@ const UserCard = ({record:user, isDragging}) => {
         >
           <Grid item xs={4} style={{ marginLeft: -15 }}>
             <SimpleShowLayout record={user}>
-              <EmailField label="Логин" source="email" color="primary" />
-              <TextField label="Возраст" source="age" color="primary" className={classes.age} />
+              <FunctionField
+                label="Логин"
+                color="primary"
+                render={(record) => {
+                  if (record.providerId === 'phone') {
+                    return (
+                      <TextField
+                        record={record}
+                        label="Логин"
+                        color="primary"
+                        source="phone"
+                      />
+                    );
+                  }
+                  return (
+                    <EmailField record={record} label="Логин" source="email" />
+                  );
+                }}
+              />
+              <TextField
+                label="Возраст"
+                source="age"
+                color="primary"
+                className={classes.age}
+              />
             </SimpleShowLayout>
           </Grid>
           <Grid item xs={8} style={{ marginRight: -35 }}>
