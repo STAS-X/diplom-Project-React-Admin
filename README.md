@@ -8,4 +8,4 @@
 Пользовательский интерфейс (объекты, диалоги и анимации) реализованы на базе библиотеки Material UI
 Реализация взаимодействия Front-Back по протоколу HTTP (сервис REST API) на базе библиотеки axios
 Анимация динамических объектов и всплывающих подсказок - AnimateCSS и pure css
-Backеnd  реализация на базе библиотеки Express + Express Validator + Firebase Admin
+Backеnd  реализация на базе библиотеки Express + Express Validator + Firebase Admin + NodeJS
