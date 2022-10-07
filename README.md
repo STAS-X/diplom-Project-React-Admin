@@ -1,4 +1,4 @@
-# Backend
+# React Admin Task Todo List Extended Project
 
 Ссылка на итоговый готовый [дипломный проект](https://a7808-87e9.f.d-f.pw).
 
