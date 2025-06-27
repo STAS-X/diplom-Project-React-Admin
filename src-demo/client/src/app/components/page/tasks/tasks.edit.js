@@ -26,7 +26,7 @@ import {
   number,
 } from 'react-admin';
 import { Stack, Box, Typography, Avatar, Chip } from '@mui/material';
-import {AddCommentRounded as AddCommentIcon, Add} from '@material-ui/icons';
+import { AddCommentRounded as AddCommentIcon, Add } from '@material-ui/icons';
 import TaskProgressBar from '../../common/progressbar/task.progress';
 import TagsField from '../../common/fields/task.tags';
 import { getAuthData } from '../../../store/authcontext';
@@ -84,7 +84,7 @@ const ExecutorChipSelector = ({ id, name, data }) => {
       avatar={
         <Avatar
           alt="Пользователь"
-          src={data.url?data.url:`https://i.pravatar.cc/300?u=${id}`}
+          src={data.url ? data.url : `https://i.pravatar.cc/300?u=${id}`}
           sx={{ width: 24, height: 24 }}
         />
       }
@@ -113,7 +113,11 @@ const CustomToolbar = ({ authId, ...props }) => {
     handleSubmitWithRedirect,
   } = props;
 
-  const { data: comments, loaded, total } = useGetList(
+  const {
+    data: comments,
+    loading,
+    total,
+  } = useGetList(
     'comments',
     { page: 1, perPage: 1 },
     { field: 'id', order: 'ASC' },
@@ -150,7 +154,7 @@ const CustomToolbar = ({ authId, ...props }) => {
               //setOnSuccess(handleSuccess);
             }}
             redirect={
-              loaded && total === 1
+              !loading && total === 1
                 ? `/comments/${comments[Object.keys(comments)[0]].id}`
                 : '/comments/create'
             }
@@ -195,7 +199,7 @@ export const TaskEdit = (props) => {
 
   const {
     data: { userId: editUserId },
-    loaded: isLoaded,
+    loading: isLoading,
   } = useGetOne('tasks', props.id);
 
   const { user: authUser } = useSelector(getAuthData());
@@ -214,10 +218,10 @@ export const TaskEdit = (props) => {
   };
 
   React.useEffect(() => {
-    if (isLoaded && authUser.uid !== editUserId)
+    if (!isLoading && authUser.uid !== editUserId)
       setTimeout(() => redirect('show', '/tasks', props.id), 0);
     return () => {};
-  }, [isLoaded]);
+  }, [isLoading]);
 
   return (
     <>

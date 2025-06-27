@@ -21,10 +21,8 @@ import {
 } from 'react-admin';
 import RichTextInput from 'ra-input-rich-text';
 import { green, blue, red } from '@mui/material/colors';
-import {
-  Chip,
-} from '@mui/material';
-import {EditRounded as TaskEditIcon, Add} from '@material-ui/icons';
+import { Chip } from '@mui/material';
+import { EditRounded as TaskEditIcon, Add } from '@material-ui/icons';
 import { getAuthData } from '../../../store/authcontext';
 import { dateFormatter } from '../../../utils/displayDate';
 
@@ -136,7 +134,7 @@ export const CommentEdit = (props) => {
 
   const {
     data: { userId: editUserId },
-    loaded: isLoaded,
+    loading: isLoading,
   } = useGetOne('comments', props.id);
 
   const { user: authUser } = useSelector(getAuthData());
@@ -167,11 +165,11 @@ export const CommentEdit = (props) => {
   };
 
   React.useEffect(() => {
-    if (isLoaded && authUser.uid !== editUserId)
+    if (!isLoading && authUser.uid !== editUserId)
       setTimeout(() => redirect('show', '/comments', props.id), 0);
 
     return () => {};
-  }, [isLoaded]);
+  }, [isLoading]);
 
   const handleUpdateTaskId = () => {
     if (localStorage.getItem('currentTaskId') && !currentTaskId) {
@@ -193,7 +191,6 @@ export const CommentEdit = (props) => {
       clearTimeout(window.commetToTaskIdTimeout);
     };
   }, []);
-
 
   return (
     <>

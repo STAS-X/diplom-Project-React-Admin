@@ -33,16 +33,18 @@
   },
   "homepage": "https://benwinding.github.io/",
   "devDependencies": {
-    "concurrently": "4.1.1",
+    "concurrently": "^4.1.1",
     "cpx": "^1.5.0",
     "gh-pages": "3.2.3"
   },
   "scripts": {
     "start": "cross-env NODE_ENV=development BROWSER=none PORT=3000 react-scripts start",
-    "build": "REACT_APP_FIREBASE_CONFIG=`cat ./FIREBASE_CONFIG.json` react-scripts build",
-    "build-ci": "react-scripts build",
+    "build-ci": "REACT_APP_FIREBASE_CONFIG=`cat ./FIREBASE_CONFIG.json` react-scripts build",
+    "build-client": "react-scripts build",
     "copy": "cpx ./node_modules2/**/* ./node_modules && cpx ../server/node_modules2/**/* ../server/node_modules && echo Файлы для построения приложения скопированы!",
-    "cp-dist": "rm -rf ./node_modules/react-admin-firebase/dist && cp -r ../dist ./node_modules/react-admin-firebase/dist",
+    "copy_client": "cpx ./node_modules2/**/* ./node_modules && echo Файлы для построения клиентского приложения скопированы!",
+    "build-parallel": "concurrently --kill-others npm:copy_client npm:build-client",
+    "cp-dist": "rm -rf ./node_modules/react-admin-firebase && cp -r ./node_modules2/react-admin-firebase/**/* ./node_modules/react-admin-firebase",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
     "deploy": "gh-pages -d build"
