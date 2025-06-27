@@ -1,8 +1,8 @@
 {
- 	"port": 8080,
-	"portProd": 8080,
-	"accessSecret": "super secret from backend",
-	"refreshSecret": "refresh secret from backend",
+  "port": 8080,
+  "portProd": 8043,
+  "accessSecret": "super secret from backend",
+  "refreshSecret": "refresh secret from backend",
   "isFireBase": true,
   "firebaseConfig": {
     "email":"backenduserfirebase@firebase.com",

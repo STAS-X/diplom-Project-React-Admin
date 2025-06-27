@@ -22,6 +22,8 @@ router.get('/:id?', [
 			const query = req.headers['providerrequest'];
 			const params = JSON.parse(req.headers['providerparams']);
 
+			console.log(params, 'Параметры запроса задач');
+
 			const firestore = app.firestore;
 			const tasksSnap = await firestore.collection(resource).get();
 			const total = tasksSnap ? tasksSnap.size : 0;
@@ -75,6 +77,7 @@ router.get('/:id?', [
 				if (search) {
 					const colRef = collection(firestore, resource);
 					const querySnapshot = await getDocs(colRef);
+
 					querySnapshot.forEach((doc) => {
 						if (items.filter((item) => item.id === doc.id).length === 0) {
 							const data = doc.data();
@@ -100,7 +103,7 @@ router.get('/:id?', [
 				const { data } = await dataProvider[query](resource, params);
 				res
 					.status(200)
-					.send({ data, total: query === 'getList' || query === 'getManyReference' ? total : data?.length });
+					.send({ data, total: ((query === 'getList' || query === 'getManyReference') ? total : data?.length || 0) });
 			}
 		} catch (e) {
 

@@ -95,8 +95,7 @@ const UserToolbar = ({ authId, record: user }) => {
   );
 };
 
-const UserCard = ({record:user, isDragging}) => {
-
+const UserCard = ({ record: user, isDragging }) => {
   const animation = '_pulse';
 
   const { user: authUser } = useSelector(getAuthData());
@@ -119,14 +118,14 @@ const UserCard = ({record:user, isDragging}) => {
         );
       };
       const handleMouseEnter = (e) => {
-        const {target} = e;
+        const { target } = e;
         if (localStorage.getItem('dragUserId')) {
         } else {
-        target.classList.add(
-          'animate__animated',
-          `animate_${animation}`,
-          'animate__fast'
-        );
+          target.classList.add(
+            'animate__animated',
+            `animate_${animation}`,
+            'animate__fast'
+          );
         }
       };
 

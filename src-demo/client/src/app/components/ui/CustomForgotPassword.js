@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
   Button,
   Dialog,
@@ -8,22 +8,23 @@ import {
   DialogTitle,
   Snackbar,
   TextField,
-} from "@material-ui/core";
+} from '@material-ui/core';
 
-import firebase from "firebase/compat/app";
-import "firebase/compat/auth";
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/auth';
+import 'firebase/compat/firestore';
 
 export default function AlertDialog() {
   const [open, setOpen] = React.useState(false);
-  const [email, setEmail] = React.useState("");
+  const [email, setEmail] = React.useState('');
 
   const [toastOpen, setToastOpen] = React.useState(false);
-  const [toastMessage, setToastMessage] = React.useState("");
+  const [toastMessage, setToastMessage] = React.useState('');
 
   const handleClickOpen = () => {
     setOpen(true);
   };
-
+ 
   const handleClose = () => {
     setOpen(false);
   };
@@ -32,7 +33,7 @@ export default function AlertDialog() {
       await firebase.auth().sendPasswordResetEmail(email);
       setOpen(false);
       setToastOpen(true);
-      setToastMessage("Password reset email sent!");
+      setToastMessage('Password reset email sent!');
     } catch (error) {
       setToastOpen(true);
       setToastMessage(error.message);
@@ -50,8 +51,19 @@ export default function AlertDialog() {
   };
 
   return (
-    <div style={{display: 'flex', justifyContent: 'center', padding: '10px', paddingTop: '0px'}}>
-      <Button variant="contained" onClick={handleClickOpen} style={{width: '100%'}}>
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'center',
+        padding: '10px',
+        paddingTop: '0px',
+      }}
+    >
+      <Button
+        variant="contained"
+        onClick={handleClickOpen}
+        style={{ width: '100%' }}
+      >
         Забыли пароль?
       </Button>
       <Dialog
@@ -63,14 +75,15 @@ export default function AlertDialog() {
         <DialogTitle id="alert-dialog-title">Сбросить пароль?</DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
-            Ссылка на подтверждение сброса пароля будет направлена на почтовый ящик:
+            Ссылка на подтверждение сброса пароля будет направлена на почтовый
+            ящик:
           </DialogContentText>
           <TextField
             id="outlined-basic"
             label="Email"
             type="email"
             variant="outlined"
-            style={{width: '100%'}}
+            style={{ width: '100%' }}
             onChange={handleOnChange}
           />
         </DialogContent>
@@ -86,11 +99,11 @@ export default function AlertDialog() {
         onClose={handleToastClose}
         autoHideDuration={6000}
         anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "center",
+          vertical: 'bottom',
+          horizontal: 'center',
         }}
         message={toastMessage}
       />
     </div>
-  )
+  );
 }

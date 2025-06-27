@@ -51,7 +51,7 @@ ReactDOM.render(
           </Switch>
         </AppLoader>
       </BrowserRouter>
-    </Provider>
+    </Provider> 
     <ToastContainer />
   </React.StrictMode>,
   document.getElementById('root')

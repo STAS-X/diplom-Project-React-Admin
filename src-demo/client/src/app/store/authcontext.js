@@ -40,6 +40,11 @@ const authSlice = createSlice({
       state.token = null;
       state.isLoggedIn = false;
       localStorageService.removeAuthData();
+      console.warn('Выходим в диалог авторизации');
+      
+      // Выполняем редирект в очереди микрозадач
+      setTimeout(()=>{ getHook('logout')();//getHook('redirect')('/login')
+                     } ,0);
     },
     authSetAuthDBStatus: (state, action) => {
       state.isAuthFromDB = action.payload;
@@ -47,7 +52,7 @@ const authSlice = createSlice({
     authSetLoggedStatus: (state, action) => {
       state.isLoggedIn = action.payload;
       if (!action.payload) {
-         localStorageService.removeAuthData();
+        localStorageService.removeAuthData();
         state.auth = null;
         state.token = null;
       }
@@ -102,7 +107,7 @@ export const setAuthLoggedStatus = (payload) => (dispatch) => {
 };
 
 export const setAuthError = (payload) => (dispatch) => {
-      dispatch(authSetError(payload));
+  dispatch(authSetError(payload));
 };
 
 export const setAuthDBStatus = (payload) => (dispatch) => {

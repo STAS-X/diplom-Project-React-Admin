@@ -31,14 +31,8 @@ import { useRedirect, useRefresh } from 'react-admin';
 import { useLogout, setSidebarVisibility } from 'react-admin';
 import { getHook } from 'react-hooks-outside/lib';
 import { useSelector } from 'react-redux';
-import {
-  getAppTheme,
-  setAppTitle,
-} from '../../../store/appcontext';
-import {
-  getAuthData,
-  setAuthLogout,
-} from '../../../store/authcontext';
+import { getAppTheme, setAppTitle } from '../../../store/appcontext';
+import { getAuthData, setAuthLogout } from '../../../store/authcontext';
 import CustomTitle from './customTitle';
 
 import ThemeButton from '../styled/themButton';
@@ -93,7 +87,7 @@ const CustomAppBar = (currentPage) => (props) => {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
 
-  const logout = useLogout();//getHook('logout');
+  //const logout = useLogout(); //getHook('logout');
   const dispatch = getHook('dispatch');
   //const dispatch = useDispatch();
   //const { getState } = useStore()
@@ -136,8 +130,8 @@ const CustomAppBar = (currentPage) => (props) => {
   //   logout();
   // };
   const handleLogout = () => {
-    dispatch(setAuthLogout());    
-    logout();
+    dispatch(setAuthLogout());
+    //logout();
   };
 
   const refresh = useRefresh();
@@ -152,15 +146,19 @@ const CustomAppBar = (currentPage) => (props) => {
   };
 
   const handleRedirectToProfile = () => {
+    if (authUser) {
     redirect('edit', '/users', authUser.uid);
+    } else {
+      handleRefresh();
+    }
   };
-
+ 
   return (
     <AppBar
       position="static"
       sx={{
         m: 0,
-        zIndex:10,
+        zIndex: 10,
         backgroundColor: theme === 'light' ? '#0f80f0' : '#0f4080',
       }}
     >
@@ -258,7 +256,7 @@ const CustomAppBar = (currentPage) => (props) => {
         </Box> */}
 
         <Box sx={{ flexGrow: 0, display: 'flex', mr: 3 }}>
-          <ReviewButton/>
+          <ReviewButton />
           <LoadingButton />
           <ColorizedButton />
           <ThemeButton />

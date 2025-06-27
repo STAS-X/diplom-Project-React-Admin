@@ -143,7 +143,7 @@ const DashBordPage = () => {
             <br />
             Цитата дня:{' '}
             <cite>- Никогда не ошибается тот, кто ничего не делает.</cite>
-            <sup> Теодор Рузвельт.</sup>
+            <strong> Теодор Рузвельт.</strong>
           </Typography>
         </Collapse>
         <Box

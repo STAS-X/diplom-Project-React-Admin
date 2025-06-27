@@ -31,90 +31,99 @@ import {
 } from 'react-admin';
 import { green, blue, red } from '@mui/material/colors';
 import { getAppColorized } from '../../../store/appcontext';
-import {
-  CircularProgress,
-  Chip,
-  TopToolbar
-  
-} from '@mui/material';
+import { CircularProgress, Chip, TopToolbar } from '@mui/material';
 import CommentCard from '../../common/cards/comment.card.list';
-import {useSelector} from 'react-redux';
+import { useSelector } from 'react-redux';
 import { getAuthData } from '../../../store/authcontext';
-import {Visibility,VisibilityOff, ViewList, People as UserIcon, Pages as TaskIcon, Comment as CommentIcon  } from '@material-ui/icons';
-import { dateFormatter } from '../../../utils/displayDate';
+import {
+  Visibility,
+  VisibilityOff,
+  ViewList,
+  People as UserIcon,
+  Pages as TaskIcon,
+  Comment as CommentIcon,
+} from '@material-ui/icons';
+//import { dateFormatter } from '../../../utils/displayDate';
 
-const CreatorField = ({userId}) => {
-  const { data: user, loaded} = useGetOne('users', userId);
+const CreatorField = ({ userId }) => {
+  const { data: user, loading, error } = useGetOne('users', userId);
 
-  if (!loaded) return <CircularProgress color="inherit" />;
+  if (loading) return <CircularProgress color="inherit" />;
 
-  if (loaded && !user) {
-    return <h5>-XXX-</h5>;
+  if (error) {
+    return <h5>Пользователь удален</h5>;
   }
- 
-  return (
-    <span>{user.name}</span>
-  );
+
+  return <span>{user.name}</span>;
 };
 
-const CommentTaskField = ({taskId}) => {
-  const { data: task, loading, loaded, error} = useGetOne('tasks', taskId);
+const CommentTaskField = ({ taskId }) => {
+  const { data: task, loading, error } = useGetOne('tasks', taskId);
 
-  if (!loaded && loading) return <CircularProgress color="inherit" />;
+  if (loading) return <CircularProgress color="inherit" />;
 
   if (error) {
     return <h5>Задача удалена</h5>;
   }
- 
+
   return (
-    <span>{task.title + (task.description?' - ' +task.description:'')}</span>
+    <span>
+      {task.title + (task.description ? ' - ' + task.description : '')}
+    </span>
   );
 };
 
-
 export const CommentTabbetShow = (props) => {
-  const { data: comment, loaded} = useGetOne('comments', props.id);
+  //const { data: comment, loaded } = useGetOne('comments', props.id);
   //const { user: authUser } = useSelector(getAuthData());
   const { pathname } = props.history.location;
-  if (pathname && pathname.slice(-4)==="show") {
-    const newTab = localStorage.getItem('currentTab')
+  if (pathname && pathname.slice(-4) === 'show') {
+    const newTab = localStorage.getItem('currentTab');
     if (newTab) localStorage.removeItem('currentTab');
-    props.history.location.pathname = props.history.location.pathname+(newTab?newTab:'/comment');
+    props.history.location.pathname =
+      props.history.location.pathname + (newTab ? newTab : '/comment');
   }
 
   //if (newPath.slice(-4)==="show")
 
-return (
-  <Show {...props} hasEdit={false}>
-    <TabbedShowLayout syncWithLocation={true} variant="scrollable" spacing={2}>
-      <Tab
-        label="Общая информация"
-        icon={<ViewList style={{ marginRight: 5 }} />}
-        path="comment"
+  return (
+    <Show {...props} hasEdit={false}>
+      <TabbedShowLayout
+        syncWithLocation={true}
+        variant="scrollable"
+        spacing={2}
       >
-        <TextField label="Описание" source="description" />
-        <FunctionField
-          label="Создатель"
-          source="userId"
-          render={(record) => <CreatorField userId={record.userId} />}
-        />
-        <FunctionField
-          label="Комментируемая задача"
-          source="taskId"
-          render={(record) => <CommentTaskField taskId={record.taskId} />}
-        />
-        <DateField label="Дата создания" source="createdAt" lacales="ru" />
-        <RichTextField label="Комментарий" source="body" />
-      </Tab>
-      <Tab
-        label="Комментарий"
-        icon={<CommentIcon style={{ marginRight: 5 }} />}
-        path="card"
-      >
-        <CommentCard style={{ margin: 20 }} record={props.record} isDragging={false} />
-      </Tab>
-    </TabbedShowLayout>
-  </Show>
-);
+        <Tab
+          label="Общая информация"
+          icon={<ViewList style={{ marginRight: 5 }} />}
+          path="comment"
+        >
+          <TextField label="Описание" source="description" />
+          <FunctionField
+            label="Создатель"
+            source="userId"
+            render={(record) => <CreatorField userId={record.userId} />}
+          />
+          <FunctionField
+            label="Комментируемая задача"
+            source="taskId"
+            render={(record) => <CommentTaskField taskId={record.taskId} />}
+          />
+          <DateField label="Дата создания" source="createdAt" lacales="ru" />
+          <RichTextField label="Комментарий" source="body" />
+        </Tab>
+        <Tab
+          label="Комментарий"
+          icon={<CommentIcon style={{ marginRight: 5 }} />}
+          path="card"
+        >
+          <CommentCard
+            style={{ margin: 20 }}
+            record={props.record}
+            isDragging={false}
+          />
+        </Tab>
+      </TabbedShowLayout>
+    </Show>
+  );
 };
-

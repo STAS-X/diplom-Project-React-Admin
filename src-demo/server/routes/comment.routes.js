@@ -21,6 +21,8 @@ router.get('/:id?', [
       const query = req.headers['providerrequest'];
       const params = JSON.parse(req.headers['providerparams']);
 
+			console.log(params, 'Параметры запроса комментариев');
+
       const firestore = app.firestore;
       const commentsSnap = await firestore.collection(resource).get();
       const total = commentsSnap ? commentsSnap.size : 0;
@@ -95,7 +97,7 @@ router.get('/:id?', [
             ? items.length
             : itemStart + pagination.perPage;
 
-            res.status(200).send({
+        res.status(200).send({
           data: items.slice(itemStart, itemEnd),
           total: items?.length,
         });
@@ -103,7 +105,7 @@ router.get('/:id?', [
         const { data } = await dataProvider[query](resource, params);
         res
           .status(200)
-          .send({ data, total: query === 'getList' ? total : data?.length });
+          .send({ data, total: ((query === 'getList' || query === 'getManyReference') ? total : data?.length || 0) });
       }
     } catch (e) {
       console.log(e);

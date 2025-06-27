@@ -69,7 +69,6 @@ const TaskForCommentSelector = (data) => {
 };
 
 const CustomToolbar = ({ authId, ...props }) => {
-
   const {
     invalid: isInvalid,
     record,
@@ -130,7 +129,7 @@ export const CommentCreate = (props) => {
   const {
     data: comments,
     total,
-    loaded,
+    loading,
   } = useGetList(
     'comments',
     { page: 1, perPage: -1 },
@@ -202,7 +201,7 @@ export const CommentCreate = (props) => {
               defaultValue={'Текст описания к задаче'}
             />
 
-            {loaded && (
+            {!loading && (
               <ReferenceInput
                 label="Комментируемая задача"
                 defaultValue={currentTaskId}
@@ -225,7 +224,7 @@ export const CommentCreate = (props) => {
                 />
               </ReferenceInput>
             )}
-            {!loaded && <CircularProgress color="inherit" />}
+            {loading && <CircularProgress color="inherit" />}
 
             <RichTextInput
               label="Комментарий"

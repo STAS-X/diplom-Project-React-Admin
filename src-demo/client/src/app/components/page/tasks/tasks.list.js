@@ -346,9 +346,9 @@ const KeywordsField = ({ keywords }) => {
 const ExecutorsField = ({ executors: ids, ...data }) => {
   if (!ids) return <h5>Исполнители не назначены</h5>;
 
-  const { data: users, loading, loaded, error } = useGetMany('users', ids);
+  const { data: users, loading, error } = useGetMany('users', ids);
 
-  if (loading || !loaded) return <CircularProgress color="inherit" />;
+  if (loading) return <CircularProgress color="inherit" />;
 
   if (error) {
     return <p style={{ color: 'red' }}>Ошибка при загрузке</p>;
@@ -530,8 +530,8 @@ const ControlButtons = ({ record, authId, ...props }) => {
         return (
           <Box sx={{ position: 'relative', display: 'inline-flex' }}>
             <ShowButton label="" record={record} />
-            {loading && !loaded && <CircularProgress color="inherit" />}
-            {loaded && Object.keys(comment).length > 0 && (
+            {loading && <CircularProgress color="inherit" />}
+            {!loading && Object.keys(comment).length > 0 && (
               <EditButton
                 basePath="/comments"
                 icon={<EditCommentIcon />}
@@ -539,7 +539,7 @@ const ControlButtons = ({ record, authId, ...props }) => {
                 record={comment[Object.keys(comment)[0]]}
               />
             )}
-            {loaded && Object.keys(comment).length === 0 && (
+            {!loading && Object.keys(comment).length === 0 && (
               <CreateButton
                 basePath="/comments"
                 icon={<CreateCommentIcon />}

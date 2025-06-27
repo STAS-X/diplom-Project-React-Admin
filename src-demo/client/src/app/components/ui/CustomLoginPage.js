@@ -148,7 +148,7 @@ const SignInScreen = () => {
   const handleUserTokenRefresh = async (user) => {
     //const logout = getHook('logout');
     const dispatch = getHook('dispatch');
-    console.log(user._delegate,'users data');
+    //console.log(user._delegate,'users data');
 
     const {
       displayName: name,

@@ -5,12 +5,7 @@ const { validate, userValidations } = require('../utils/validations');
 
 const router = express.Router({ mergeParams: true });
 const app = require('../app.js');
-const {
-  query: q,
-  where,
-  getDocs,
-  collection,
-} = require('firebase/firestore');
+const { query: q, where, getDocs, collection } = require('firebase/firestore');
 
 const resource = 'users';
 
@@ -107,7 +102,7 @@ router.get('/:id?', [
           .send({ data, total: query === 'getList' ? total : data?.length });
       }
     } catch (e) {
-
+      console.log(`Ошибка на сервере ${e.status}`, e.message);
       res.status(500).send({
         code: e.status === 200 ? 200 : 500,
         name: 'ServerError',

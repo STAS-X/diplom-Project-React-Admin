@@ -219,12 +219,12 @@ const CommentToolbar = ({ commentsIds, setCommentsIds, userId }) => {
 const CommentAuthorField = ({ userId }) => {
   if (!userId) return <h5>Исполнитель не найден</h5>;
 
-  const { data: user, loaded, error } = useGetOne('users', userId);
+  const { data: user, loading, error } = useGetOne('users', userId);
 
-  if (!loaded) return <CircularProgress color="inherit" />;
+  if (loading) return <CircularProgress color="inherit" />;
 
   if (error) {
-    return <p>ERROR</p>;
+    return <p style={{ color: 'red' }}>Пользователь удален</p>;
   }
   return (
     <>
@@ -256,9 +256,9 @@ const CommentAuthorField = ({ userId }) => {
 const CommentTaskField = ({ taskId }) => {
   if (!taskId) return <h5>Задача не найдена</h5>;
 
-  const { data: task, loading, loaded, error } = useGetOne('tasks', taskId);
+  const { data: task, loading, error } = useGetOne('tasks', taskId);
 
-  if (!loaded && loading) return <CircularProgress color="inherit" />;
+  if (loading) return <CircularProgress color="inherit" />;
 
   if (error) {
     return <p style={{ color: 'red' }}>Задача удалена</p>;
