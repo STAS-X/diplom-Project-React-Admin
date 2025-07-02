@@ -65,14 +65,14 @@ const BulkUpdateButton = ({ label, status }) => {
   );
 
   //React.useEffect(() => {
-    if (!loading) {
-      refresh();
-      //notify(status?'Задачи завершены успешно':'Задачи открыты для исполнения');
-      unselectAll();
-    }
-    if (error) {
-      notify(`Ошибка ${error} при обновлении задач!`, { type: 'warning' });
-    }
+  // if (!loading) {
+  //   refresh();
+  //   //notify(status?'Задачи завершены успешно':'Задачи открыты для исполнения');
+  //   unselectAll();
+  // }
+  // if (error) {
+  //   notify(`Ошибка ${error} при обновлении задач!`, { type: 'warning' });
+  // }
   //}, [loading, error]);
 
   return (
@@ -93,8 +93,8 @@ const TaskBulkActionButtons = (props) => {
     <>
       <BulkUpdateButton label="Завершить" status={true} />
       <BulkUpdateButton label="Открыть" status={false} />
-      <BulkTaskButton label="Update"  />
-         {/*default bulk delete action */}
+      <BulkTaskButton label="Update" />
+      {/*default bulk delete action */}
       <BulkDeleteButton />
     </>
   );
@@ -108,7 +108,7 @@ const MyTaskDataGrid = ({ userId, ...props }) => {
   const { user: authUser } = useSelector(getAuthData());
 
   const { data, loading, total } = useListContext();
-  
+
   const taskRowStyle = (id) => (record) => {
     return {
       backgroundColor: record.userId === id ? green[200] : red[100],
@@ -330,7 +330,7 @@ export const UserTabbetShow = (props) => {
               <MyTaskDataGrid userId={props.id} />
             </List>
           </ReferenceManyField>
-        </Tab> 
+        </Tab>
         <Tab
           label="Комментарии"
           icon={<CommentIcon style={{ marginRight: 5 }} />}
