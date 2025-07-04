@@ -61,11 +61,13 @@ const authService = {
   logout: async () => {
     const token = localStorageService.getToken();
     const user = localStorageService.getUser();
+    const authId = localStorageService.getAuthId();
     return httpAuth
       .delete('signOut/', {
         headers: {
           Authorization: token ? `Bearer ${token.accessToken}` : '',
           UserUid: `${user.uid}`,
+          AuthId: `${authId}`,
         },
       })
       .then(({ status, statusText, data }) => {
@@ -81,11 +83,14 @@ const authService = {
   refreshToken: async (newToken) => {
     const oldToken = localStorageService.getToken();
     return httpAuth
-      .put('token/', 
-        {data: { ...newToken, oldRefresh: oldToken.refreshToken} },
-        {headers: {
-          Authorization: oldToken ? `Bearer ${oldToken.accessToken}` : '',
-        }},
+      .put(
+        'token/',
+        { data: { ...newToken, oldRefresh: oldToken.refreshToken } },
+        {
+          headers: {
+            Authorization: oldToken ? `Bearer ${oldToken.accessToken}` : '',
+          },
+        }
       )
       .then(({ status, statusText, data }) => {
         if (status < 200 || status >= 300) {

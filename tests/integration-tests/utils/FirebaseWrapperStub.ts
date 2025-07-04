@@ -9,7 +9,7 @@ import {
   FireStore,
   FireStoreBatch,
   FireStoreCollectionRef,
-  FireUploadTaskSnapshot, 
+  FireUploadTaskSnapshot,
   FireUser,
 } from '../../../src/misc/firebase-models';
 

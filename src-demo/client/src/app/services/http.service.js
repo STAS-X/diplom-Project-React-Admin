@@ -1,9 +1,7 @@
 import axios from 'axios';
 //import { toastDarkBounce } from '../utils/animateTostify';
 import { setAppError } from '../store/appcontext';
-import {
-  setAuthRefreshToken,
-} from '../store/authcontext';
+import { setAuthRefreshToken } from '../store/authcontext';
 import configFile from '../config/default.json';
 import { getHook } from 'react-hooks-outside';
 import { firebaseApp, authProvider } from '../dbapp/initFireBase';
@@ -24,13 +22,13 @@ http.interceptors.request.use(
 
       const token = getState().authContext.token;
       const user = getState().authContext.auth;
+      const authId = getState().authContext.authId;
 
       const {
         expirationTime = null,
         refreshToken = null,
         accessToken = null,
       } = token;
-
       //const authToken =
       //  firebaseApp.auth().currentUser._delegate.stsTokenManager;
       if (refreshToken && expirationTime && expirationTime < Date.now()) {
@@ -44,12 +42,14 @@ http.interceptors.request.use(
             ...config.headers,
             Authorization: `Bearer ${data.accessToken}`,
             UserUid: `${uid}`,
+            AuthId: `${authId}`,
           };
         } else {
           config.headers = {
             ...config.headers,
             Authorization: '',
             UserUid: '',
+            AuthId: '',
           };
         }
       } else {
@@ -57,6 +57,7 @@ http.interceptors.request.use(
           ...config.headers,
           Authorization: accessToken ? `Bearer ${accessToken}` : '',
           UserUid: accessToken ? `${user.uid}` : '',
+          AuthId: accessToken ? `${authId}` : '',
           // DataUserId: `${user.uid}`
         };
       }

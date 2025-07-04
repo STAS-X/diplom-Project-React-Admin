@@ -98,10 +98,7 @@ const validateAge = [
 
 const MyProfileImage = ({ transform, authURL, profileURL, setProfileURL }) => {
   const { record, setTransform } = useEditContext();
-  const avatarsUrl = [
-    'https://avatars.dicebear.com/api/avataaars/',
-    'https://i.pravatar.cc/300?u=',
-  ];
+  const avatarsUrl = ['https://i.pravatar.cc/300?u='];
 
   React.useEffect(() => {
     if (!profileURL) {
@@ -265,9 +262,7 @@ export const UserEdit = (props) => {
               render={(record) => {
                 <EmailField
                   label="Логин"
-                  source={
-                    record.providerId === 'phone' ? 'phone' : 'email'
-                  }
+                  source={record.providerId === 'phone' ? 'phone' : 'email'}
                 />;
               }}
             />

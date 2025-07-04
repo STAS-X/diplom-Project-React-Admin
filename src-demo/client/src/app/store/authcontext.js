@@ -1,13 +1,13 @@
 import { createAction, createSlice } from '@reduxjs/toolkit';
 import localStorageService from '../services/localStorage.service';
 import authService from '../services/auth.service';
-import { getHook } from 'react-hooks-outside';
 // import commentService from "../services/comment.service";
 
 const initialState = localStorageService.getToken()
   ? {
       auth: localStorageService.getUser(),
       token: localStorageService.getToken(),
+      authId: localStorageService.getAuthId(),
       isLoggedIn: true,
       isAuthFromDB: false,
       error: null,
@@ -17,6 +17,7 @@ const initialState = localStorageService.getToken()
       isLoading: false,
       error: null,
       auth: null,
+      authId: null,
       isLoggedIn: false,
       isAuthFromDB: false,
       dataLoaded: false,
@@ -38,24 +39,19 @@ const authSlice = createSlice({
     authLogout: (state, action) => {
       state.auth = null;
       state.token = null;
+      state.authId = null;
       state.isLoggedIn = false;
       localStorageService.removeAuthData();
-      console.warn('Выходим в диалог авторизации');
-      
-      // Выполняем редирект в очереди микрозадач
-      setTimeout(()=>{ getHook('logout')();//getHook('redirect')('/login')
-                     } ,0);
     },
     authSetAuthDBStatus: (state, action) => {
       state.isAuthFromDB = action.payload;
     },
-    authSetLoggedStatus: (state, action) => {
+    authSetAuthLoggedStatus: (state, action) => {
       state.isLoggedIn = action.payload;
-      if (!action.payload) {
-        localStorageService.removeAuthData();
-        state.auth = null;
-        state.token = null;
-      }
+    },
+    authSetAuthStatus: (state, action) => {
+      state.authId = action.payload;
+      localStorageService.setAuthId(action.payload);
     },
     authSetError: (state, action) => {
       state.error = action.payload;
@@ -69,7 +65,8 @@ const {
   authSetToken,
   authSetError,
   authLogout,
-  authSetLoggedStatus,
+  authSetAuthLoggedStatus,
+  authSetAuthStatus,
   authSetAuthDBStatus,
 } = actions;
 
@@ -93,17 +90,23 @@ export const setAuthToken = (payload) => (dispatch) => {
 
 export const setAuthLogout = () => async (dispatch, state) => {
   try {
-    if (state().authContext.isLoggedIn) {
-      await authService.logout();
-    }
+    //if (state().authContext.isLoggedIn) {
+    await authService.logout();
+    //}
   } catch (error) {
-    //dispatch(authSetError(error));
+    dispatch(authSetError(error));
+  } finally {
+    console.log('Удаляем данные авторизации');
+    dispatch(authLogout());
   }
-  dispatch(authLogout());
 };
 
 export const setAuthLoggedStatus = (payload) => (dispatch) => {
-  dispatch(authSetLoggedStatus(payload));
+  dispatch(authSetAuthLoggedStatus(payload));
+};
+
+export const setAuthStatus = (payload) => (dispatch) => {
+  dispatch(authSetAuthStatus(payload));
 };
 
 export const setAuthError = (payload) => (dispatch) => {
@@ -138,7 +141,12 @@ export const setAuthRefreshToken = (payload) => async (dispatch) => {
 };
 
 export const getAuthData = () => (state) => {
-  return { user: state.authContext.auth, token: state.authContext.token };
+  return {
+    user: state.authContext.auth,
+    isLoggedIn: state.authContext.isLoggedIn,
+    authId: state.authContext.authId,
+    token: state.authContext.token,
+  };
 };
 
 // export const getAuthToken = () => (state) => {

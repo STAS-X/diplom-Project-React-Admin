@@ -10,6 +10,7 @@ import { getHook } from 'react-hooks-outside';
 import authService from '../../services/auth.service';
 import { nanoid } from 'nanoid';
 import {
+  setAuthStatus,
   setAuthLoggedStatus,
   setAuthDBStatus,
   setAuthUser,
@@ -174,10 +175,11 @@ const SignInScreen = () => {
       token: authToken,
     });
 
-    dispatch(setAuthLoggedStatus(true));
+    dispatch(setAuthStatus(data.authId));
     dispatch(setAuthToken(data.token));
     dispatch(setAuthUser(data.user));
     dispatch(setAuthDBStatus(false));
+    //dispatch(setAuthLoggedStatus(true));
   };
 
   const [isSignedIn, setIsSignedIn] = useState(false); // Local signed-in state.

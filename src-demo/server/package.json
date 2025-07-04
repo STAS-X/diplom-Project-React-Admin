@@ -1,12 +1,11 @@
 {
-  "name": "jfd-server",
+  "name": "radmin-server",
   "version": "1.0.0",
   "description": "",
-  "main": "app.js",
   "scripts": {
     "start": "cross-env NODE_ENV=production node app.js",
     "serve": "cross-env NODE_ENV=development nodemon --harmony app.js",
-    "client": "cd ../client && cross-env NODE_ENV=development BROWSER=none PORT=3000 npx react-scripts start",
+    "client": "cd ../client && npm start",
     "copy_server": "cpx ../client/node_modules2/**/* ../client/node_modules && cpx ./node_modules2/**/* ./node_modules && echo Обновления к NPM модулям для построения приложения скопированы!",
     "copy_prod": "cpx ./node_modules2/react-admin-firebase/dist/**/* ./node_modules/react-admin-firebase/dist && echo Обновления к NPM модулям для построения приложения скопированы!",
     "dev": "concurrently npm:copy_prod npm:serve npm:client",

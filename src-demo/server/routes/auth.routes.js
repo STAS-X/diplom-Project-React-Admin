@@ -41,6 +41,7 @@ router.post('/signIn', [
 
       const { user, token } = req.body;
       let userDB;
+      let newId = nanoid();
 
       const q = query(
         collection(firestore, 'users'),
@@ -49,7 +50,10 @@ router.post('/signIn', [
       );
       const querySnapshot = await getDocs(q);
       if (querySnapshot.size === 0) {
-        //const newId = nanoid();
+        while (doc(firestore, 'auth', newId)) {
+          newId = nanoid();
+        }
+
         await setDoc(doc(firestore, 'users', user.uid), {
           ...user,
           createdAt: Date.now(),
@@ -68,14 +72,16 @@ router.post('/signIn', [
 
       const validateToken = tokenService.generate(token);
 
-      await setDoc(doc(firestore, 'auth', user.uid), {
-        user: { ...user, loggedIn: true },
+      await setDoc(doc(firestore, 'auth', newId), {
+        user: { ...user },
+        loggedIn: true,
         token: validateToken,
       });
 
       return res.status(200).send({
         user: userDB,
         token: validateToken,
+        authId: newId,
         signIn: true,
       });
     } catch (error) {
@@ -93,28 +99,33 @@ router.delete('/signOut', [
       const firestore = app.firestore;
 
       const userUid = req.headers.useruid ? req.headers.useruid : null;
+      const authId = req.headers.authid ? req.headers.authid : null;
 
-      const userAuthSnap = doc(firestore, 'auth', userUid)
-        ? await getDoc(doc(firestore, 'auth', userUid))
+      const userAuthSnap = doc(firestore, 'auth', authId)
+        ? await getDoc(doc(firestore, 'auth', authId))
         : null;
+
       if (userAuthSnap?.exists()) {
+        // Обновляем данные авторизации и удаляем объект auth
+        await firestore
+          .collection('auth')
+          .doc(authId)
+          .update({ loggedIn: false });
+        await firestore.collection('auth').doc(authId).delete();
+
         // Меняем поле даты последнего входа
         const q = query(
           collection(firestore, 'users'),
           where('uid', '==', userUid),
           limit(1)
         );
+
         const querySnapshot = await getDocs(q);
         querySnapshot.forEach(async (doc) => {
           await firestore
             .collection('users')
             .doc(doc.id)
             .update({ lastLogOut: Date.now() });
-          await firestore
-            .collection('auth')
-            .doc(userUid)
-            .update({ user: { loggedIn: false } });
-          await firestore.collection('auth').doc(userUid).delete();
         });
       } else return res.status(500).send({ signOut: false });
 
@@ -136,8 +147,10 @@ router.get('/authData', [
       const firestore = app.firestore;
 
       const userUid = req.headers.useruid ? req.headers.useruid : null;
-      const userAuthSnap = doc(firestore, 'auth', userUid)
-        ? await getDoc(doc(firestore, 'auth', userUid))
+      const authId = req.headers.authid ? req.headers.authid : null;
+
+      const userAuthSnap = doc(firestore, 'auth', authId)
+        ? await getDoc(doc(firestore, 'auth', authId))
         : null;
       let userDB;
 
@@ -181,9 +194,11 @@ router.put('/token', [
       const firestore = app.firestore;
       const { data } = req.body;
       const userUid = req.headers.useruid ? req.headers.useruid : null;
+      const authId = req.headers.authid ? req.headers.authid : null;
+
       const isValid = await tokenService.validateRefresh(
         data.oldRefresh,
-        userUid
+        authId
       );
 
       if (!isValid) {
@@ -198,7 +213,7 @@ router.put('/token', [
       const validateToken = tokenService.generate(data);
       await firestore
         .collection('auth')
-        .doc(userUid)
+        .doc(authId)
         .update({ token: validateToken });
 
       res.status(200).send({ token: validateToken, refresh: true });

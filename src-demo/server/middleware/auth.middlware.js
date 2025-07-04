@@ -17,7 +17,6 @@ module.exports = async (req, res, next) => {
       //console.log(authToken.expirationTime, 'Дата истечения токена');
       if (Date(authToken.expirationTime) < Date.now()) {
         const newAuthToken = await authUser.getIdToken(true);
-        console.log('Получен новый токен ', newAuthToken);
       }
     }
 
@@ -26,7 +25,8 @@ module.exports = async (req, res, next) => {
       ? req.headers.authorization.split(' ')[1]
       : null;
     const userUid = req.headers.useruid ? req.headers.useruid : null;
-    const isValid = await tokenService.validateAccess(token, userUid);
+    const authId = req.headers.authid ? req.headers.authid : null;
+    const isValid = await tokenService.validateAccess(token, authId);
 
     if (!isValid) {
       return res.status(401).send({
@@ -37,8 +37,8 @@ module.exports = async (req, res, next) => {
     }
     const firestore = app.firestore;
 
-    const userSnap = doc(firestore, 'auth', userUid)
-      ? await getDoc(doc(firestore, 'auth', userUid))
+    const userSnap = doc(firestore, 'auth', authId)
+      ? await getDoc(doc(firestore, 'auth', authId))
       : null;
     if (userSnap?.exists() > 0) {
       const { user } = userSnap.data();
@@ -67,17 +67,23 @@ module.exports = async (req, res, next) => {
           }
         }
       }
-
     } else {
-          return res.status(401).send({
-            code: 401,
-            name: 'AuthorizationError',
-            message: 'Unautorized',
-          });
+      if (authId) {
+        return res.status(401).send({
+          code: 401,
+          name: 'AuthorizationError',
+          message: 'Unautorized',
+        });
+      } else {
+        return res.status(402).send({
+          code: 402,
+          name: 'EmptyUser',
+          message: 'Unautorized',
+        });
+      }
     }
 
     next();
-
   } catch (error) {
     console.log(error, 'error trying');
     return res.status(400).send({

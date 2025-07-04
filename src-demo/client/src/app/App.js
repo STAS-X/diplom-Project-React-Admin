@@ -6,7 +6,6 @@ import CommentIcon from '@material-ui/icons/Comment';
 import TaskIcon from '@material-ui/icons/Pages';
 
 import { getAppTheme, getAppTitle } from './store/appcontext';
-import { getLoggedStatus } from './store/authcontext';
 
 import merge from 'lodash/merge';
 
@@ -35,12 +34,10 @@ import CustomLoginPage from './components/ui/CustomLoginPage';
 import DashBoardPage from './components/ui/DashBoardPage';
 import NotFound from './components/ui/NotFound';
 
-
 const App = (props) => {
   const theme = useSelector(getAppTheme());
   const mainAppPage = useSelector(getAppTitle());
   //const loggedStatus = useSelector(getLoggedStatus());
-
 
   const changeTheme = (theme) => {
     if (theme === 'light') {
